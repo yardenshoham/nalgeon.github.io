@@ -24,7 +24,7 @@ description: >- # this means to ignore newlines until "baseurl:"
     Everything about SQLite, Python, open data and awesome software
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-# twitter_username: nalgeon
+twitter_username: ohmypy
 github_username: nalgeon
 
 permalink: /:title/
