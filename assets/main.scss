@@ -1,0 +1,48 @@
+---
+# Only the main Sass file needs front matter (the dashes are enough)
+---
+
+@import "minima";
+
+:root {
+    --color-markdown-code-bg: rgba(27, 31, 35, 0.05);
+    --color-bg-tertiary: rgb(246, 248, 250);
+}
+
+code {
+    background-color: var(--color-markdown-code-bg);
+}
+
+pre {
+    background-color: var(--color-bg-tertiary);
+}
+
+pre code {
+    background-color: transparent;
+}
+
+.highlighter-rouge .highlight {
+    background-color: var(--color-bg-tertiary);
+}
+
+blockquote {
+    letter-spacing: 0;
+}
+
+.post-content {
+    font-size: 1.2rem;
+}
+
+.post-date {
+    display: inline-block;
+    margin-right: 1rem;
+    color: $grey-color;
+}
+
+.post__tags {
+    display: inline-block;
+}
+
+a.tag {
+    color: $grey-color;
+}
