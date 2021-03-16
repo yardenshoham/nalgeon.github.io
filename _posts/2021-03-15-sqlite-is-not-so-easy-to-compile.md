@@ -21,3 +21,5 @@ I found myself in these situations a couple of times. So I decided to create rep
 <p class="big"><a href="https://github.com/nalgeon/sqlite/releases/latest">SQLite shell builds</a></p>
 
 Refer to [build.yml](https://github.com/nalgeon/sqlite/blob/main/.github/workflows/build.yml) for build instructions if you prefer to build SQLite shell yourself.
+
+*Follow [@ohmypy](https://twitter.com/ohmypy) on Twitter to keep up with new posts!*
