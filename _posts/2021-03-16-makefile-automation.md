@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Automate Your Python Project with Makefile"
+title: "Automate your Python project with Makefile"
 date: 2021-03-16 20:15:00 +0300
 tags: python
 ---
