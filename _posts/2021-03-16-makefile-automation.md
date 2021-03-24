@@ -1,16 +1,18 @@
 ---
 layout: post
 title: "Automate your Python project with Makefile"
+description: "Makefile is not just some relict from the 70s."
+image: /assets/2021/makefile-automation.png
 date: 2021-03-16 20:15:00 +0300
 tags: python
 ---
 
 When working on a library or application, certain tasks tend to show up over and over again:
 
-- checking the code with linters,
-- running tests with coverage,
-- deploying with Docker,
-- ...
+-   checking the code with linters,
+-   running tests with coverage,
+-   deploying with Docker,
+-   ...
 
 JS developers are lucky (ha!): their `package.json` has a special `scripts` section for this stuff:
 
@@ -161,8 +163,8 @@ $ make serve
 
 If basic features are not enough, there are some great in-depth guides:
 
-- [Learn Makefiles with the tastiest examples](https://makefiletutorial.com)
-- [Automation and Make](https://swcarpentry.github.io/make-novice/reference.html)
+-   [Learn Makefiles with the tastiest examples](https://makefiletutorial.com)
+-   [Automation and Make](https://swcarpentry.github.io/make-novice/reference.html)
 
 ## In the wild
 
@@ -172,4 +174,4 @@ Here is a Makefile from one of my projects (podcast search tool):
 
 Makefiles are great for automating routine tasks, regardless of the language you prefer. Use them!
 
-*And follow [@ohmypy](https://twitter.com/ohmypy) on Twitter to keep up with new posts*
+_And follow [@ohmypy](https://twitter.com/ohmypy) on Twitter to keep up with new posts_

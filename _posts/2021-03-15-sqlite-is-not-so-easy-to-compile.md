@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "SQLite is not so easy to compile"
+description: "But with GitHub Actions it is."
 date: 2021-03-15 14:45:00 +0300
 tags: sqlite
 ---
@@ -22,4 +23,4 @@ I found myself in these situations a couple of times. So I decided to create rep
 
 Refer to [build.yml](https://github.com/nalgeon/sqlite/blob/main/.github/workflows/build.yml) for build instructions if you prefer to build SQLite shell yourself.
 
-*Follow [@ohmypy](https://twitter.com/ohmypy) on Twitter to keep up with new posts!*
+_Follow [@ohmypy](https://twitter.com/ohmypy) on Twitter to keep up with new posts!_
