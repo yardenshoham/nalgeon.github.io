@@ -24,6 +24,14 @@ with recursive tmp(x) as (
 select * from tmp;
 ```
 
+Or, if your database supports `generate_series()` (and does not support `limit` in recursive queries, like PostgreSQL):
+
+```
+create table random_data as
+select random() as x
+from generate_series(1, 1000000);
+```
+
 Validate:
 
 ```
@@ -47,6 +55,14 @@ with recursive tmp(x) as (
     limit 1000000
 )
 select * from tmp;
+```
+
+Or with `generate_series()`:
+
+```
+create table seq_data as
+select value as x
+from generate_series(1, 1000000);
 ```
 
 Validate:
@@ -84,16 +100,13 @@ create table names (
     name text
 );
 
-insert into names(name)
-select 'Ann'
-union all
-select 'Bill'
-union all
-select 'Cindy'
-union all
-select 'Diane'
-union all
-select 'Emma';
+insert into names(id, name)
+values
+(1, 'Ann'),
+(2, 'Bill'),
+(3, 'Cindy'),
+(4, 'Diane'),
+(5, 'Emma');
 ```
 
 And generate some customers:
@@ -112,6 +125,24 @@ with recursive tmp(id, idx, name, age) as (
     limit 1000000
 )
 select id, name, age from tmp;
+```
+
+Or with `generate_series()`:
+
+```
+create table person_data as
+with tmp as (
+    select
+        value as id,
+        abs(random() % 5) + 1 as idx,
+        abs(random() % 80) + 1 as age
+    from generate_series(1, 1000000)
+)
+select
+    id,
+    (select name from names where id = idx) as name,
+    age
+from tmp;
 ```
 
 Everything is according to the rules here:
@@ -147,3 +178,5 @@ sqlite> select * from person_data limit 10;
 A single query has brought us a million customers. Not bad! It would be great to achieve such results in sales, wouldn't it? ツ
 
 _Follow [@ohmypy](https://twitter.com/ohmypy) on Twitter to keep up with new posts!_
+
+[Comments on Hacker News](https://news.ycombinator.com/item?id=26564168)
