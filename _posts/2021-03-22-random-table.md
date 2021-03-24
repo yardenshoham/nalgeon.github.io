@@ -7,7 +7,7 @@ tags: sqlite
 
 Let's say you want to check how a query behaves on a large table - but there is no such table at hand. This is not a problem if your DBMS supports SQL recursion: lots of data can be generated with a single query. The `WITH RECURSIVE` clause comes to the rescue.
 
-I'm going to use SQLite, but the same (or similar) queries will work for PostgreSQL and other DBMSs.
+I'm going to use SQLite, but the same (or similar) queries will work for PostgreSQL and other DBMSs. Specifically, `WITH RECURSIVE` is supported in MariaDB 10.2+, MySQL 8.0+, PostgreSQL 8.4+ and SQLite 3.8+. Oracle 11.2+ and SQL Server 2005+ support recursive queries, but without the `RECURSIVE` keyword.
 
 ## Random numbers
 
