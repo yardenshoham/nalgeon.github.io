@@ -7,6 +7,8 @@ date: 2021-03-25 12:00:00 +0300
 tags: sqlite
 ---
 
+_English • [Russian](https://habr.com/ru/post/547448/) • [Spanish](https://sysarmy.com/blog/posts/sqlite-no-es-una-base-de-datos-de-juguete/)_
+
 Whether you are a developer, data analyst, QA engineer, DevOps person, or product manager - SQLite is a perfect tool for you. Here is why.
 
 A few well-known facts to get started:
