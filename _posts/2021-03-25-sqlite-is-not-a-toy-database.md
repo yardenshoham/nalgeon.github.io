@@ -246,7 +246,7 @@ from books;
 >
 > Therefore, I decided to make a consistent set of extensions, divided by domain area and compiled for major operating systems. There are few of them there yet, but more are on their way:
 >
-> [sqlite-plus @ GitHub](https://github.com/nalgeon/sqlite-plus/)
+> [sqlean @ GitHub](https://github.com/nalgeon/sqlean/)
 
 More fun with statistics. You can plot the data distribution right in the console. Look how cute it is:
 
