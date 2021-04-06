@@ -9,7 +9,7 @@ tags: python
 
 If you are like me, every once in a while you write a useful python utility and want to share it with your colleagues. The best way to do this is to make a package: it easy to install and saves from copy-pasting.
 
-If you are like me, you might be thinking that creating packages is a real headache. Well, that's not the case anymore. And I am going to prove it with this step-by-step guide. Just three main steps (and a bunch of optional ones), each accompanied by a GitHub link. See for yourself:
+If you are like me, you might be thinking that creating packages is a real headache. Well, that's not the case anymore. And I am going to prove it with this step-by-step guide. Just three main steps (and a bunch of optional ones) accompanied by few GitHub links. See for yourself:
 
 ## 1. Stub
 
@@ -39,12 +39,12 @@ Define a minimal package structure:
 
  def search(name, count=5):
      """Search podcast by name."""
-     raise NotImplementedError()</pre>
+     raise NotImplementedError()
 ```
 
 ## 2. Test package
 
-Creating a package in Python used to be a troublesome task. Fortunately, nowadays there is a great little [flit](https://flit.readthedocs.io/en/latest/) utility, which simplifies everything. Let's install it:
+Creating a package in Python used to be a troublesome task. Fortunately, nowadays there is a great little [flit](https://flit.readthedocs.io/en/latest/) utility which simplifies everything. Let's install it:
 
 ```
 pip install flit
@@ -72,7 +72,7 @@ Written pyproject.toml; edit that file to add optional extra info.
 
 Flit has created `pyproject.toml` - the project metadata file. It already has everything you need to publish the package to the public repository - PyPI.
 
-Sign up for [TestPyPi](https://test.pypy.org/) (test repository) and [PyPI](http://pypi.org/) (the main one). They are completely independent, so you will need two accounts.
+Sign up for [TestPyPi](https://test.pypi.org/) (test repository) and [PyPI](http://pypi.org/) (the main one). They are completely independent, so you will need two accounts.
 
 Setup access to repositories in the `~/.pypirc`:
 
@@ -219,7 +219,7 @@ py39: commands succeeded
 congratulations :)
 ```
 
-Lovely! The linters are happy, the tests have passed, the coverage is 100%.
+Lovely! The linters are happy, the tests passed, the coverage is 100%.
 
 ## C. Cloud build
 
@@ -227,7 +227,7 @@ Every solid open-source project runs cloud tests after each commit, so we will t
 
 Let's build the project with [GitHub Actions](https://github.com/features/actions), check test coverage with [Codecov](https://about.codecov.io/) and code quality with [Code Climate](https://codeclimate.com/).
 
-You will have to sign up for Codecov and Code Climate (both have GitHub login) and enable package repository in the settings.
+You will have to sign up for Codecov and Code Climate (both support GitHub login) and enable package repository in the settings.
 
 After that, add the GitHub Actions build config to `.github/workflows/build.yml`:
 
@@ -299,7 +299,7 @@ Now commit, push, and enjoy the result in a minute. And let everyone enjoy as we
 
 Aren't they cute?
 
-![Readme badges](/assets/2021/python-packaging-badges.png)  
+<p><img style="border: 1px solid #e8e8e8;" alt="Readme badges" src="/assets/2021/python-packaging-badges.png"></p>
 
 ## D. Task automation
 
@@ -404,7 +404,7 @@ jobs:
 
 Now GitHub will automatically publish the package as soon as you create a new release. Sweet!
 
----
+<p style="text-align: center;">⌘&nbsp;⌘&nbsp;⌘</p>
 
 Your perfect package is ready! It has everything one could dream of: clean code, clear documentation, tests, and cloud builds. Time to tell your colleagues and friends.
 
