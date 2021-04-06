@@ -54,10 +54,10 @@ And create package description:
 
 ```
 $ flit init
-Module name [podsearch]: 
-Author [Anton Zhiyanov]: 
-Author email [m@antonz.org]: 
-Home page [https://github.com/nalgeon/podsearch-py]:                                     
+Module name [podsearch]:
+Author [Anton Zhiyanov]:
+Author email [m@antonz.org]:
+Home page [https://github.com/nalgeon/podsearch-py]:
 Choose a license (see http://choosealicense.com/ for more info)
 1. MIT - simple and permissive
 2. Apache - explicitly grants patent rights
@@ -144,8 +144,8 @@ To make the package a pleasure to use, I recommend that you follow a few more st
 
 No one likes to write documentation. But without docs, it is unlikely that people will want to install your package, so let's add `README.md` and `CHANGELOG.md`.
 
-- [README.md](https://github.com/nalgeon/podsearch-py/blob/main/README.md)
-- [CHANGELOG.md](https://github.com/nalgeon/podsearch-py/blob/main/CHANGELOG.md)
+-   [README.md](https://github.com/nalgeon/podsearch-py/blob/main/README.md)
+-   [CHANGELOG.md](https://github.com/nalgeon/podsearch-py/blob/main/CHANGELOG.md)
 
 Add readme to the `pyproject.toml`, so that PyPI shows it on the package page:
 
@@ -239,7 +239,7 @@ jobs:
         strategy:
             matrix:
                 python-version: [3.7, 3.8, 3.9]
-        
+
         env:
             USING_COVERAGE: "3.9"
 
@@ -266,12 +266,11 @@ jobs:
               if: contains(env.USING_COVERAGE, matrix.python-version)
               with:
                   fail_ci_if_error: true
-
 ```
 
 [build.yml](https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/build.yml)
 
-GitHub runs tests via `tox` - just as we did. `tox-gh-actions` package and `USING_COVERAGE` settings ensure that `tox` uses the same Python version as GitHub Actions themself (as required by `strategy.matrix`).
+GitHub runs tests via `tox` - just as we did. `tox-gh-actions` package and `USING_COVERAGE` settings ensure that `tox` uses the same Python version as GitHub Actions themself, as required by `strategy.matrix` (I learned this clever trick from [Hynek Schlawak](https://hynek.me/articles/python-github-actions/)).
 
 The last step sends test coverage to Codecov. Code Climate does not need a separate step - it spots repository changes automatically.
 
@@ -306,7 +305,6 @@ Aren't they cute?
 `tox` is fine, but not very handy for development. It's faster to run individual commands like `pylint`, `coverage` etc. But they are quite verbose, so we'll automate the boring stuff.
 
 Let's create short aliases for frequent actions with [Makefile](/makefile-automation/):
-
 
 ```Makefile
 .DEFAULT_GOAL := help
@@ -395,7 +393,6 @@ jobs:
                   FLIT_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
               run: |
                   make publish
-
 ```
 
 [publish.yml](https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/publish.yml)
@@ -410,10 +407,10 @@ Your perfect package is ready! It has everything one could dream of: clean code,
 
 These settings will make your package awesome:
 
-- [pyproject.toml](https://github.com/nalgeon/podsearch-py/blob/main/pyproject.toml)
-- [tox.ini](https://github.com/nalgeon/podsearch-py/blob/main/tox.ini)
-- [Makefile](https://github.com/nalgeon/podsearch-py/blob/main/Makefile)
-- [build.yml](https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/build.yml)
-- [publish.yml](https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/publish.yml)
+-   [pyproject.toml](https://github.com/nalgeon/podsearch-py/blob/main/pyproject.toml)
+-   [tox.ini](https://github.com/nalgeon/podsearch-py/blob/main/tox.ini)
+-   [Makefile](https://github.com/nalgeon/podsearch-py/blob/main/Makefile)
+-   [build.yml](https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/build.yml)
+-   [publish.yml](https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/publish.yml)
 
 _Thanks for reading! Follow [@ohmypy](https://twitter.com/ohmypy) on Twitter to keep up with new posts 🚀_
