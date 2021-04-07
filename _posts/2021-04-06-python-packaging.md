@@ -76,7 +76,7 @@ Sign up for [TestPyPi](https://test.pypi.org/) (test repository) and [PyPI](http
 
 Setup access to repositories in the `~/.pypirc`:
 
-```ini
+```
 [distutils]
 index-servers =
   pypi
@@ -175,7 +175,7 @@ $ pip install black coverage flake8 mccabe mypy pylint pytest tox
 
 Create `tox` configuration in `tox.ini`:
 
-```ini
+```
 [tox]
 isolated_build = True
 envlist = py37,py38,py39
