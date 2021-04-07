@@ -364,6 +364,8 @@ To make the code more DRY, replace raw `build.yml` steps with `make` calls:
 
 GitHub is quite capable of running `flit publish` for us. Let's create a separate workflow:
 
+<!-- {% raw %} -->
+
 ```yaml
 name: publish
 
@@ -394,6 +396,8 @@ jobs:
               run: |
                   make publish
 ```
+
+<!-- {% endraw %} -->
 
 [publish.yml](https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/publish.yml)
 
