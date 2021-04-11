@@ -13,7 +13,7 @@ Today I've come across a perfect information graphics / data visualization guide
 -   Comprehensive yet not too wordy (150 pages).
 -   Highly practical and with lots of examples (197 figures).
 
-The book consists of seven chapters. They provide advice on designing clear, concise, and actionable reports and dashboards:
+The book provides advice on designing clear, concise, and actionable reports and dashboards:
 
 1. How to articulate the message.
 2. How to choose an appropriate chart type.
