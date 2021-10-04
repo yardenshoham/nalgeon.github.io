@@ -26,7 +26,7 @@ First I'll show the results, then describe how everything works:
 
 -   [empty playground](https://sqlime.org/);
 -   [sample database](https://sqlime.org/#gist:e012594111ce51f91590c4737e41a046);
--   [source coode](https://github.com/nalgeon/sqlime).
+-   [source code](https://github.com/nalgeon/sqlime).
 
 Now the details.
 
