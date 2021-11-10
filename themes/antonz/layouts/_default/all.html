@@ -1,0 +1,32 @@
+{{ define "main" }}
+<section class="storey">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 col-sm-10">
+                <div class="article">
+                    <header>
+                        <h1>{{ .Title }}</h1>
+                    </header>
+                    {{ .Content }}
+                </div>
+
+                <div class="posts">
+                    {{- range (where site.RegularPages "Section" "posts").GroupByDate "2006" | first 1 }}
+                    {{- range .Pages }}
+                    {{- if eq .Date.Year now.Year }}
+                    {{- partial "post-stub.html" . -}}
+                    {{- end }}
+                    {{- end }}
+                    {{- end }}
+
+                    {{- range (where site.RegularPages "Section" "years") }}
+                    {{- if ne .Date.Year now.Year }}
+                    <h2><a href="{{ .RelPermalink}}">{{ .Title }}</a></h2>
+                    {{- end}}
+                    {{- end}}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{{ end }}

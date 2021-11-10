@@ -1,0 +1,27 @@
+{{ if not .IsHome }}
+<div class="header">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-6 col-sm-3">
+                <a class="img-link" href="/">
+                    <img src="/assets/antonz.jpg" class="header-icon">
+                </a> 
+                <a href="/">
+                    <strong>{{ .Site.Param "author" }}</strong>
+                </a>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+                <a class="menu__link" href="/all/">
+                    <span>blog</span>
+                </a>
+                <a class="menu__link" href="/#about">
+                    <span>contacts</span>
+                </a>
+                <a class="menu__link" href="https://antonz.ru">
+                    <span>ru</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

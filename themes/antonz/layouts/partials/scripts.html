@@ -1,0 +1,6 @@
+{{/*- $script := (resources.Match "js/*.js") | resources.Concat "assets/css/site.js" */}}
+{{/*- $script := $script | minify | fingerprint */}}
+{{/* <script defer src="{{ $script.RelPermalink }}"></script> */}}
+{{- if hugo.IsProduction | or (eq .Site.Params.env "production") }}
+<script async src="//gc.zgo.at/count.js" data-goatcounter="https://antonzorg.goatcounter.com/count"></script>
+{{- end }}

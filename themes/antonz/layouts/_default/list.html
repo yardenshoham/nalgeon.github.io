@@ -1,0 +1,22 @@
+{{ define "main" }}
+<section class="storey">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 col-sm-10">
+                <div class="article">
+                    <header>
+                        <h1>{{ .Title }}</h1>
+                    </header>
+                    {{ .Content }}
+                </div>
+
+                <div class="posts">
+                    {{- range .Pages.ByDate.Reverse }}
+                    {{- partial "post-stub.html" . -}}
+                    {{- end }}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{{ end }}

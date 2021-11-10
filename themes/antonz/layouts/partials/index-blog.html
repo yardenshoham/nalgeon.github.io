@@ -1,0 +1,16 @@
+<section id="blog" class="storey storey--notop home__block">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 col-sm-10">
+                <h2 class="storey__header">Latest posts</h2>
+                <p>I occasionally blog about Python, SQL and software in general.</p>
+                {{- range (where site.RegularPages "Section" "posts").ByDate.Reverse | first 5 }}
+                {{- partial "post-stub.html" . -}}
+                {{- end}}
+                <div class="post-stub">
+                    <a class="post-stub__title" href="/all/">and more →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
