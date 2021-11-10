@@ -1,0 +1,202 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>What's new in SQLite 3.35</title>
+<meta name=description content="Math functions, column removal and RETURNING clause.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.47ee4414f88524dddca3750ff145f76d063e98533419d597b56ed0c385c01eab.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/sqlite-3-35/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:site_name" content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="What's new in SQLite 3.35">
+<meta property="og:description" content="Math functions, column removal and RETURNING clause.">
+<meta property="og:url" content="https://antonz.org/sqlite-3-35/">
+<meta property="og:image" content="https://antonz.org/sqlite-3-35/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="What's new in SQLite 3.35">
+<meta name=twitter:description content="Math functions, column removal and RETURNING clause.">
+<meta name=twitter:url content="https://antonz.org/sqlite-3-35/">
+<meta name=twitter:site content="@nalgeon">
+<meta name=twitter:image content="https://antonz.org/sqlite-3-35/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/antonz.jpg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>What's new in SQLite 3.35</h1>
+</header>
+<p>SQLite developers often prefer to work on database internals. For an external observer nothing really changes. 2020 was a pleasant exception - SQLite received a bunch of nice features for ordinary users, such as generated columns, <code>UPDATE FROM</code> and fantastic <code>.mode box</code> in the shell.</p>
+<p>There&rsquo;s every chance that 2021 will continue the tradition. Here&rsquo;s what shipped in the 3.35 release today:</p>
+<ol>
+<li>Math functions ‼️</li>
+<li>Column removal ❗</li>
+<li><code>RETURNING</code> processed rows for <code>DELETE</code>, <code>INSERT</code> and <code>UPDATE</code>.</li>
+<li>Materialized CTEs.</li>
+</ol>
+<p>Here are some details about each feature.</p>
+<h2 id=math-functions>Math functions</h2>
+<p>For many years, users literally begged SQLite devs to add basic functions like <code>sqrt()</code>, <code>log()</code> and <code>pow()</code>. The answer was always about the same (not a direct quote):</p>
+<blockquote>
+<p>SQLite is called &lsquo;lite&rsquo; for a reason. If you need functions, add them yourself.</p>
+</blockquote>
+<p>An understandable position indeed. But refusing to add the square root? At the same time implementing window functions, recursive queries and other advanced SQL magic? Seriously?</p>
+<p>Maybe SQLite developers prefer to focus on features that large customers are willing to pay for. Anyway, after 20 years we now have mathematical functions!</p>
+<p>Here is the full list:</p>
+<pre tabindex=0><code>acos(X)
+acosh(X)
+asin(X)
+asinh(X)
+atan(X)
+atan2(X,Y)
+ceil(X)
+ceiling(X)
+cos(X)
+cosh(X)
+degrees(X)
+exp(X)
+floor(X)
+ln(X)
+log(B,X)
+log(X)
+log10(X)
+log2(X)
+mod(X,Y)
+pi()
+pow(X,Y)
+power(X,Y)
+radians(X)
+sin(X)
+sinh(X)
+sqrt(X)
+tan(X)
+tanh(X)
+trunc(X)
+</code></pre><h2 id=column-removal>Column removal</h2>
+<p>Probably the second most popular source of user suffering. It&rsquo;s incredibly annoying that you can create as many columns as you want, but there is no way to delete them. Want to delete a column? Make a copy of the table without it, and delete the old one.</p>
+<p>Now this pain is also going away! <code>ALTER TABLE DROP COLUMN</code>, how long have we been waiting for you.</p>
+<p>To delete a column, SQLite have to completely overwrite the table - so the operation is not fast. But it&rsquo;s still nice.</p>
+<h2 id=returning-clause>RETURNING clause</h2>
+<p><code>DELETE</code>, <code>INSERT</code> and <code>UPDATE</code> queries now can return the rows that they deleted, added, or changed respectively.</p>
+<p>E.g., return the <code>id</code> of a new record:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>create</span> <span style=color:#a90d91>table</span> <span style=color:#000>users</span> (
+  <span style=color:#000>id</span> <span style=color:#a90d91>integer</span> <span style=color:#a90d91>primary</span> <span style=color:#a90d91>key</span>,
+  <span style=color:#000>first_name</span> <span style=color:#a90d91>text</span>,
+  <span style=color:#000>last_name</span> <span style=color:#a90d91>text</span>
+);
+
+<span style=color:#a90d91>insert</span> <span style=color:#a90d91>into</span> <span style=color:#000>users</span> (<span style=color:#000>first_name</span>, <span style=color:#000>last_name</span>)
+<span style=color:#a90d91>values</span> (<span style=color:#c41a16>&#39;Jane&#39;</span>, <span style=color:#c41a16>&#39;Doe&#39;</span>)
+<span style=color:#000>returning</span> <span style=color:#000>id</span>;
+</code></pre></div><p>Or return products with increased price:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>update</span> <span style=color:#000>products</span> <span style=color:#a90d91>set</span> <span style=color:#000>price</span> <span style=color:#000>=</span> <span style=color:#000>price</span> <span style=color:#000>*</span> <span style=color:#1c01ce>1</span>.<span style=color:#1c01ce>10</span>
+<span style=color:#a90d91>where</span> <span style=color:#000>price</span> <span style=color:#000>&lt;=</span> <span style=color:#1c01ce>99</span>.<span style=color:#1c01ce>99</span>
+<span style=color:#000>returning</span> <span style=color:#000>name</span>, <span style=color:#000>price</span> <span style=color:#a90d91>as</span> <span style=color:#000>new_price</span>;
+</code></pre></div><h2 id=materialized-ctes>Materialized CTEs</h2>
+<p>CTE (Common Table Expression) is a great way to make a query more expressive. E.g., count the number of cities founded in each century:</p>
+<pre tabindex=0><code>create table city(
+  city text,
+  timezone text,
+  geo_lat real,
+  geo_lon real,
+  population integer,
+  foundation_year integer
+);
+
+-- insert data ...
+
+with history as (
+  select
+    city,
+    (foundation_year/100)+1 as century
+  from city
+)
+select
+  century || ' century' as dates,
+  count(*) as city_count
+from history
+group by century
+order by century desc;
+</code></pre><p>If the same CTE occurs multiple times in a query, SQLite calculates it multiple times. For large tables this may not be fast.</p>
+<p>With a materialized CTE, SQLite executes the query once, remembers the result and does not recalculate it (within the same query):</p>
+<pre tabindex=0><code>with history as materialized (
+  select ...
+)
+select ... from history where ...
+except
+select ... from history where ...
+;
+</code></pre><p>Four great features, all in the same release! Awesome ツ</p>
+<p><a href=https://sqlite.org/releaselog/3_35_0.html>SQLite 3.35 Release Notes</a></p>
+<p><a href=https://sqlite.org/download.html>Download latest version</a></p>
+<p><a href="https://news.ycombinator.com/item?id=26440397">Comments on Hacker News</a></p>
+<p><em>Follow <a href=https://twitter.com/ohmypy>@ohmypy</a> on Twitter to keep up with new posts!</em></p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2021-03-12 19:10:16 +0000 UTC">12 Mar, 2021</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/sqlite/>sqlite</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p><a href=https://antonz.org/sqlite-is-not-so-easy-to-compile/>SQLite is not so easy to compile</a>&nbsp;&rarr;</p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/rss class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>

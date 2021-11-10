@@ -1,0 +1,220 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>SQLite playground in the browser</title>
+<meta name=description content="I have built an online SQL playground with vanilla JS and a bit of GitHub API. Here's how.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.47ee4414f88524dddca3750ff145f76d063e98533419d597b56ed0c385c01eab.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/sqlite-playground/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:site_name" content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SQLite playground in the browser">
+<meta property="og:description" content="I have built an online SQL playground with vanilla JS and a bit of GitHub API. Here's how.">
+<meta property="og:url" content="https://antonz.org/sqlite-playground/">
+<meta property="og:image" content="https://antonz.org/sqlite-playground/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="SQLite playground in the browser">
+<meta name=twitter:description content="I have built an online SQL playground with vanilla JS and a bit of GitHub API. Here's how.">
+<meta name=twitter:url content="https://antonz.org/sqlite-playground/">
+<meta name=twitter:site content="@nalgeon">
+<meta name=twitter:image content="https://antonz.org/sqlite-playground/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/antonz.jpg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>SQLite playground in the browser</h1>
+</header>
+<p>What I&rsquo;ve always lacked is something similar to JSFiddle, but for SQLite. An online playground to quickly test an SQL query and share it with others.</p>
+<p>Here is what I wanted:</p>
+<ul>
+<li>Binary database import, not just SQL schema.</li>
+<li>Support both local and remote databases (by url).</li>
+<li>Save the database and queries in the cloud.</li>
+<li>Free of charge, no sign-up required.</li>
+<li>The latest version of SQLite.</li>
+<li>Minimalistic and mobile friendly.</li>
+</ul>
+<p>So I&rsquo;ve built <strong><a href=https://sqlime.org/>SQLime</a></strong> — an online SQLite playground for debugging and sharing SQL snippets.</p>
+<p><img src=sqlime.png alt="SQLime - SQLite Playground"></p>
+<p>First I&rsquo;ll show the results, then describe how everything works:</p>
+<ul>
+<li><a href=https://sqlime.org/>empty playground</a>;</li>
+<li><a href=https://sqlime.org/#gist:e012594111ce51f91590c4737e41a046>sample database</a>;</li>
+<li><a href=https://github.com/nalgeon/sqlime>source code</a>.</li>
+</ul>
+<p>Now the details.</p>
+<h2 id=sqlite-in-the-browser>SQLite in the browser</h2>
+<p>All browsers — both mobile and desktop — have an excellent DBMS is already built-in — <a href=https://sqlite.org/>SQLite</a>. It implements the SQL-92 standard (and a large part of later standards). Seems only logical to access it through the browser API.</p>
+<p>Many browser vendors thought so at the end of the 00s. That&rsquo;s how Web SQL standard appeared, supported by Apple (Safari), Google (Chrome), and Opera (popular at the time). Not by Mozilla (Firefox), though. As a result, Web SQL was killed in 2010. After that, browser data storage went along the NoSQL path (Indexed Database, Cache API).</p>
+<p>In 2019, Ophir Lojkine compiled SQLite sources into WebAssembly (the &lsquo;native&rsquo; browser binary format) for the <a href=https://github.com/sql-js/sql.js>sql.js</a> project. It is a full-fledged SQLite instance that works in the browser (and quite a small one — the binary takes about 1Mb).</p>
+<p>sql.js is the perfect engine for an online playground. So I used it.</p>
+<h2 id=loading-the-database-from-a-file>Loading the database from a file</h2>
+<p>Get the file from the user via <code>input[type=file]</code>, read it with the <code>FileReader</code>, convert into an 8-bit array, and upload to SQLite:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-javascript data-lang=javascript><span style=color:#a90d91>const</span> <span style=color:#000>file</span> <span style=color:#000>=</span> <span style=color:#000>event</span>.<span style=color:#000>target</span>.<span style=color:#000>files</span>[<span style=color:#1c01ce>0</span>];
+<span style=color:#a90d91>const</span> <span style=color:#000>reader</span> <span style=color:#000>=</span> <span style=color:#a90d91>new</span> <span style=color:#000>FileReader</span>();
+<span style=color:#000>reader</span>.<span style=color:#000>onload</span> <span style=color:#000>=</span> <span style=color:#a90d91>function</span> () {
+    <span style=color:#a90d91>const</span> <span style=color:#000>arr</span> <span style=color:#000>=</span> <span style=color:#a90d91>new</span> <span style=color:#000>Uint8Array</span>(<span style=color:#000>reader</span>.<span style=color:#000>result</span>);
+    <span style=color:#a90d91>return</span> <span style=color:#a90d91>new</span> <span style=color:#000>SQL</span>.<span style=color:#000>Database</span>(<span style=color:#000>arr</span>);
+};
+<span style=color:#000>reader</span>.<span style=color:#000>readAsArrayBuffer</span>(<span style=color:#000>file</span>);
+</code></pre></div><h2 id=loading-the-database-by-url>Loading the database by URL</h2>
+<p>Upload the file using <code>fetch()</code>, read the answer into <code>ArrayBuffer</code>, then proceed as with a regular file:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-javascript data-lang=javascript><span style=color:#a90d91>const</span> <span style=color:#000>resp</span> <span style=color:#000>=</span> <span style=color:#a90d91>await</span> <span style=color:#000>fetch</span>(<span style=color:#000>url</span>);
+<span style=color:#a90d91>const</span> <span style=color:#000>buffer</span> <span style=color:#000>=</span> <span style=color:#a90d91>await</span> <span style=color:#000>response</span>.<span style=color:#000>arrayBuffer</span>();
+<span style=color:#a90d91>const</span> <span style=color:#000>arr</span> <span style=color:#000>=</span> <span style=color:#a90d91>new</span> <span style=color:#000>Uint8Array</span>(<span style=color:#000>buffer</span>);
+<span style=color:#a90d91>return</span> <span style=color:#a90d91>new</span> <span style=color:#000>SQL</span>.<span style=color:#000>Database</span>(<span style=color:#000>arr</span>);
+</code></pre></div><p>Works equally well with local and remote URLs. Also handles databases hosted on GitHub — just use the <code>raw.githubusercontent.com</code> domain instead of <code>github.com</code>:</p>
+<pre tabindex=0><code>https://github.com/nalgeon/sqliter/blob/main/employees.en.db
+→ https://raw.githubusercontent.com/nalgeon/sqliter/main/employees.en.db
+</code></pre><h2 id=querying-the-database>Querying the database</h2>
+<p>Perhaps the simplest part, as sql.js provides a convenient query API:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-javascript data-lang=javascript><span style=color:#177500>// execute one or more queries
+</span><span style=color:#177500>// and return the last result
+</span><span style=color:#177500></span><span style=color:#a90d91>const</span> <span style=color:#000>result</span> <span style=color:#000>=</span> <span style=color:#000>db</span>.<span style=color:#000>exec</span>(<span style=color:#000>sql</span>);
+<span style=color:#a90d91>if</span> (<span style=color:#000>!</span><span style=color:#000>result</span>.<span style=color:#000>length</span>) {
+    <span style=color:#a90d91>return</span> <span style=color:#a90d91>null</span>;
+}
+<span style=color:#a90d91>return</span> <span style=color:#000>result</span>[<span style=color:#000>result</span>.<span style=color:#000>length</span> <span style=color:#000>-</span> <span style=color:#1c01ce>1</span>];
+</code></pre></div><h2 id=exporting-the-database-to-sql>Exporting the database to SQL</h2>
+<p>It is not hard to get the binary database content — sql.js provides a method:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-javascript data-lang=javascript><span style=color:#a90d91>const</span> <span style=color:#000>buffer</span> <span style=color:#000>=</span> <span style=color:#000>db</span>.<span style=color:#a90d91>export</span>();
+<span style=color:#a90d91>const</span> <span style=color:#000>blob</span> <span style=color:#000>=</span> <span style=color:#a90d91>new</span> <span style=color:#000>Blob</span>([<span style=color:#000>buffer</span>]);
+<span style=color:#a90d91>const</span> <span style=color:#000>link</span> <span style=color:#000>=</span> <span style=color:#a90d91>document</span>.<span style=color:#000>createElement</span>(<span style=color:#c41a16>&#34;a&#34;</span>);
+<span style=color:#000>link</span>.<span style=color:#000>href</span> <span style=color:#000>=</span> <span style=color:#a90d91>window</span>.<span style=color:#000>URL</span>.<span style=color:#000>createObjectURL</span>(<span style=color:#000>blob</span>);
+<span style=color:#177500>// ...
+</span><span style=color:#177500></span><span style=color:#000>link</span>.<span style=color:#000>click</span>();
+</code></pre></div><p>But I wanted a full SQL script with table schema and contents instead of a binary file. Such script is easier to understand and upload to PostgreSQL or another DBMS.</p>
+<p>To export the database, I used the algorithm from the <a href=https://github.com/simonw/sqlite-dump>sqlite-dump</a> project. The code is not very concise, so I will not show it here (see <a href=https://github.com/nalgeon/sqlime/blob/main/js/dumper.js>dumper.js</a> if interested). In short:</p>
+<ol>
+<li>Get a list of tables from the system <code>sqlite_schema</code> table, extract <code>create table...</code> queries.</li>
+<li>For each table, get a list of columns from the virtual table <code>table_info(name)</code>.</li>
+<li>Select data from each table and generate <code>insert into...</code> queries.</li>
+</ol>
+<p>It produces a readable script:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>create</span> <span style=color:#a90d91>table</span> <span style=color:#a90d91>if</span> <span style=color:#a90d91>not</span> <span style=color:#a90d91>exists</span> <span style=color:#000>employees</span> (
+    <span style=color:#000>id</span> <span style=color:#a90d91>integer</span> <span style=color:#a90d91>primary</span> <span style=color:#a90d91>key</span>,
+    <span style=color:#000>name</span> <span style=color:#a90d91>text</span>,
+    <span style=color:#000>city</span> <span style=color:#a90d91>text</span>,
+    <span style=color:#000>department</span> <span style=color:#a90d91>text</span>,
+    <span style=color:#000>salary</span> <span style=color:#a90d91>integer</span>
+);
+<span style=color:#a90d91>insert</span> <span style=color:#a90d91>into</span> <span style=color:#c41a16>&#34;employees&#34;</span> <span style=color:#a90d91>values</span>(<span style=color:#1c01ce>11</span>,<span style=color:#c41a16>&#39;Diane&#39;</span>,<span style=color:#c41a16>&#39;London&#39;</span>,<span style=color:#c41a16>&#39;hr&#39;</span>,<span style=color:#1c01ce>70</span>);
+<span style=color:#a90d91>insert</span> <span style=color:#a90d91>into</span> <span style=color:#c41a16>&#34;employees&#34;</span> <span style=color:#a90d91>values</span>(<span style=color:#1c01ce>12</span>,<span style=color:#c41a16>&#39;Bob&#39;</span>,<span style=color:#c41a16>&#39;London&#39;</span>,<span style=color:#c41a16>&#39;hr&#39;</span>,<span style=color:#1c01ce>78</span>);
+<span style=color:#a90d91>insert</span> <span style=color:#a90d91>into</span> <span style=color:#c41a16>&#34;employees&#34;</span> <span style=color:#a90d91>values</span>(<span style=color:#1c01ce>21</span>,<span style=color:#c41a16>&#39;Emma&#39;</span>,<span style=color:#c41a16>&#39;London&#39;</span>,<span style=color:#c41a16>&#39;it&#39;</span>,<span style=color:#1c01ce>84</span>);
+...
+</code></pre></div><h2 id=saving-to-the-cloud>Saving to the cloud</h2>
+<p>The database and queries need to be stored somewhere so that you can share a link to the prepared playground. The last thing I wanted was to implement the backend with authorization and storage. That way the service could not stay free, not to mention an extra signup headache.</p>
+<p>Fortunately, there is a GitHub Gist API that perfectly fits all criteria:</p>
+<ul>
+<li>many developers already have GitHub accounts;</li>
+<li>API allows CORS (allowed to make requests from my domain);</li>
+<li>nice user interface;</li>
+<li>free and reliable.</li>
+</ul>
+<p>I integrated the Gist API via the ordinary <code>fetch()</code>: <code>GET</code> to load the gist, <code>POST</code> to save it.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-javascript data-lang=javascript><span style=color:#177500>// produce an SQL script with db schema and contents
+</span><span style=color:#177500></span><span style=color:#a90d91>const</span> <span style=color:#000>data</span> <span style=color:#000>=</span> <span style=color:#a90d91>export</span>(<span style=color:#000>db</span>);
+<span style=color:#177500>// save as gist
+</span><span style=color:#177500></span><span style=color:#000>fetch</span>(<span style=color:#c41a16>&#34;https://api.github.com/gists&#34;</span>, {
+    <span style=color:#000>method</span><span style=color:#000>:</span> <span style=color:#c41a16>&#34;post&#34;</span>,
+    <span style=color:#000>headers</span><span style=color:#000>:</span> {
+        <span style=color:#000>Accept</span><span style=color:#000>:</span> <span style=color:#c41a16>&#34;application/json&#34;</span>,
+        <span style=color:#c41a16>&#34;Content-Type&#34;</span><span style=color:#000>:</span> <span style=color:#c41a16>&#34;application/json&#34;</span>,
+        <span style=color:#000>Authorization</span><span style=color:#000>:</span> <span style=color:#c41a16>`Token </span><span style=color:#c41a16>${</span><span style=color:#000>token</span><span style=color:#c41a16>}</span><span style=color:#c41a16>`</span>
+    },
+    <span style=color:#000>body</span><span style=color:#000>:</span> <span style=color:#000>JSON</span>.<span style=color:#000>stringify</span>(<span style=color:#000>data</span>),
+});
+</code></pre></div><p>All the user needs is to specify the Github API token. Conveniently, the token is scoped exclusively to work with gists — it has no access to repositories, so is guaranteed to do no harm.</p>
+<h2 id=user-interface>User Interface</h2>
+<p>Modern frontend projects are full of tooling and infrastructure stuff. Honestly, I&rsquo;m not interested in it at all (I&rsquo;m not a JS developer). So I deliberately did not use UI frameworks and did everything with vanilla HTML + CSS + JS. It seems to be quite acceptable for a small project.</p>
+<figure>
+<img alt="SQLime on mobile" src=mobile.png>
+<figcaption class=align-center>I took care of the mobile layout: the playground is perfectly usable on the phone. And there are command shortcuts for the desktop.</figcaption>
+</figure>
+<p>At the same time, the code turned out to be quite modular, thanks to native JS modules and web components — they are supported by all modern browsers. A real frontend developer will wince probably, but I&rsquo;m fine.</p>
+<p>The playground is hosted on GitHub Pages, and the deployment is a basic <code>git push</code>. Since there is no build stage, I didn&rsquo;t even have to set up GitHub Actions.</p>
+<h2 id=summary>Summary</h2>
+<p>Try <a href=https://sqlime.org/>SQLime</a> for yourself — see if you find it useful. Or, perhaps, you&rsquo;ll adopt the approach of creating serverless tools with vanilla JS and GitHub API. Constructive critique is also welcome, of course ツ</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy>@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
+<p><a href="https://news.ycombinator.com/item?id=28669703">Comments on Hacker News</a></p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2021-10-04 10:40:00 +0000 UTC">04 Oct, 2021</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/sqlite/>sqlite</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/good-code/>Good Code Criterion</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sqlite-is-not-a-toy-database/>SQLite is not a toy database</a></p>
+<p><a href=/random-table/>How to create a 1M record table with a single query</a></p>
+<p><a href=/sqlite-is-not-so-easy-to-compile/>SQLite is not so easy to compile</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/rss class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>

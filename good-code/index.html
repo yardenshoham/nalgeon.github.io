@@ -1,0 +1,143 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Good Code Criterion</title>
+<meta name=description content="Optimize T, keep an eye on R.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.47ee4414f88524dddca3750ff145f76d063e98533419d597b56ed0c385c01eab.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/good-code/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:site_name" content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Good Code Criterion">
+<meta property="og:description" content="Optimize T, keep an eye on R.">
+<meta property="og:url" content="https://antonz.org/good-code/">
+<meta property="og:image" content="https://antonz.org/good-code/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Good Code Criterion">
+<meta name=twitter:description content="Optimize T, keep an eye on R.">
+<meta name=twitter:url content="https://antonz.org/good-code/">
+<meta name=twitter:site content="@nalgeon">
+<meta name=twitter:image content="https://antonz.org/good-code/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/antonz.jpg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Good Code Criterion</h1>
+</header>
+<p>Good code is understandable and non-greedy. Let&rsquo;s talk about it.</p>
+<h2 id=time-to-understanding>Time to understanding</h2>
+<p>The main criterion for good code is the time T it takes for a non-author to understand the code. Not &ldquo;I sorta get it&rdquo;, but understand deep enough to make changes and not break anything.</p>
+<p>The smaller the T, the better the code.</p>
+<p>Let&rsquo;s say Alice and Bob implemented the same feature, and you want to modify it. If you understand Alice&rsquo;s code in 10 minutes, and Bob&rsquo;s code in 30 minutes - Alice&rsquo;s code is better. It doesn&rsquo;t matter how layered Bob&rsquo;s architecture is, whether he used a functional approach, a modern framework, etc.</p>
+<p>The T-metric is different for a beginner and an experienced programmer. Therefore, it makes sense to focus on the average level of devs who will use the code. If you have a team of people working for 10+ years, and everyone writes compilers in their spare time - even very complex code will have a low T. If you have a huge turnover and hire yesterday&rsquo;s students — the code should be rather primitive so that T does not shoot through the roof.</p>
+<p>It&rsquo;s not easy to measure T directly, so usually, teams track secondary metrics that affect T:</p>
+<ul>
+<li>code style (<code>black</code> for Python),</li>
+<li>code smells (<code>pylint</code>, <code>flake8</code>),</li>
+<li>cyclomatic complexity (<code>mccabe</code>),</li>
+<li>module dependencies (<code>import-linter</code>).</li>
+</ul>
+<p>Plus code review.</p>
+<h2 id=resource-usage>Resource usage</h2>
+<p>The second criterion for good code is the amount of resources R it consumes (time, CPU, memory, disk). The smaller the R, the better the code.</p>
+<p>If Alice and Bob implemented a feature with the same T, but Alice&rsquo;s code time complexity is O(n), and Bob&rsquo;s is O(n²) (with the same consumption of other resources) - Alice&rsquo;s code is better.</p>
+<p>Note about the notorious &ldquo;sacrifice readability for efficiency&rdquo;. For each task, there is a resource consumption threshold R0, which the solution should not exceed. If R &lt; R0, do not degrade T for the sake of further reducing R.</p>
+<p>If a non-critical service processes a request in 50ms, you don&rsquo;t need to rewrite it from Python to C to reduce the time to 5ms. The thing is already fast enough.</p>
+<p>If the code has a high T and a low R, in most cases you can reduce T while keeping R &lt; R0.</p>
+<p>But sometimes, if resources are limited, or the input data is huge, it may not possible to reach R &lt; R0 without degrading T. Then you really have to sacrifice clarity. But make sure that:</p>
+<ol>
+<li>This is the last resort when all the other options have failed.</li>
+<li>The code sections where T is traded for R are well isolated.</li>
+<li>There are few such sections.</li>
+<li>They are well-documented.</li>
+</ol>
+<h2 id=summary>Summary</h2>
+<p>Here is the mnemonics for good code:</p>
+<pre class=big>
+T↓ R&lt;R0
+</pre>
+<p>Optimize T, keep an eye on R. Your team will thank you.</p>
+<p><em>Thanks for reading! Follow <a href=https://twitter.com/ohmypy>@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2021-06-02 11:00:00 +0000 UTC">02 Jun, 2021</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/python/>python</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/dataviz-guide/>Data Visualization Guide</a></p>
+</div>
+<div class="col-xs-12 col-sm-6">
+<p><a href=https://antonz.org/sqlite-playground/>SQLite playground in the browser</a>&nbsp;&rarr;</p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/python-packaging/>How to make an awesome Python package in 2021</a></p>
+<p><a href=/makefile-automation/>Automate your Python project with Makefile</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/rss class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>

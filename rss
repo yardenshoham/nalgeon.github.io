@@ -1,0 +1,1212 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Anton Zhiyanov</title>
+    <description>Everything about SQLite, Python, open data and awesome software.</description>
+    <link>https://antonz.org/</link>
+    <image>
+      <url>https://antonz.org/assets/favicon/favicon.png</url>
+      <title>Anton Zhiyanov</title>
+      <link>https://antonz.org/</link>
+    </image>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 04 Oct 2021 10:40:00 +0000</lastBuildDate><atom:link href="https://antonz.org/rss" rel="self" type="application/rss+xml" />
+    <item>
+      <title>SQLite playground in the browser</title>
+      <link>https://antonz.org/sqlite-playground/</link>
+      <pubDate>Mon, 04 Oct 2021 10:40:00 +0000</pubDate>
+      
+      <guid>https://antonz.org/sqlite-playground/</guid>
+      <description>I have built an online SQL playground with vanilla JS and a bit of GitHub API. Here&#39;s how.</description>
+      <content:encoded><![CDATA[<p>What I&rsquo;ve always lacked is something similar to JSFiddle, but for SQLite. An online playground to quickly test an SQL query and share it with others.</p>
+<p>Here is what I wanted:</p>
+<ul>
+<li>Binary database import, not just SQL schema.</li>
+<li>Support both local and remote databases (by url).</li>
+<li>Save the database and queries in the cloud.</li>
+<li>Free of charge, no sign-up required.</li>
+<li>The latest version of SQLite.</li>
+<li>Minimalistic and mobile friendly.</li>
+</ul>
+<p>So I&rsquo;ve built <strong><a href="https://sqlime.org/">SQLime</a></strong> — an online SQLite playground for debugging and sharing SQL snippets.</p>
+<p><img src="sqlime.png" alt="SQLime - SQLite Playground"></p>
+<p>First I&rsquo;ll show the results, then describe how everything works:</p>
+<ul>
+<li><a href="https://sqlime.org/">empty playground</a>;</li>
+<li><a href="https://sqlime.org/#gist:e012594111ce51f91590c4737e41a046">sample database</a>;</li>
+<li><a href="https://github.com/nalgeon/sqlime">source code</a>.</li>
+</ul>
+<p>Now the details.</p>
+<h2 id="sqlite-in-the-browser">SQLite in the browser</h2>
+<p>All browsers — both mobile and desktop — have an excellent DBMS is already built-in — <a href="https://sqlite.org/">SQLite</a>. It implements the SQL-92 standard (and a large part of later standards). Seems only logical to access it through the browser API.</p>
+<p>Many browser vendors thought so at the end of the 00s. That&rsquo;s how Web SQL standard appeared, supported by Apple (Safari), Google (Chrome), and Opera (popular at the time). Not by Mozilla (Firefox), though. As a result, Web SQL was killed in 2010. After that, browser data storage went along the NoSQL path (Indexed Database, Cache API).</p>
+<p>In 2019, Ophir Lojkine compiled SQLite sources into WebAssembly (the &lsquo;native&rsquo; browser binary format) for the <a href="https://github.com/sql-js/sql.js">sql.js</a> project. It is a full-fledged SQLite instance that works in the browser (and quite a small one — the binary takes about 1Mb).</p>
+<p>sql.js is the perfect engine for an online playground. So I used it.</p>
+<h2 id="loading-the-database-from-a-file">Loading the database from a file</h2>
+<p>Get the file from the user via <code>input[type=file]</code>, read it with the <code>FileReader</code>, convert into an 8-bit array, and upload to SQLite:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a90d91">const</span> <span style="color:#000">file</span> <span style="color:#000">=</span> <span style="color:#000">event</span>.<span style="color:#000">target</span>.<span style="color:#000">files</span>[<span style="color:#1c01ce">0</span>];
+<span style="color:#a90d91">const</span> <span style="color:#000">reader</span> <span style="color:#000">=</span> <span style="color:#a90d91">new</span> <span style="color:#000">FileReader</span>();
+<span style="color:#000">reader</span>.<span style="color:#000">onload</span> <span style="color:#000">=</span> <span style="color:#a90d91">function</span> () {
+    <span style="color:#a90d91">const</span> <span style="color:#000">arr</span> <span style="color:#000">=</span> <span style="color:#a90d91">new</span> <span style="color:#000">Uint8Array</span>(<span style="color:#000">reader</span>.<span style="color:#000">result</span>);
+    <span style="color:#a90d91">return</span> <span style="color:#a90d91">new</span> <span style="color:#000">SQL</span>.<span style="color:#000">Database</span>(<span style="color:#000">arr</span>);
+};
+<span style="color:#000">reader</span>.<span style="color:#000">readAsArrayBuffer</span>(<span style="color:#000">file</span>);
+</code></pre></div><h2 id="loading-the-database-by-url">Loading the database by URL</h2>
+<p>Upload the file using <code>fetch()</code>, read the answer into <code>ArrayBuffer</code>, then proceed as with a regular file:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a90d91">const</span> <span style="color:#000">resp</span> <span style="color:#000">=</span> <span style="color:#a90d91">await</span> <span style="color:#000">fetch</span>(<span style="color:#000">url</span>);
+<span style="color:#a90d91">const</span> <span style="color:#000">buffer</span> <span style="color:#000">=</span> <span style="color:#a90d91">await</span> <span style="color:#000">response</span>.<span style="color:#000">arrayBuffer</span>();
+<span style="color:#a90d91">const</span> <span style="color:#000">arr</span> <span style="color:#000">=</span> <span style="color:#a90d91">new</span> <span style="color:#000">Uint8Array</span>(<span style="color:#000">buffer</span>);
+<span style="color:#a90d91">return</span> <span style="color:#a90d91">new</span> <span style="color:#000">SQL</span>.<span style="color:#000">Database</span>(<span style="color:#000">arr</span>);
+</code></pre></div><p>Works equally well with local and remote URLs. Also handles databases hosted on GitHub — just use the <code>raw.githubusercontent.com</code> domain instead of <code>github.com</code>:</p>
+<pre tabindex="0"><code>https://github.com/nalgeon/sqliter/blob/main/employees.en.db
+→ https://raw.githubusercontent.com/nalgeon/sqliter/main/employees.en.db
+</code></pre><h2 id="querying-the-database">Querying the database</h2>
+<p>Perhaps the simplest part, as sql.js provides a convenient query API:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#177500">// execute one or more queries
+</span><span style="color:#177500">// and return the last result
+</span><span style="color:#177500"></span><span style="color:#a90d91">const</span> <span style="color:#000">result</span> <span style="color:#000">=</span> <span style="color:#000">db</span>.<span style="color:#000">exec</span>(<span style="color:#000">sql</span>);
+<span style="color:#a90d91">if</span> (<span style="color:#000">!</span><span style="color:#000">result</span>.<span style="color:#000">length</span>) {
+    <span style="color:#a90d91">return</span> <span style="color:#a90d91">null</span>;
+}
+<span style="color:#a90d91">return</span> <span style="color:#000">result</span>[<span style="color:#000">result</span>.<span style="color:#000">length</span> <span style="color:#000">-</span> <span style="color:#1c01ce">1</span>];
+</code></pre></div><h2 id="exporting-the-database-to-sql">Exporting the database to SQL</h2>
+<p>It is not hard to get the binary database content — sql.js provides a method:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a90d91">const</span> <span style="color:#000">buffer</span> <span style="color:#000">=</span> <span style="color:#000">db</span>.<span style="color:#a90d91">export</span>();
+<span style="color:#a90d91">const</span> <span style="color:#000">blob</span> <span style="color:#000">=</span> <span style="color:#a90d91">new</span> <span style="color:#000">Blob</span>([<span style="color:#000">buffer</span>]);
+<span style="color:#a90d91">const</span> <span style="color:#000">link</span> <span style="color:#000">=</span> <span style="color:#a90d91">document</span>.<span style="color:#000">createElement</span>(<span style="color:#c41a16">&#34;a&#34;</span>);
+<span style="color:#000">link</span>.<span style="color:#000">href</span> <span style="color:#000">=</span> <span style="color:#a90d91">window</span>.<span style="color:#000">URL</span>.<span style="color:#000">createObjectURL</span>(<span style="color:#000">blob</span>);
+<span style="color:#177500">// ...
+</span><span style="color:#177500"></span><span style="color:#000">link</span>.<span style="color:#000">click</span>();
+</code></pre></div><p>But I wanted a full SQL script with table schema and contents instead of a binary file. Such script is easier to understand and upload to PostgreSQL or another DBMS.</p>
+<p>To export the database, I used the algorithm from the <a href="https://github.com/simonw/sqlite-dump">sqlite-dump</a> project. The code is not very concise, so I will not show it here (see <a href="https://github.com/nalgeon/sqlime/blob/main/js/dumper.js">dumper.js</a> if interested). In short:</p>
+<ol>
+<li>Get a list of tables from the system <code>sqlite_schema</code> table, extract <code>create table...</code> queries.</li>
+<li>For each table, get a list of columns from the virtual table <code>table_info(name)</code>.</li>
+<li>Select data from each table and generate <code>insert into...</code> queries.</li>
+</ol>
+<p>It produces a readable script:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">create</span> <span style="color:#a90d91">table</span> <span style="color:#a90d91">if</span> <span style="color:#a90d91">not</span> <span style="color:#a90d91">exists</span> <span style="color:#000">employees</span> (
+    <span style="color:#000">id</span> <span style="color:#a90d91">integer</span> <span style="color:#a90d91">primary</span> <span style="color:#a90d91">key</span>,
+    <span style="color:#000">name</span> <span style="color:#a90d91">text</span>,
+    <span style="color:#000">city</span> <span style="color:#a90d91">text</span>,
+    <span style="color:#000">department</span> <span style="color:#a90d91">text</span>,
+    <span style="color:#000">salary</span> <span style="color:#a90d91">integer</span>
+);
+<span style="color:#a90d91">insert</span> <span style="color:#a90d91">into</span> <span style="color:#c41a16">&#34;employees&#34;</span> <span style="color:#a90d91">values</span>(<span style="color:#1c01ce">11</span>,<span style="color:#c41a16">&#39;Diane&#39;</span>,<span style="color:#c41a16">&#39;London&#39;</span>,<span style="color:#c41a16">&#39;hr&#39;</span>,<span style="color:#1c01ce">70</span>);
+<span style="color:#a90d91">insert</span> <span style="color:#a90d91">into</span> <span style="color:#c41a16">&#34;employees&#34;</span> <span style="color:#a90d91">values</span>(<span style="color:#1c01ce">12</span>,<span style="color:#c41a16">&#39;Bob&#39;</span>,<span style="color:#c41a16">&#39;London&#39;</span>,<span style="color:#c41a16">&#39;hr&#39;</span>,<span style="color:#1c01ce">78</span>);
+<span style="color:#a90d91">insert</span> <span style="color:#a90d91">into</span> <span style="color:#c41a16">&#34;employees&#34;</span> <span style="color:#a90d91">values</span>(<span style="color:#1c01ce">21</span>,<span style="color:#c41a16">&#39;Emma&#39;</span>,<span style="color:#c41a16">&#39;London&#39;</span>,<span style="color:#c41a16">&#39;it&#39;</span>,<span style="color:#1c01ce">84</span>);
+...
+</code></pre></div><h2 id="saving-to-the-cloud">Saving to the cloud</h2>
+<p>The database and queries need to be stored somewhere so that you can share a link to the prepared playground. The last thing I wanted was to implement the backend with authorization and storage. That way the service could not stay free, not to mention an extra signup headache.</p>
+<p>Fortunately, there is a GitHub Gist API that perfectly fits all criteria:</p>
+<ul>
+<li>many developers already have GitHub accounts;</li>
+<li>API allows CORS (allowed to make requests from my domain);</li>
+<li>nice user interface;</li>
+<li>free and reliable.</li>
+</ul>
+<p>I integrated the Gist API via the ordinary <code>fetch()</code>: <code>GET</code> to load the gist, <code>POST</code> to save it.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#177500">// produce an SQL script with db schema and contents
+</span><span style="color:#177500"></span><span style="color:#a90d91">const</span> <span style="color:#000">data</span> <span style="color:#000">=</span> <span style="color:#a90d91">export</span>(<span style="color:#000">db</span>);
+<span style="color:#177500">// save as gist
+</span><span style="color:#177500"></span><span style="color:#000">fetch</span>(<span style="color:#c41a16">&#34;https://api.github.com/gists&#34;</span>, {
+    <span style="color:#000">method</span><span style="color:#000">:</span> <span style="color:#c41a16">&#34;post&#34;</span>,
+    <span style="color:#000">headers</span><span style="color:#000">:</span> {
+        <span style="color:#000">Accept</span><span style="color:#000">:</span> <span style="color:#c41a16">&#34;application/json&#34;</span>,
+        <span style="color:#c41a16">&#34;Content-Type&#34;</span><span style="color:#000">:</span> <span style="color:#c41a16">&#34;application/json&#34;</span>,
+        <span style="color:#000">Authorization</span><span style="color:#000">:</span> <span style="color:#c41a16">`Token </span><span style="color:#c41a16">${</span><span style="color:#000">token</span><span style="color:#c41a16">}</span><span style="color:#c41a16">`</span>
+    },
+    <span style="color:#000">body</span><span style="color:#000">:</span> <span style="color:#000">JSON</span>.<span style="color:#000">stringify</span>(<span style="color:#000">data</span>),
+});
+</code></pre></div><p>All the user needs is to specify the Github API token. Conveniently, the token is scoped exclusively to work with gists — it has no access to repositories, so is guaranteed to do no harm.</p>
+<h2 id="user-interface">User Interface</h2>
+<p>Modern frontend projects are full of tooling and infrastructure stuff. Honestly, I&rsquo;m not interested in it at all (I&rsquo;m not a JS developer). So I deliberately did not use UI frameworks and did everything with vanilla HTML + CSS + JS. It seems to be quite acceptable for a small project.</p>
+<figure>
+    <img alt="SQLime on mobile" src="mobile.png">
+    <figcaption class="align-center">I took care of the mobile layout: the playground is perfectly usable on the phone. And there are command shortcuts for the desktop.</figcaption>
+</figure>
+<p>At the same time, the code turned out to be quite modular, thanks to native JS modules and web components — they are supported by all modern browsers. A real frontend developer will wince probably, but I&rsquo;m fine.</p>
+<p>The playground is hosted on GitHub Pages, and the deployment is a basic <code>git push</code>. Since there is no build stage, I didn&rsquo;t even have to set up GitHub Actions.</p>
+<h2 id="summary">Summary</h2>
+<p>Try <a href="https://sqlime.org/">SQLime</a> for yourself — see if you find it useful. Or, perhaps, you&rsquo;ll adopt the approach of creating serverless tools with vanilla JS and GitHub API. Constructive critique is also welcome, of course ツ</p>
+<p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
+<p><a href="https://news.ycombinator.com/item?id=28669703">Comments on Hacker News</a></p>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Good Code Criterion</title>
+      <link>https://antonz.org/good-code/</link>
+      <pubDate>Wed, 02 Jun 2021 11:00:00 +0000</pubDate>
+      
+      <guid>https://antonz.org/good-code/</guid>
+      <description>Optimize T, keep an eye on R.</description>
+      <content:encoded><![CDATA[<p>Good code is understandable and non-greedy. Let&rsquo;s talk about it.</p>
+<h2 id="time-to-understanding">Time to understanding</h2>
+<p>The main criterion for good code is the time T it takes for a non-author to understand the code. Not &ldquo;I sorta get it&rdquo;, but understand deep enough to make changes and not break anything.</p>
+<p>The smaller the T, the better the code.</p>
+<p>Let&rsquo;s say Alice and Bob implemented the same feature, and you want to modify it. If you understand Alice&rsquo;s code in 10 minutes, and Bob&rsquo;s code in 30 minutes - Alice&rsquo;s code is better. It doesn&rsquo;t matter how layered Bob&rsquo;s architecture is, whether he used a functional approach, a modern framework, etc.</p>
+<p>The T-metric is different for a beginner and an experienced programmer. Therefore, it makes sense to focus on the average level of devs who will use the code. If you have a team of people working for 10+ years, and everyone writes compilers in their spare time - even very complex code will have a low T. If you have a huge turnover and hire yesterday&rsquo;s students — the code should be rather primitive so that T does not shoot through the roof.</p>
+<p>It&rsquo;s not easy to measure T directly, so usually, teams track secondary metrics that affect T:</p>
+<ul>
+<li>code style (<code>black</code> for Python),</li>
+<li>code smells (<code>pylint</code>, <code>flake8</code>),</li>
+<li>cyclomatic complexity (<code>mccabe</code>),</li>
+<li>module dependencies (<code>import-linter</code>).</li>
+</ul>
+<p>Plus code review.</p>
+<h2 id="resource-usage">Resource usage</h2>
+<p>The second criterion for good code is the amount of resources R it consumes (time, CPU, memory, disk). The smaller the R, the better the code.</p>
+<p>If Alice and Bob implemented a feature with the same T, but Alice&rsquo;s code time complexity is O(n), and Bob&rsquo;s is O(n²) (with the same consumption of other resources) - Alice&rsquo;s code is better.</p>
+<p>Note about the notorious &ldquo;sacrifice readability for efficiency&rdquo;. For each task, there is a resource consumption threshold R0, which the solution should not exceed. If R &lt; R0, do not degrade T for the sake of further reducing R.</p>
+<p>If a non-critical service processes a request in 50ms, you don&rsquo;t need to rewrite it from Python to C to reduce the time to 5ms. The thing is already fast enough.</p>
+<p>If the code has a high T and a low R, in most cases you can reduce T while keeping R &lt; R0.</p>
+<p>But sometimes, if resources are limited, or the input data is huge, it may not possible to reach R &lt; R0 without degrading T. Then you really have to sacrifice clarity. But make sure that:</p>
+<ol>
+<li>This is the last resort when all the other options have failed.</li>
+<li>The code sections where T is traded for R are well isolated.</li>
+<li>There are few such sections.</li>
+<li>They are well-documented.</li>
+</ol>
+<h2 id="summary">Summary</h2>
+<p>Here is the mnemonics for good code:</p>
+<pre class="big">
+T↓ R&lt;R0
+</pre>
+<p>Optimize T, keep an eye on R. Your team will thank you.</p>
+<p><em>Thanks for reading! Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Data Visualization Guide</title>
+      <link>https://antonz.org/dataviz-guide/</link>
+      <pubDate>Sat, 10 Apr 2021 20:00:00 +0000</pubDate>
+      
+      <guid>https://antonz.org/dataviz-guide/</guid>
+      <description>CC-licensed design guide for presentations, reports, and dashboards.</description>
+      <content:encoded><![CDATA[<p>Today I&rsquo;ve come across a perfect information graphics / data visualization guide:</p>
+<ul>
+<li>Based on the works of Edward Tufte and Stephen Few.</li>
+<li>Comprehensive yet not too wordy (150 pages).</li>
+<li>Highly practical and with lots of examples (197 figures).</li>
+</ul>
+<p>The book provides advice on designing clear, concise, and actionable reports and dashboards:</p>
+<ol>
+<li>How to articulate the message.</li>
+<li>How to choose an appropriate chart type.</li>
+<li>How to design specific chart elements.</li>
+<li>How to avoid clutter and increase information density.</li>
+<li>How to make everything clear and consistent.</li>
+</ol>
+<img alt="Sample report" src="sample.png" class="img-bordered-thin">
+<p>While the guide itself is great, the authors - IBCS Association - made some questionable choices:</p>
+<ol>
+<li>They vaguely and somewhat misleadingly called it &lsquo;International Business Communication Standards&rsquo;.</li>
+<li>They presented it on the <a href="https://www.ibcs.com/standards/">IBCS website</a> in a way that is barely readable (in my opinion).</li>
+</ol>
+<p>Fortunately, IBCS published the guide under the permissive CC BY-SA license. So with some hard work and a bunch of Python I&rsquo;ve created a <a href="https://github.com/nalgeon/dataviz">web version</a>, <a href="https://github.com/nalgeon/dataviz/releases/download/1.1/data-visualization-guide.epub">EPUB</a> and <a href="https://github.com/nalgeon/dataviz/releases/download/1.1/data-visualization-guide.pdf">PDF</a>.</p>
+<p>IBCS Association put a lot of thought it the guide, and the result really impressed me. So I encourage you to try it out.</p>
+<p><em>Thanks for reading! Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>How to make an awesome Python package in 2021</title>
+      <link>https://antonz.org/python-packaging/</link>
+      <pubDate>Tue, 06 Apr 2021 20:30:00 +0300</pubDate>
+      
+      <guid>https://antonz.org/python-packaging/</guid>
+      <description>The one to be proud of.</description>
+      <content:encoded><![CDATA[<p>If you are like me, every once in a while you write a useful python utility and want to share it with your colleagues. The best way to do this is to make a package: it easy to install and saves from copy-pasting.</p>
+<p>If you are like me, you might be thinking that creating packages is a real headache. Well, that&rsquo;s not the case anymore. And I am going to prove it with this step-by-step guide. Just three main steps (and a bunch of optional ones) accompanied by few GitHub links. See for yourself:</p>
+<h2 id="1-stub">1. Stub</h2>
+<p>We will create <code>podsearch</code> - a utility that searches for podcasts in iTunes. Let&rsquo;s create a directory and a virtual environment:</p>
+<pre tabindex="0"><code>$ mkdir podsearch
+$ cd podsearch
+$ python3 -m venv env
+$ . env/bin/activate
+</code></pre><p>Define a minimal package structure:</p>
+<pre tabindex="0"><code>.
+├── .gitignore
+└── podsearch
+    └── __init__.py
+</code></pre><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#c41a16">&#34;&#34;&#34;Let&#39;s find some podcasts!&#34;&#34;&#34;</span>
+
+ <span style="color:#000">__version__</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#34;0.1.0&#34;</span>
+
+
+ <span style="color:#a90d91">def</span> <span style="color:#000">search</span>(<span style="color:#000">name</span>, <span style="color:#000">count</span><span style="color:#000">=</span><span style="color:#1c01ce">5</span>):
+     <span style="color:#c41a16">&#34;&#34;&#34;Search podcast by name.&#34;&#34;&#34;</span>
+     <span style="color:#a90d91">raise</span> <span style="color:#000">NotImplementedError</span>()
+</code></pre></div><h2 id="2-test-package">2. Test package</h2>
+<p>Creating a package in Python used to be a troublesome task. Fortunately, nowadays there is a great little <a href="https://flit.readthedocs.io/en/latest/">flit</a> utility which simplifies everything. Let&rsquo;s install it:</p>
+<pre tabindex="0"><code>pip install flit
+</code></pre><p>And create package description:</p>
+<pre tabindex="0"><code>$ flit init
+Module name [podsearch]:
+Author [Anton Zhiyanov]:
+Author email [m@antonz.org]:
+Home page [https://github.com/nalgeon/podsearch-py]:
+Choose a license (see http://choosealicense.com/ for more info)
+1. MIT - simple and permissive
+2. Apache - explicitly grants patent rights
+3. GPL - ensures that code based on this is shared with the same terms
+4. Skip - choose a license later
+Enter 1-4 [1]: 1
+
+Written pyproject.toml; edit that file to add optional extra info.
+</code></pre><p><a href="https://github.com/nalgeon/podsearch-py/blob/main/pyproject.toml">pyproject.toml</a></p>
+<p>Flit has created <code>pyproject.toml</code> - the project metadata file. It already has everything you need to publish the package to the public repository - PyPI.</p>
+<p>Sign up for <a href="https://test.pypi.org/">TestPyPi</a> (test repository) and <a href="http://pypi.org/">PyPI</a> (the main one). They are completely independent, so you will need two accounts.</p>
+<p>Setup access to repositories in the <code>~/.pypirc</code>:</p>
+<pre tabindex="0"><code>[distutils]
+index-servers =
+  pypi
+  pypitest
+
+[pypi]
+username: nalgeon  # replace with your PyPI username
+
+[pypitest]
+repository: https://test.pypi.org/legacy/
+username: nalgeon  # replace with your TestPyPI username
+</code></pre><p>And publish the package to the test repository:</p>
+<pre tabindex="0"><code>$ flit publish --repository pypitest
+Found 4 files tracked in git
+...
+Package is at https://test.pypi.org/project/podsearch/
+</code></pre><p>Done! The package is available on <a href="https://test.pypi.org/project/podsearch/">TestPyPi</a>.</p>
+<h2 id="3-public-package">3. Public package</h2>
+<p>Let&rsquo;s improve the code so that it actually searches for podcasts:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#177500"># ...</span>
+
+<span style="color:#000">SEARCH_URL</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#34;https://itunes.apple.com/search&#34;</span>
+
+<span style="color:#000">@dataclass</span>
+<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Podcast</span>:
+    <span style="color:#c41a16">&#34;&#34;&#34;Podcast metadata.&#34;&#34;&#34;</span>
+
+    <span style="color:#a90d91">id</span>: <span style="color:#a90d91">str</span>
+    <span style="color:#000">name</span>: <span style="color:#a90d91">str</span>
+    <span style="color:#000">author</span>: <span style="color:#a90d91">str</span>
+    <span style="color:#000">url</span>: <span style="color:#a90d91">str</span>
+    <span style="color:#000">feed</span>: <span style="color:#000">Optional</span>[<span style="color:#a90d91">str</span>] <span style="color:#000">=</span> <span style="color:#a90d91">None</span>
+    <span style="color:#000">category</span>: <span style="color:#000">Optional</span>[<span style="color:#a90d91">str</span>] <span style="color:#000">=</span> <span style="color:#a90d91">None</span>
+    <span style="color:#000">image</span>: <span style="color:#000">Optional</span>[<span style="color:#a90d91">str</span>] <span style="color:#000">=</span> <span style="color:#a90d91">None</span>
+
+
+<span style="color:#a90d91">def</span> <span style="color:#000">search</span>(<span style="color:#000">name</span>: <span style="color:#a90d91">str</span>, <span style="color:#000">limit</span>: <span style="color:#a90d91">int</span> <span style="color:#000">=</span> <span style="color:#1c01ce">5</span>) <span style="color:#000">-&gt;</span> <span style="color:#000">List</span>[<span style="color:#000">Podcast</span>]:
+    <span style="color:#c41a16">&#34;&#34;&#34;Search podcast by name.&#34;&#34;&#34;</span>
+    <span style="color:#000">params</span> <span style="color:#000">=</span> {<span style="color:#c41a16">&#34;term&#34;</span>: <span style="color:#000">name</span>, <span style="color:#c41a16">&#34;limit&#34;</span>: <span style="color:#000">limit</span>, <span style="color:#c41a16">&#34;media&#34;</span>: <span style="color:#c41a16">&#34;podcast&#34;</span>}
+    <span style="color:#000">response</span> <span style="color:#000">=</span> <span style="color:#000">_get</span>(<span style="color:#000">url</span><span style="color:#000">=</span><span style="color:#000">SEARCH_URL</span>, <span style="color:#000">params</span><span style="color:#000">=</span><span style="color:#000">params</span>)
+    <span style="color:#a90d91">return</span> <span style="color:#000">_parse</span>(<span style="color:#000">response</span>)
+</code></pre></div><p>And publish to the main repository - PyPI. Perform this step only after your package has working code that does something useful. Do not publish non-working packages and stubs.</p>
+<pre tabindex="0"><code>flit publish
+</code></pre><p>Done! Time to <a href="https://pypi.org/project/podsearch/">share it with colleagues</a>.</p>
+<p>To make the package a pleasure to use, I recommend that you follow a few more steps.</p>
+<h2 id="a-readme-and-changelog">A. Readme and changelog</h2>
+<p>No one likes to write documentation. But without docs, it is unlikely that people will want to install your package, so let&rsquo;s add <code>README.md</code> and <code>CHANGELOG.md</code>.</p>
+<ul>
+<li><a href="https://github.com/nalgeon/podsearch-py/blob/main/README.md">README.md</a></li>
+<li><a href="https://github.com/nalgeon/podsearch-py/blob/main/CHANGELOG.md">CHANGELOG.md</a></li>
+</ul>
+<p>Add readme to the <code>pyproject.toml</code>, so that PyPI shows it on the package page:</p>
+<pre tabindex="0"><code>description-file = &quot;README.md&quot;
+</code></pre><p>Also specify the minimal supported Python version:</p>
+<pre tabindex="0"><code>requires-python = &quot;&gt;=3.7&quot;
+</code></pre><p>Update the version in <code>__init__.py</code> and publish the package via <code>flit publish</code>:</p>
+<p><img src="pypi.jpg" alt="Package on PyPi"></p>
+<p>Mmm, nice.</p>
+<h2 id="b-linters-and-tests">B. Linters and tests</h2>
+<p>Let&rsquo;s take care of formatting (<code>black</code>), test coverage (<code>coverage</code>), code quality (<code>flake8</code>, <code>pylint</code>, <code>mccabe</code>), and static analysis (<code>mypy</code>). We will run everything through <code>tox</code>.</p>
+<pre tabindex="0"><code>$ pip install black coverage flake8 mccabe mypy pylint pytest tox
+</code></pre><p>Create <code>tox</code> configuration in <code>tox.ini</code>:</p>
+<pre tabindex="0"><code>[tox]
+isolated_build = True
+envlist = py37,py38,py39
+
+[testenv]
+deps =
+    black
+    coverage
+    flake8
+    mccabe
+    mypy
+    pylint
+    pytest
+commands =
+    black podsearch
+    flake8 podsearch
+    pylint podsearch
+    mypy podsearch
+    coverage erase
+    coverage run --include=podsearch/* -m pytest -ra
+    coverage report -m
+</code></pre><p><a href="https://github.com/nalgeon/podsearch-py/blob/main/tox.ini">tox.ini</a></p>
+<p>And run all the checks:</p>
+<pre tabindex="0"><code>$ tox -e py39
+...
+py39 run-test: commands[0] | black podsearch
+All done! ✨ 🍰 ✨
+...
+py39 run-test: commands[2] | pylint podsearch
+Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
+...
+py39 run-test: commands[6] | coverage report -m
+TOTAL 100%
+...
+py39: commands succeeded
+congratulations :)
+</code></pre><p>Lovely! The linters are happy, the tests passed, the coverage is 100%.</p>
+<h2 id="c-cloud-build">C. Cloud build</h2>
+<p>Every solid open-source project runs cloud tests after each commit, so we will too. A nice side effect is having beautiful badges in the readme ツ</p>
+<p>Let&rsquo;s build the project with <a href="https://github.com/features/actions">GitHub Actions</a>, check test coverage with <a href="https://about.codecov.io/">Codecov</a> and code quality with <a href="https://codeclimate.com/">Code Climate</a>.</p>
+<p>You will have to sign up for Codecov and Code Climate (both support GitHub login) and enable package repository in the settings.</p>
+<p>After that, add the GitHub Actions build config to <code>.github/workflows/build.yml</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#177500"># ...</span>
+<span style="color:#000">jobs</span>:
+    <span style="color:#000">build</span>:
+        <span style="color:#000">runs-on</span>: <span style="color:#1c01ce">ubuntu-latest</span>
+        <span style="color:#000">strategy</span>:
+            <span style="color:#000">matrix</span>:
+                <span style="color:#000">python-version</span>: [<span style="color:#1c01ce">3.7</span>, <span style="color:#1c01ce">3.8</span>, <span style="color:#1c01ce">3.9</span>]
+
+        <span style="color:#000">env</span>:
+            <span style="color:#000">USING_COVERAGE</span>: <span style="color:#c41a16">&#34;3.9&#34;</span>
+
+        <span style="color:#000">steps</span>:
+            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Checkout sources</span>
+              <span style="color:#000">uses</span>: <span style="color:#1c01ce">actions/checkout@v2</span>
+
+            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Set up Python</span>
+              <span style="color:#000">uses</span>: <span style="color:#1c01ce">actions/setup-python@v2</span>
+              <span style="color:#000">with</span>:
+                  <span style="color:#000">python-version</span>: <span style="color:#1c01ce">${{ matrix.python-version }}</span>
+
+            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Install dependencies</span>
+              <span style="color:#000">run</span>: |<span style="color:#c41a16">
+</span><span style="color:#c41a16">                  python -m pip install --upgrade pip
+</span><span style="color:#c41a16">                  python -m pip install black coverage flake8 flit mccabe mypy pylint pytest tox tox-gh-actions</span>                  
+
+            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Run tox</span>
+              <span style="color:#000">run</span>: |<span style="color:#c41a16">
+</span><span style="color:#c41a16">                  </span>                  <span style="color:#1c01ce">python -m tox</span>
+
+            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Upload coverage to Codecov</span>
+              <span style="color:#000">uses</span>: <span style="color:#1c01ce">codecov/codecov-action@v1</span>
+              <span style="color:#000">if</span>: <span style="color:#1c01ce">contains(env.USING_COVERAGE, matrix.python-version)</span>
+              <span style="color:#000">with</span>:
+                  <span style="color:#000">fail_ci_if_error</span>: <span style="color:#a90d91">true</span>
+</code></pre></div><p><a href="https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/build.yml">build.yml</a></p>
+<p>GitHub runs tests via <code>tox</code> - just as we did. <code>tox-gh-actions</code> package and <code>USING_COVERAGE</code> settings ensure that <code>tox</code> uses the same Python version as GitHub Actions themself, as required by <code>strategy.matrix</code> (I learned this clever trick from <a href="https://hynek.me/articles/python-github-actions/">Hynek Schlawak</a>).</p>
+<p>The last step sends test coverage to Codecov. Code Climate does not need a separate step - it spots repository changes automatically.</p>
+<p>Now commit, push, and enjoy the result in a minute. And let everyone enjoy as well - add badges to <code>README.md</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-markdown" data-lang="markdown">[![PyPI Version][pypi-image]][pypi-url]
+[![Build Status][build-image]][build-url]
+[![Code Coverage][coverage-image]][coverage-url]
+[![Code Quality][quality-image]][quality-url]
+
+...
+
+<span style="color:#177500">&lt;!-- Badges --&gt;</span>
+
+[pypi-image]: https://img.shields.io/pypi/v/podsearch
+[pypi-url]: https://pypi.org/project/podsearch/
+[build-image]: https://github.com/nalgeon/podsearch-py/actions/workflows/build.yml/badge.svg
+[build-url]: https://github.com/nalgeon/podsearch-py/actions/workflows/build.yml
+[coverage-image]: https://codecov.io/gh/nalgeon/podsearch-py/branch/main/graph/badge.svg
+[coverage-url]: https://codecov.io/gh/nalgeon/podsearch-py
+[quality-image]: https://api.codeclimate.com/v1/badges/3130fa0ba3b7993fbf0a/maintainability
+[quality-url]: https://codeclimate.com/github/nalgeon/podsearch-py
+</code></pre></div><p>Aren&rsquo;t they cute?</p>
+<p><img class="img-bordered-thin" alt="Readme badges" src="badges.png"></p>
+<h2 id="d-task-automation">D. Task automation</h2>
+<p><code>tox</code> is fine, but not very handy for development. It&rsquo;s faster to run individual commands like <code>pylint</code>, <code>coverage</code> etc. But they are quite verbose, so we&rsquo;ll automate the boring stuff.</p>
+<p>Let&rsquo;s create short aliases for frequent actions with <a href="/makefile-automation/">Makefile</a>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Makefile" data-lang="Makefile"><span style="color:#000">.DEFAULT_GOAL</span> <span style="color:#000">:=</span> <span style="color:#a90d91">help</span>
+<span style="color:#000">.PHONY</span><span style="color:#000">:</span> <span style="color:#000">coverage</span> <span style="color:#000">deps</span> <span style="color:#000">help</span> <span style="color:#000">lint</span> <span style="color:#000">push</span> <span style="color:#000">test</span>
+
+<span style="color:#000">coverage</span><span style="color:#000">:</span>  <span style="color:#177500">## Run tests with coverage
+</span><span style="color:#177500"></span>	coverage erase
+	coverage run --include<span style="color:#000">=</span>podsearch/* -m pytest -ra
+	coverage report -m
+
+<span style="color:#000">deps</span><span style="color:#000">:</span>  <span style="color:#177500">## Install dependencies
+</span><span style="color:#177500"></span>	pip install black coverage flake8 mccabe mypy pylint pytest tox
+
+<span style="color:#000">lint</span><span style="color:#000">:</span>  <span style="color:#177500">## Lint and static-check
+</span><span style="color:#177500"></span>	flake8 podsearch
+	pylint podsearch
+	mypy podsearch
+
+<span style="color:#000">push</span><span style="color:#000">:</span>  <span style="color:#177500">## Push code with tags
+</span><span style="color:#177500"></span>	git push <span style="color:#000">&amp;&amp;</span> git push --tags
+
+<span style="color:#000">test</span><span style="color:#000">:</span>  <span style="color:#177500">## Run tests
+</span><span style="color:#177500"></span>	pytest -ra
+</code></pre></div><p><a href="https://github.com/nalgeon/podsearch-py/blob/main/Makefile">Makefile</a></p>
+<p>Here are our tasks:</p>
+<pre tabindex="0"><code>$ make help
+Usage: make [task]
+
+task                 help
+------               ----
+coverage             Run tests with coverage
+deps                 Install dependencies
+lint                 Lint and static-check
+push                 Push code with tags
+test                 Run tests
+help                 Show help message
+</code></pre><p>To make the code more DRY, replace raw <code>build.yml</code> steps with <code>make</code> calls:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">- <span style="color:#000">name</span>: <span style="color:#1c01ce">Install dependencies</span>
+  <span style="color:#000">run</span>: |<span style="color:#c41a16">
+</span><span style="color:#c41a16">      </span>      <span style="color:#1c01ce">make deps</span>
+
+- <span style="color:#000">name</span>: <span style="color:#1c01ce">Run tox</span>
+  <span style="color:#000">run</span>: |<span style="color:#c41a16">
+</span><span style="color:#c41a16">      </span>      <span style="color:#1c01ce">make tox</span>
+</code></pre></div><h2 id="e-cloud-publish">E. Cloud publish</h2>
+<p>GitHub is quite capable of running <code>flit publish</code> for us. Let&rsquo;s create a separate workflow:</p>
+<!-- {% raw %} -->
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#000">name</span>: <span style="color:#1c01ce">publish</span>
+
+<span style="color:#000">on</span>:
+    <span style="color:#000">release</span>:
+        <span style="color:#000">types</span>: [<span style="color:#1c01ce">created]</span>
+
+<span style="color:#000">jobs</span>:
+    <span style="color:#000">publish</span>:
+        <span style="color:#000">runs-on</span>: <span style="color:#1c01ce">ubuntu-latest</span>
+        <span style="color:#000">steps</span>:
+            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Checkout sources</span>
+              <span style="color:#000">uses</span>: <span style="color:#1c01ce">actions/checkout@v2</span>
+
+            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Set up Python</span>
+              <span style="color:#000">uses</span>: <span style="color:#1c01ce">actions/setup-python@v2</span>
+              <span style="color:#000">with</span>:
+                  <span style="color:#000">python-version</span>: <span style="color:#c41a16">&#34;3.9&#34;</span>
+
+            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Install dependencies</span>
+              <span style="color:#000">run</span>: |<span style="color:#c41a16">
+</span><span style="color:#c41a16">                  </span>                  <span style="color:#1c01ce">make deps</span>
+
+            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Publish to PyPi</span>
+              <span style="color:#000">env</span>:
+                  <span style="color:#000">FLIT_USERNAME</span>: <span style="color:#1c01ce">${{ secrets.PYPI_USERNAME }}</span>
+                  <span style="color:#000">FLIT_PASSWORD</span>: <span style="color:#1c01ce">${{ secrets.PYPI_PASSWORD }}</span>
+              <span style="color:#000">run</span>: |<span style="color:#c41a16">
+</span><span style="color:#c41a16">                  </span>                  <span style="color:#1c01ce">make publish</span>
+</code></pre></div><!-- {% endraw %} -->
+<p><a href="https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/publish.yml">publish.yml</a></p>
+<p><code>PYPI_USERNAME</code> and <code>PYPI_PASSWORD</code> are set in repository settings (Settings &gt; Secrets &gt; New repository secret). Use your PyPi username and password, or even better - an <a href="https://pypi.org/manage/account/token/">API token</a>.</p>
+<p>Now GitHub will automatically publish the package as soon as you create a new release. Sweet!</p>
+<p class="align-center">⌘&nbsp;⌘&nbsp;⌘</p>
+<p>Your perfect package is ready! It has everything one could dream of: clean code, clear documentation, tests, and cloud builds. Time to tell your colleagues and friends.</p>
+<p>These settings will make your package awesome:</p>
+<ul>
+<li><a href="https://github.com/nalgeon/podsearch-py/blob/main/pyproject.toml">pyproject.toml</a></li>
+<li><a href="https://github.com/nalgeon/podsearch-py/blob/main/tox.ini">tox.ini</a></li>
+<li><a href="https://github.com/nalgeon/podsearch-py/blob/main/Makefile">Makefile</a></li>
+<li><a href="https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/build.yml">build.yml</a></li>
+<li><a href="https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/publish.yml">publish.yml</a></li>
+</ul>
+<p><em>Thanks for reading! Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>SQLite is not a toy database</title>
+      <link>https://antonz.org/sqlite-is-not-a-toy-database/</link>
+      <pubDate>Thu, 25 Mar 2021 09:00:00 +0000</pubDate>
+      
+      <guid>https://antonz.org/sqlite-is-not-a-toy-database/</guid>
+      <description>Here is why SQLite is a perfect tool for you - whether you are a developer, data analyst, or geek.</description>
+      <content:encoded><![CDATA[<p><em>English • <a href="https://habr.com/ru/post/547448/">Russian</a> • <a href="https://sysarmy.com/blog/posts/sqlite-no-es-una-base-de-datos-de-juguete/">Spanish</a></em></p>
+<p>Whether you are a developer, data analyst, QA engineer, DevOps person, or product manager - SQLite is a perfect tool for you. Here is why.</p>
+<p>A few well-known facts to get started:</p>
+<ul>
+<li>SQLite is the most common DBMS in the world, shipped with all popular operating systems.</li>
+<li>SQLite is serverless.</li>
+<li>For developers, SQLite is embedded directly into the app.</li>
+<li>For everyone else, there is a convenient database console (REPL), provided as a single file (sqlite3.exe on Windows, sqlite3 on Linux / macOS).</li>
+</ul>
+<h2 id="console-import-and-export">Console, import, and export</h2>
+<p>The console is a killer SQLite feature for data analysis: more powerful than Excel and more simple than <code>pandas</code>. One can import CSV data with a single command, the table is created automatically:</p>
+<pre tabindex="0"><code>&gt; .import --csv city.csv city
+&gt; select count(*) from city;
+1117
+</code></pre><p>The console supports basic SQL features and shows query results in a nice ASCII-drawn table. Advanced SQL features are also supported, but more on that later.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#000">century</span> <span style="color:#000">||</span> <span style="color:#c41a16">&#39; century&#39;</span> <span style="color:#a90d91">as</span> <span style="color:#000">dates</span>,
+  <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#a90d91">as</span> <span style="color:#000">city_count</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">history</span>
+<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#000">century</span>
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">century</span> <span style="color:#a90d91">desc</span>;
+</code></pre></div><pre tabindex="0"><code>┌────────────┬────────────┐
+│   dates    │ city_count │
+├────────────┼────────────┤
+│ 21 century │ 1          │
+│ 20 century │ 263        │
+│ 19 century │ 189        │
+│ 18 century │ 191        │
+│ 17 century │ 137        │
+│ ...        │ ...        │
+└────────────┴────────────┘
+</code></pre><p>Data could be exported as SQL, CSV, JSON, even Markdown and HTML. Takes just a couple of commands:</p>
+<pre tabindex="0"><code>.mode json
+.output city.json
+select city, foundation_year, timezone from city limit 10;
+.shell cat city.json
+</code></pre><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">[
+    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Amsterdam&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1300</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+1&#34;</span> },
+    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Berlin&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1237</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+1&#34;</span> },
+    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Helsinki&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1548</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+2&#34;</span> },
+    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Monaco&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1215</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+1&#34;</span> },
+    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Moscow&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1147</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+3&#34;</span> },
+    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Reykjavik&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">874</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC&#34;</span> },
+    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Sarajevo&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1461</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+1&#34;</span> },
+    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Stockholm&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1252</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+1&#34;</span> },
+    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Tallinn&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1219</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+2&#34;</span> },
+    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Zagreb&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1094</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+1&#34;</span> }
+]
+</code></pre></div><p>If you are more of a BI than a console person - popular data exploration tools like <a href="https://www.metabase.com/">Metabase</a>, <a href="https://redash.io/">Redash</a>, and <a href="https://superset.apache.org/">Superset</a> all support SQLite.</p>
+<h2 id="native-json">Native JSON</h2>
+<p>There is nothing more convenient than SQLite for analyzing and transforming JSON. You can select data directly from a file as if it were a regular table. Or import data into the table and select from there.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#000">json_extract</span>(<span style="color:#000">value</span>, <span style="color:#c41a16">&#39;$.iso.code&#39;</span>) <span style="color:#a90d91">as</span> <span style="color:#000">code</span>,
+  <span style="color:#000">json_extract</span>(<span style="color:#000">value</span>, <span style="color:#c41a16">&#39;$.iso.number&#39;</span>) <span style="color:#a90d91">as</span> <span style="color:#000">num</span>,
+  <span style="color:#000">json_extract</span>(<span style="color:#000">value</span>, <span style="color:#c41a16">&#39;$.name&#39;</span>) <span style="color:#a90d91">as</span> <span style="color:#000">name</span>,
+  <span style="color:#000">json_extract</span>(<span style="color:#000">value</span>, <span style="color:#c41a16">&#39;$.units.major.name&#39;</span>) <span style="color:#a90d91">as</span> <span style="color:#000">unit</span>
+<span style="color:#a90d91">from</span>
+  <span style="color:#000">json_each</span>(<span style="color:#000">readfile</span>(<span style="color:#c41a16">&#39;currency.sample.json&#39;</span>))
+;
+</code></pre></div><pre tabindex="0"><code>┌──────┬─────┬─────────────────┬──────────┐
+│ code │ num │      name       │   unit   │
+├──────┼─────┼─────────────────┼──────────┤
+│ ARS  │ 032 │ Argentine peso  | peso     │
+│ CHF  │ 756 │ Swiss Franc     │ franc    │
+│ EUR  │ 978 │ Euro            │ euro     │
+│ GBP  │ 826 │ British Pound   │ pound    │
+│ INR  │ 356 │ Indian Rupee    │ rupee    │
+│ JPY  │ 392 │ Japanese yen    │ yen      │
+│ MAD  │ 504 │ Moroccan Dirham │ dirham   │
+│ RUR  │ 643 │ Russian Rouble  │ rouble   │
+│ SOS  │ 706 │ Somali Shilling │ shilling │
+│ USD  │ 840 │ US Dollar       │ dollar   │
+└──────┴─────┴─────────────────┴──────────┘
+</code></pre><p>Doesn&rsquo;t matter how deep the JSON is - you can extract any nested object:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#000">json_extract</span>(<span style="color:#000">value</span>, <span style="color:#c41a16">&#39;$.id&#39;</span>) <span style="color:#a90d91">as</span> <span style="color:#000">id</span>,
+  <span style="color:#000">json_extract</span>(<span style="color:#000">value</span>, <span style="color:#c41a16">&#39;$.name&#39;</span>) <span style="color:#a90d91">as</span> <span style="color:#000">name</span>
+<span style="color:#a90d91">from</span>
+  <span style="color:#000">json_tree</span>(<span style="color:#000">readfile</span>(<span style="color:#c41a16">&#39;industry.sample.json&#39;</span>))
+<span style="color:#a90d91">where</span>
+  <span style="color:#000">path</span> <span style="color:#a90d91">like</span> <span style="color:#c41a16">&#39;$[%].industries&#39;</span>
+;
+</code></pre></div><pre tabindex="0"><code>┌────────┬──────────────────────┐
+│   id   │         name         │
+├────────┼──────────────────────┤
+│ 7.538  │ Internet provider    │
+│ 7.539  │ IT consulting        │
+│ 7.540  │ Software development │
+│ 9.399  │ Mobile communication │
+│ 9.400  │ Fixed communication  │
+│ 9.401  │ Fiber-optics         │
+│ 43.641 │ Audit                │
+│ 43.646 │ Insurance            │
+│ 43.647 │ Bank                 │
+└────────┴──────────────────────┘
+</code></pre><h2 id="ctes-and-set-operations">CTEs and set operations</h2>
+<p>Of course, SQLite supports Common Table Expressions (<code>WITH</code> clause) and <code>JOIN</code>s, I won&rsquo;t even give examples here. If the data is hierarchical (the table refers to itself through a column like <code>parent_id</code>) - <code>WITH RECURSIVE</code> will come in handy. Any hierarchy, no matter how deep, can be &lsquo;unrolled&rsquo; with a single query.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#a90d91">recursive</span> <span style="color:#000">tmp</span>(<span style="color:#000">id</span>, <span style="color:#000">name</span>, <span style="color:#a90d91">level</span>) <span style="color:#a90d91">as</span> (
+  <span style="color:#a90d91">select</span> <span style="color:#000">id</span>, <span style="color:#000">name</span>, <span style="color:#1c01ce">1</span> <span style="color:#a90d91">as</span> <span style="color:#a90d91">level</span>
+  <span style="color:#a90d91">from</span> <span style="color:#000">area</span>
+  <span style="color:#a90d91">where</span> <span style="color:#000">parent_id</span> <span style="color:#a90d91">is</span> <span style="color:#a90d91">null</span>
+
+  <span style="color:#a90d91">union</span> <span style="color:#a90d91">all</span>
+
+  <span style="color:#a90d91">select</span>
+    <span style="color:#000">area</span>.<span style="color:#000">id</span>,
+    <span style="color:#000">tmp</span>.<span style="color:#000">name</span> <span style="color:#000">||</span> <span style="color:#c41a16">&#39;, &#39;</span> <span style="color:#000">||</span> <span style="color:#000">area</span>.<span style="color:#000">name</span> <span style="color:#a90d91">as</span> <span style="color:#000">name</span>,
+    <span style="color:#000">tmp</span>.<span style="color:#a90d91">level</span> <span style="color:#000">+</span> <span style="color:#1c01ce">1</span> <span style="color:#a90d91">as</span> <span style="color:#a90d91">level</span>
+  <span style="color:#a90d91">from</span> <span style="color:#000">area</span>
+    <span style="color:#a90d91">join</span> <span style="color:#000">tmp</span> <span style="color:#a90d91">on</span> <span style="color:#000">area</span>.<span style="color:#000">parent_id</span> <span style="color:#000">=</span> <span style="color:#000">tmp</span>.<span style="color:#000">id</span>
+)
+
+<span style="color:#a90d91">select</span> <span style="color:#000">*</span> <span style="color:#a90d91">from</span> <span style="color:#000">tmp</span>;
+</code></pre></div><pre tabindex="0"><code>┌──────┬──────────────────────────┬───────┐
+│  id  │           name           │ level │
+├──────┼──────────────────────────┼───────┤
+│ 93   │ US                       │ 1     │
+│ 768  │ US, Washington DC        │ 2     │
+│ 1833 │ US, Washington           │ 2     │
+│ 2987 │ US, Washington, Bellevue │ 3     │
+│ 3021 │ US, Washington, Everett  │ 3     │
+│ 3039 │ US, Washington, Kent     │ 3     │
+│ ...  │ ...                      │ ...   │
+└──────┴──────────────────────────┴───────┘
+</code></pre><p>Sets? No problem: <code>UNION</code>, <code>INTERSECT</code>, <code>EXCEPT</code> are at your service.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">employer_id</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">employer_area</span>
+<span style="color:#a90d91">where</span> <span style="color:#000">area_id</span> <span style="color:#000">=</span> <span style="color:#1c01ce">1</span>
+
+<span style="color:#a90d91">except</span>
+
+<span style="color:#a90d91">select</span> <span style="color:#000">employer_id</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">employer_area</span>
+<span style="color:#a90d91">where</span> <span style="color:#000">area_id</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2</span>;
+</code></pre></div><p>Calculate one column based on several others? Enter generated columns:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">alter</span> <span style="color:#a90d91">table</span> <span style="color:#000">vacancy</span>
+<span style="color:#a90d91">add</span> <span style="color:#a90d91">column</span> <span style="color:#000">salary_net</span> <span style="color:#a90d91">integer</span> <span style="color:#a90d91">as</span> (
+  <span style="color:#a90d91">case</span> <span style="color:#a90d91">when</span> <span style="color:#000">salary_gross</span> <span style="color:#000">=</span> <span style="color:#a90d91">true</span> <span style="color:#a90d91">then</span>
+    <span style="color:#000">round</span>(<span style="color:#000">salary_from</span><span style="color:#000">/</span><span style="color:#1c01ce">1</span>.<span style="color:#1c01ce">04</span>)
+  <span style="color:#a90d91">else</span>
+    <span style="color:#000">salary_from</span>
+  <span style="color:#a90d91">end</span>
+);
+</code></pre></div><p>Generated columns can be queried in the same way as &lsquo;normal&rsquo; ones:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#000">substr</span>(<span style="color:#000">name</span>, <span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">40</span>) <span style="color:#a90d91">as</span> <span style="color:#000">name</span>,
+  <span style="color:#000">salary_net</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">vacancy</span>
+<span style="color:#a90d91">where</span>
+  <span style="color:#000">salary_currency</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#39;JPY&#39;</span>
+  <span style="color:#a90d91">and</span> <span style="color:#000">salary_net</span> <span style="color:#a90d91">is</span> <span style="color:#a90d91">not</span> <span style="color:#a90d91">null</span>
+<span style="color:#a90d91">limit</span> <span style="color:#1c01ce">10</span>;
+</code></pre></div><h2 id="math-statistics">Math statistics</h2>
+<p>Descriptive statistics? Easy: mean, median, percentiles, standard deviation, you name it. You&rsquo;ll have to load an extension, but it&rsquo;s also a single command (and a single file).</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql">.<span style="color:#a90d91">load</span> <span style="color:#000">sqlite3</span><span style="color:#000">-</span><span style="color:#000">stats</span>
+
+<span style="color:#a90d91">select</span>
+  <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#a90d91">as</span> <span style="color:#000">book_count</span>,
+  <span style="color:#a90d91">cast</span>(<span style="color:#a90d91">avg</span>(<span style="color:#000">num_pages</span>) <span style="color:#a90d91">as</span> <span style="color:#a90d91">integer</span>) <span style="color:#a90d91">as</span> <span style="color:#000">mean</span>,
+  <span style="color:#a90d91">cast</span>(<span style="color:#000">median</span>(<span style="color:#000">num_pages</span>) <span style="color:#a90d91">as</span> <span style="color:#a90d91">integer</span>) <span style="color:#a90d91">as</span> <span style="color:#000">median</span>,
+  <span style="color:#a90d91">mode</span>(<span style="color:#000">num_pages</span>) <span style="color:#a90d91">as</span> <span style="color:#a90d91">mode</span>,
+  <span style="color:#000">percentile_90</span>(<span style="color:#000">num_pages</span>) <span style="color:#a90d91">as</span> <span style="color:#000">p90</span>,
+  <span style="color:#000">percentile_95</span>(<span style="color:#000">num_pages</span>) <span style="color:#a90d91">as</span> <span style="color:#000">p95</span>,
+  <span style="color:#000">percentile_99</span>(<span style="color:#000">num_pages</span>) <span style="color:#a90d91">as</span> <span style="color:#000">p99</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">books</span>;
+</code></pre></div><pre tabindex="0"><code>┌────────────┬──────┬────────┬──────┬─────┬─────┬──────┐
+│ book_count │ mean │ median │ mode │ p90 │ p95 │ p99  │
+├────────────┼──────┼────────┼──────┼─────┼─────┼──────┤
+│ 1483       │ 349  │ 295    │ 256  │ 640 │ 817 │ 1199 │
+└────────────┴──────┴────────┴──────┴─────┴─────┴──────┘
+</code></pre><blockquote>
+<p><strong>Note on extensions</strong>. SQLite is missing a lot of functions compared to other DBMSs like PostgreSQL. But they are easy to add, which is what people do - so it turns out quite a mess.</p>
+<p>Therefore, I decided to make a consistent set of extensions, divided by domain area and compiled for major operating systems. There are few of them there yet, but more are on their way:</p>
+<p><a href="https://github.com/nalgeon/sqlean/">sqlean @ GitHub</a></p>
+</blockquote>
+<p>More fun with statistics. You can plot the data distribution right in the console. Look how cute it is:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#000">slots</span> <span style="color:#a90d91">as</span> (
+  <span style="color:#a90d91">select</span>
+    <span style="color:#000">num_pages</span><span style="color:#000">/</span><span style="color:#1c01ce">100</span> <span style="color:#a90d91">as</span> <span style="color:#000">slot</span>,
+    <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#a90d91">as</span> <span style="color:#000">book_count</span>
+  <span style="color:#a90d91">from</span> <span style="color:#000">books</span>
+  <span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#000">slot</span>
+),
+<span style="color:#a90d91">max</span> <span style="color:#a90d91">as</span> (
+  <span style="color:#a90d91">select</span> <span style="color:#a90d91">max</span>(<span style="color:#000">book_count</span>) <span style="color:#a90d91">as</span> <span style="color:#000">value</span>
+  <span style="color:#a90d91">from</span> <span style="color:#000">slots</span>
+)
+<span style="color:#a90d91">select</span>
+  <span style="color:#000">slot</span>,
+  <span style="color:#000">book_count</span>,
+  <span style="color:#000">printf</span>(<span style="color:#c41a16">&#39;%.&#39;</span> <span style="color:#000">||</span> (<span style="color:#000">book_count</span> <span style="color:#000">*</span> <span style="color:#1c01ce">30</span> <span style="color:#000">/</span> <span style="color:#a90d91">max</span>.<span style="color:#000">value</span>) <span style="color:#000">||</span> <span style="color:#c41a16">&#39;c&#39;</span>, <span style="color:#c41a16">&#39;*&#39;</span>) <span style="color:#a90d91">as</span> <span style="color:#000">bar</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">slots</span>, <span style="color:#a90d91">max</span>
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">slot</span>;
+</code></pre></div><pre tabindex="0"><code>┌──────┬────────────┬────────────────────────────────┐
+│ slot │ book_count │              bar               │
+├──────┼────────────┼────────────────────────────────┤
+│ 0    │ 116        │ *********                      │
+│ 1    │ 254        │ ********************           │
+│ 2    │ 376        │ ****************************** │
+│ 3    │ 285        │ **********************         │
+│ 4    │ 184        │ **************                 │
+│ 5    │ 90         │ *******                        │
+│ 6    │ 54         │ ****                           │
+│ 7    │ 41         │ ***                            │
+│ 8    │ 31         │ **                             │
+│ 9    │ 15         │ *                              │
+│ 10   │ 11         │ *                              │
+│ 11   │ 12         │ *                              │
+│ 12   │ 2          │ *                              │
+└──────┴────────────┴────────────────────────────────┘
+</code></pre><h2 id="performance">Performance</h2>
+<p>SQLite works with hundreds of millions of records just fine. Regular <code>INSERT</code>s show about 240K records per second on my laptop. And if you connect the CSV file as a virtual table (there is an extension for that) - inserts become 2 times faster.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql">.<span style="color:#a90d91">load</span> <span style="color:#000">sqlite3</span><span style="color:#000">-</span><span style="color:#000">vsv</span>
+
+<span style="color:#a90d91">create</span> <span style="color:#000">virtual</span> <span style="color:#a90d91">table</span> <span style="color:#000">temp</span>.<span style="color:#000">blocks_csv</span> <span style="color:#a90d91">using</span> <span style="color:#000">vsv</span>(
+    <span style="color:#000">filename</span><span style="color:#000">=</span><span style="color:#c41a16">&#34;ipblocks.csv&#34;</span>,
+    <span style="color:#a90d91">schema</span><span style="color:#000">=</span><span style="color:#c41a16">&#34;create table x(network text, geoname_id integer, registered_country_geoname_id integer, represented_country_geoname_id integer, is_anonymous_proxy integer, is_satellite_provider integer, postal_code text, latitude real, longitude real, accuracy_radius integer)&#34;</span>,
+    <span style="color:#000">columns</span><span style="color:#000">=</span><span style="color:#1c01ce">10</span>,
+    <span style="color:#000">header</span><span style="color:#000">=</span><span style="color:#a90d91">on</span>,
+    <span style="color:#000">nulls</span><span style="color:#000">=</span><span style="color:#a90d91">on</span>
+);
+</code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql">.<span style="color:#000">timer</span> <span style="color:#a90d91">on</span>
+<span style="color:#a90d91">insert</span> <span style="color:#a90d91">into</span> <span style="color:#000">blocks</span>
+<span style="color:#a90d91">select</span> <span style="color:#000">*</span> <span style="color:#a90d91">from</span> <span style="color:#000">blocks_csv</span>;
+
+<span style="color:#000">Run</span> <span style="color:#000">Time</span>: <span style="color:#a90d91">real</span> <span style="color:#1c01ce">5</span>.<span style="color:#1c01ce">176</span> <span style="color:#a90d91">user</span> <span style="color:#1c01ce">4</span>.<span style="color:#1c01ce">716420</span> <span style="color:#000">sys</span> <span style="color:#1c01ce">0</span>.<span style="color:#1c01ce">403866</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#a90d91">from</span> <span style="color:#000">blocks</span>;
+<span style="color:#1c01ce">3386629</span>
+
+<span style="color:#000">Run</span> <span style="color:#000">Time</span>: <span style="color:#a90d91">real</span> <span style="color:#1c01ce">0</span>.<span style="color:#1c01ce">095</span> <span style="color:#a90d91">user</span> <span style="color:#1c01ce">0</span>.<span style="color:#1c01ce">021972</span> <span style="color:#000">sys</span> <span style="color:#1c01ce">0</span>.<span style="color:#1c01ce">063716</span>
+</code></pre></div><p>There is a popular opinion among developers that SQLite is not suitable for the web, because it doesn&rsquo;t support concurrent access. This is a myth. In the write-ahead log mode (available since long ago), there can be as many concurrent readers as you want. There can be only one concurrent writer, but often one is enough.</p>
+<p>SQLite is a perfect fit for small websites and applications. <a href="https://sqlite.org/">sqlite.org</a> uses SQLite as a database, not bothering with optimization (≈200 requests per page). It handles 700K visits per month and serves pages faster than 95% of websites I&rsquo;ve seen.</p>
+<h2 id="documents-graphs-and-search">Documents, graphs, and search</h2>
+<p>SQLite supports partial indexes and indexes on expressions, as &lsquo;big&rsquo; DBMSs do. You can build indexes on generated columns and even turn SQLite into a document database. Just store raw JSON and build indexes on <code>json_extract()</code>-ed columns:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">create</span> <span style="color:#a90d91">table</span> <span style="color:#000">currency</span>(
+  <span style="color:#000">body</span> <span style="color:#a90d91">text</span>,
+  <span style="color:#000">code</span> <span style="color:#a90d91">text</span> <span style="color:#a90d91">as</span> (<span style="color:#000">json_extract</span>(<span style="color:#000">body</span>, <span style="color:#c41a16">&#39;$.code&#39;</span>)),
+  <span style="color:#000">name</span> <span style="color:#a90d91">text</span> <span style="color:#a90d91">as</span> (<span style="color:#000">json_extract</span>(<span style="color:#000">body</span>, <span style="color:#c41a16">&#39;$.name&#39;</span>))
+);
+
+<span style="color:#a90d91">create</span> <span style="color:#a90d91">index</span> <span style="color:#000">currency_code_idx</span> <span style="color:#a90d91">on</span> <span style="color:#000">currency</span>(<span style="color:#000">code</span>);
+
+<span style="color:#a90d91">insert</span> <span style="color:#a90d91">into</span> <span style="color:#000">currency</span>
+<span style="color:#a90d91">select</span> <span style="color:#000">value</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">json_each</span>(<span style="color:#000">readfile</span>(<span style="color:#c41a16">&#39;currency.sample.json&#39;</span>));
+</code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">explain</span> <span style="color:#000">query</span> <span style="color:#000">plan</span>
+<span style="color:#a90d91">select</span> <span style="color:#000">name</span> <span style="color:#a90d91">from</span> <span style="color:#000">currency</span> <span style="color:#a90d91">where</span> <span style="color:#000">code</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#39;EUR&#39;</span>;
+
+<span style="color:#000">QUERY</span> <span style="color:#000">PLAN</span>
+<span style="color:#000">`</span><span style="color:#177500">--SEARCH TABLE currency USING INDEX currency_code_idx (code=?)
+</span></code></pre></div><blockquote>
+<p>You can also use SQLite as a graph database. A bunch of complex <code>WITH RECURSIVE</code> will do the trick, or maybe you&rsquo;ll prefer to add a bit of Python:</p>
+<p><a href="https://github.com/dpapathanasiou/simple-graph">simple-graph @ GitHub</a></p>
+</blockquote>
+<p>Full-text search works out of the box:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">create</span> <span style="color:#000">virtual</span> <span style="color:#a90d91">table</span> <span style="color:#000">books_fts</span>
+<span style="color:#a90d91">using</span> <span style="color:#000">fts5</span>(<span style="color:#000">title</span>, <span style="color:#000">author</span>, <span style="color:#000">publisher</span>);
+
+<span style="color:#a90d91">insert</span> <span style="color:#a90d91">into</span> <span style="color:#000">books_fts</span>
+<span style="color:#a90d91">select</span> <span style="color:#000">title</span>, <span style="color:#000">author</span>, <span style="color:#000">publisher</span> <span style="color:#a90d91">from</span> <span style="color:#000">books</span>;
+
+<span style="color:#a90d91">select</span>
+  <span style="color:#000">author</span>,
+  <span style="color:#000">substr</span>(<span style="color:#000">title</span>, <span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">30</span>) <span style="color:#a90d91">as</span> <span style="color:#000">title</span>,
+  <span style="color:#000">substr</span>(<span style="color:#000">publisher</span>, <span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">10</span>) <span style="color:#a90d91">as</span> <span style="color:#000">publisher</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">books_fts</span>
+<span style="color:#a90d91">where</span> <span style="color:#000">books_fts</span> <span style="color:#a90d91">match</span> <span style="color:#c41a16">&#39;ann&#39;</span>
+<span style="color:#a90d91">limit</span> <span style="color:#1c01ce">5</span>;
+</code></pre></div><pre tabindex="0"><code>┌─────────────────────┬────────────────────────────────┬────────────┐
+│       author        │             title              │ publisher  │
+├─────────────────────┼────────────────────────────────┼────────────┤
+│ Ruby Ann Boxcar     │ Ruby Ann's Down Home Trailer P │ Citadel    │
+│ Ruby Ann Boxcar     │ Ruby Ann's Down Home Trailer P │ Citadel    │
+│ Lynne Ann DeSpelder │ The Last Dance: Encountering D │ McGraw-Hil │
+│ Daniel Defoe        │ Robinson Crusoe                │ Ann Arbor  │
+│ Ann Thwaite         │ Waiting for the Party: The Lif │ David R. G │
+└─────────────────────┴────────────────────────────────┴────────────┘
+</code></pre><p>Maybe you need an in-memory database for intermediate computations? Single line of python code:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">db</span> <span style="color:#000">=</span> <span style="color:#000">sqlite3</span><span style="color:#000">.</span><span style="color:#000">connect</span>(<span style="color:#c41a16">&#34;:memory:&#34;</span>)
+</code></pre></div><p>You can even access it from multiple connections:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">db</span> <span style="color:#000">=</span> <span style="color:#000">sqlite3</span><span style="color:#000">.</span><span style="color:#000">connect</span>(<span style="color:#c41a16">&#34;file::memory:?cache=shared&#34;</span>)
+</code></pre></div><h2 id="and-so-much-more">And so much more</h2>
+<p>There are fancy window functions (just like in PostgreSQL). <code>UPSERT</code>, <code>UPDATE FROM</code>, and <code>generate_series()</code>. R-Tree indexes. Regular expressions, fuzzy-search, and geo. In terms of features, SQLite can compete with any &lsquo;big&rsquo; DBMS.</p>
+<p>There is also great tooling around SQLite. I especially like <a href="https://datasette.io/">Datasette</a> - an open-source tool for exploring and publishing SQLite datasets. And <a href="https://dbeaver.io/">DBeaver</a> is an excellent open-source database IDE with the latest SQLite versions support.</p>
+<p>I hope this article will inspire you to try SQLite. Thanks for reading!</p>
+<p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
+<p><a href="https://news.ycombinator.com/item?id=26580614">Comments on Hacker News</a></p>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>How to create a 1M record table with a single query</title>
+      <link>https://antonz.org/random-table/</link>
+      <pubDate>Sun, 21 Mar 2021 21:15:00 +0000</pubDate>
+      
+      <guid>https://antonz.org/random-table/</guid>
+      <description>With recursive CTE and randomized data.</description>
+      <content:encoded><![CDATA[<p>Let&rsquo;s say you want to check how a query behaves on a large table - but there is no such table at hand. This is not a problem if your DBMS supports SQL recursion: lots of data can be generated with a single query. The <code>WITH RECURSIVE</code> clause comes to the rescue.</p>
+<p>I&rsquo;m going to use SQLite, but the same (or similar) queries will work for PostgreSQL and other DBMSs. Specifically, <code>WITH RECURSIVE</code> is supported in MariaDB 10.2+, MySQL 8.0+, PostgreSQL 8.4+ and SQLite 3.8+. Oracle 11.2+ and SQL Server 2005+ support recursive queries, but without the <code>RECURSIVE</code> keyword.</p>
+<h2 id="random-numbers">Random numbers</h2>
+<p>Let&rsquo;s create a table with 1 million random numbers:</p>
+<pre tabindex="0"><code>create table random_data as
+with recursive tmp(x) as (
+    select random()
+    union all
+    select random() from tmp
+    limit 1000000
+)
+select * from tmp;
+</code></pre><p>Or, if your database supports <code>generate_series()</code> (and does not support <code>limit</code> in recursive queries, like PostgreSQL):</p>
+<pre tabindex="0"><code>create table random_data as
+select random() as x
+from generate_series(1, 1000000);
+</code></pre><p>Validate:</p>
+<pre tabindex="0"><code>sqlite&gt; select count(*) from random_data;
+1000000
+
+sqlite&gt; select avg(x) from random_data;
+1.000501737529e+16
+</code></pre><h2 id="numeric-sequence">Numeric sequence</h2>
+<p>Let&rsquo;s fill the table with numbers from one to a million instead of random numbers:</p>
+<pre tabindex="0"><code>create table seq_data as
+with recursive tmp(x) as (
+    select 1
+    union all
+    select x+1 from tmp
+    limit 1000000
+)
+select * from tmp;
+</code></pre><p>Or with <code>generate_series()</code>:</p>
+<pre tabindex="0"><code>create table seq_data as
+select value as x
+from generate_series(1, 1000000);
+</code></pre><p>Validate:</p>
+<pre tabindex="0"><code>sqlite&gt; select count(*) from seq_data;
+1000000
+
+sqlite&gt; select avg(x) from seq_data;
+500000.5
+
+sqlite&gt; select min(x) from seq_data;
+1
+
+sqlite&gt; select max(x) from seq_data;
+1000000
+</code></pre><h2 id="randomized-data">Randomized data</h2>
+<p>Numbers are fine, but what if you need a large table filled with customer data? No sweat!</p>
+<p>Let&rsquo;s agree on some rules:</p>
+<ul>
+<li>customer has an ID, name, and age;</li>
+<li>ID is filled sequentially from 1 to 1000000;</li>
+<li>name is randomly selected from a fixed list;</li>
+<li>age is a random number from 1 to 80.</li>
+</ul>
+<p>Let&rsquo;s create a table of names:</p>
+<pre tabindex="0"><code>create table names (
+    id integer primary key,
+    name text
+);
+
+insert into names(id, name)
+values
+(1, 'Ann'),
+(2, 'Bill'),
+(3, 'Cindy'),
+(4, 'Diane'),
+(5, 'Emma');
+</code></pre><p>And generate some customers:</p>
+<pre tabindex="0"><code>create table person_data as
+with recursive tmp(id, idx, name, age) as (
+    select 1, 1, 'Ann', 20
+    union all
+    select
+        tmp.id + 1 as id,
+        abs(random() % 5) + 1 as idx,
+        (select name from names where id = idx) as name,
+        abs(random() % 80) + 1 as age
+    from tmp
+    limit 1000000
+)
+select id, name, age from tmp;
+</code></pre><p>Or with <code>generate_series()</code>:</p>
+<pre tabindex="0"><code>create table person_data as
+with tmp as (
+    select
+        value as id,
+        abs(random() % 5) + 1 as idx,
+        abs(random() % 80) + 1 as age
+    from generate_series(1, 1000000)
+)
+select
+    id,
+    (select name from names where id = idx) as name,
+    age
+from tmp;
+</code></pre><p>Everything is according to the rules here:</p>
+<ul>
+<li><code>id</code> is calculated as the previous value + 1;</li>
+<li><code>idx</code> field contains a random number from 1 to 5;</li>
+<li><code>name</code> is selected from the <code>names</code> table according to <code>idx</code> value;</li>
+<li><code>age</code> is calculated as a random number from 1 to 80.</li>
+</ul>
+<p>Check it out:</p>
+<pre tabindex="0"><code>sqlite&gt; select count(*) from person_data;
+1000000
+
+sqlite&gt; select * from person_data limit 10;
+┌────┬───────┬─────┐
+│ id │ name  │ age │
+├────┼───────┼─────┤
+│ 1  │ Ann   │ 20  │
+│ 2  │ Ann   │ 33  │
+│ 3  │ Ann   │ 26  │
+│ 4  │ Ann   │ 4   │
+│ 5  │ Diane │ 20  │
+│ 6  │ Diane │ 76  │
+│ 7  │ Bill  │ 42  │
+│ 8  │ Cindy │ 35  │
+│ 9  │ Diane │ 6   │
+│ 10 │ Ann   │ 29  │
+└────┴───────┴─────┘
+</code></pre><p>A single query has brought us a million customers. Not bad! It would be great to achieve such results in sales, wouldn&rsquo;t it? ツ</p>
+<p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts!</em></p>
+<p><a href="https://news.ycombinator.com/item?id=26564168">Comments on Hacker News</a></p>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>Automate your Python project with Makefile</title>
+      <link>https://antonz.org/makefile-automation/</link>
+      <pubDate>Tue, 16 Mar 2021 17:15:00 +0000</pubDate>
+      
+      <guid>https://antonz.org/makefile-automation/</guid>
+      <description>Makefile is not just some relict from the 70s.</description>
+      <content:encoded><![CDATA[<p>When working on a library or application, certain tasks tend to show up over and over again:</p>
+<ul>
+<li>checking the code with linters,</li>
+<li>running tests with coverage,</li>
+<li>deploying with Docker,</li>
+<li>&hellip;</li>
+</ul>
+<p>JS developers are lucky (ha!): their <code>package.json</code> has a special <code>scripts</code> section for this stuff:</p>
+<pre tabindex="0"><code>{
+    ...
+    &quot;scripts&quot;: {
+        &quot;format&quot;: &quot;prettier --write \&quot;src/**/*.ts\&quot;&quot;,
+        &quot;lint&quot;: &quot;tslint -p tsconfig.json&quot;,
+        &quot;test&quot;: &quot;jest --coverage --config jestconfig.json&quot;,
+    },
+    ...
+}
+</code></pre><p>Nothing like this is provided with Python. You can, of course, make a <code>.sh</code> script for each task. But it litters the project directory, and it&rsquo;s better to keep all such tasks together. Installing a separate task runner or using the one built into IDE also seems weird.</p>
+<p>Good news: Linux and macOS already have a great task automation tool for any project - <code>Makefile</code>.</p>
+<h2 id="makefile-for-task-automation">Makefile for task automation</h2>
+<p>Perhaps you, like me, thought that Makefile is a relict from the 70s, useful for compiling <code>C</code> programs. True. But it is also perfectly suitable for automating any tasks in general.</p>
+<p>Here&rsquo;s what it might look like in a python project. Create a file named <code>Makefile</code>:</p>
+<pre tabindex="0"><code>coverage:  ## Run tests with coverage
+	coverage erase
+	coverage run --include=podsearch/* -m pytest -ra
+	coverage report -m
+
+deps:  ## Install dependencies
+	pip install black coverage flake8 mypy pylint pytest tox
+
+lint:  ## Lint and static-check
+	flake8 podsearch
+	pylint podsearch
+	mypy podsearch
+
+push:  ## Push code with tags
+	git push &amp;&amp; git push --tags
+
+test:  ## Run tests
+	pytest -ra
+</code></pre><p>And run linter with tests, for example:</p>
+<pre tabindex="0"><code>$ make lint coverage
+
+flake8 podsearch
+pylint podsearch
+...
+mypy podsearch
+...
+coverage erase
+coverage run —include=podsearch/* -m pytest -ra
+...
+coverage report -m
+Name                    Stmts   Miss  Cover   Missing
+-----------------------------------------------------
+podsearch/__init__.py       2      0   100%
+podsearch/http.py          17      0   100%
+podsearch/searcher.py      51      0   100%
+-----------------------------------------------------
+TOTAL                      70      0   100%
+</code></pre><h2 id="features">Features</h2>
+<h3 id="task-steps">Task steps</h3>
+<p>A task can include multiple steps, like <code>lint</code> in the example above:</p>
+<pre tabindex="0"><code>lint:
+	flake8 podsearch
+	pylint podsearch
+	mypy podsearch
+</code></pre><p>Each step is executed in a separate subprocess. To run a chain of actions (for example, <code>cd</code> and <code>git pull</code>) combine them through <code>&amp;&amp;</code>:</p>
+<pre tabindex="0"><code>push:
+	git push &amp;&amp; git push --tags
+</code></pre><h3 id="task-dependencies">Task dependencies</h3>
+<p>Consider the <code>test</code> task, which should first perform linting, and then run the tests. Specify <code>lint</code> as a dependency for <code>test</code>, and you&rsquo;re done:</p>
+<pre tabindex="0"><code>test: lint
+	pytest -ra
+</code></pre><p>You can specify multiple space-separated dependencies. Or tasks can explicitly call each other:</p>
+<pre tabindex="0"><code>lint:
+	flake8 podsearch
+	pylint podsearch
+	mypy podsearch
+
+test:
+	pytest -ra
+
+prepare:
+	make lint
+	make test
+</code></pre><h3 id="task-parameters">Task parameters</h3>
+<p>Consider the <code>serve</code> task which serves a static site, with IP and port specified as parameters. No problem:</p>
+<pre tabindex="0"><code>serve:
+	python -m http.server dist --bind $(bind) $(port)
+</code></pre><p>Run task with parameters:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ make serve <span style="color:#000">bind</span><span style="color:#000">=</span>localhost <span style="color:#000">port</span><span style="color:#000">=</span><span style="color:#1c01ce">3000</span>
+</code></pre></div><p>You can specify default parameter values:</p>
+<pre tabindex="0"><code>bind ?= localhost
+port ?= 3000
+serve:
+	python -m http.server dist --bind $(bind) $(port)
+</code></pre><p>Now they are optional when running <code>make</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ make serve <span style="color:#000">bind</span><span style="color:#000">=</span>192.168.0.1
+$ make serve <span style="color:#000">port</span><span style="color:#000">=</span><span style="color:#1c01ce">8000</span>
+$ make serve
+</code></pre></div><h3 id="and-so-much-more">And so much more</h3>
+<p>If basic features are not enough, there are some great in-depth guides:</p>
+<ul>
+<li><a href="https://makefiletutorial.com">Learn Makefiles with the tastiest examples</a></li>
+<li><a href="https://swcarpentry.github.io/make-novice/reference.html">Automation and Make</a></li>
+</ul>
+<h2 id="in-the-wild">In the wild</h2>
+<p>Here is a Makefile from one of my projects (podcast search tool):</p>
+<blockquote>
+<p><a href="https://github.com/nalgeon/podsearch-py/blob/master/Makefile">podsearch</a></p>
+</blockquote>
+<p>Makefiles are great for automating routine tasks, regardless of the language you prefer. Use them!</p>
+<p><em>And follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts</em></p>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>SQLite is not so easy to compile</title>
+      <link>https://antonz.org/sqlite-is-not-so-easy-to-compile/</link>
+      <pubDate>Mon, 15 Mar 2021 11:45:00 +0000</pubDate>
+      
+      <guid>https://antonz.org/sqlite-is-not-so-easy-to-compile/</guid>
+      <description>But with GitHub Actions it is.</description>
+      <content:encoded><![CDATA[<p>SQLite shell is quite easy to compile, right?</p>
+<pre tabindex="0"><code>curl -L http://sqlite.org/2021/sqlite-amalgamation-3350000.zip --output src.zip
+unzip src.zip
+mv sqlite-amalgamation-3350000 src
+gcc src/shell.c src/sqlite3.c -o sqlite3 -lpthread -ldl
+</code></pre><p>Well, unless you want all the cool features which are not included in the default build. Or unless you are using Windows and prefer 64-bit binary to 32-bit. Or unless you do not have <code>gcc</code> installed.</p>
+<p>I found myself in these situations a couple of times. So I decided to create reproducible builds for Windows, Ubuntu, and macOS — using GitHub Actions. Here they are:</p>
+<p class="big"><a href="https://github.com/nalgeon/sqlite/releases/latest">SQLite shell builds</a></p>
+<p>Refer to <a href="https://github.com/nalgeon/sqlite/blob/main/.github/workflows/build.yml">build.yml</a> for build instructions if you prefer to build SQLite shell yourself.</p>
+<p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts!</em></p>
+]]></content:encoded>
+    </item>
+    
+    <item>
+      <title>What&#39;s new in SQLite 3.35</title>
+      <link>https://antonz.org/sqlite-3-35/</link>
+      <pubDate>Fri, 12 Mar 2021 19:10:16 +0000</pubDate>
+      
+      <guid>https://antonz.org/sqlite-3-35/</guid>
+      <description>Math functions, column removal and RETURNING clause.</description>
+      <content:encoded><![CDATA[<p>SQLite developers often prefer to work on database internals. For an external observer nothing really changes. 2020 was a pleasant exception - SQLite received a bunch of nice features for ordinary users, such as generated columns, <code>UPDATE FROM</code> and fantastic <code>.mode box</code> in the shell.</p>
+<p>There&rsquo;s every chance that 2021 will continue the tradition. Here&rsquo;s what shipped in the 3.35 release today:</p>
+<ol>
+<li>Math functions ‼️</li>
+<li>Column removal ❗</li>
+<li><code>RETURNING</code> processed rows for <code>DELETE</code>, <code>INSERT</code> and <code>UPDATE</code>.</li>
+<li>Materialized CTEs.</li>
+</ol>
+<p>Here are some details about each feature.</p>
+<h2 id="math-functions">Math functions</h2>
+<p>For many years, users literally begged SQLite devs to add basic functions like <code>sqrt()</code>, <code>log()</code> and <code>pow()</code>. The answer was always about the same (not a direct quote):</p>
+<blockquote>
+<p>SQLite is called &lsquo;lite&rsquo; for a reason. If you need functions, add them yourself.</p>
+</blockquote>
+<p>An understandable position indeed. But refusing to add the square root? At the same time implementing window functions, recursive queries and other advanced SQL magic? Seriously?</p>
+<p>Maybe SQLite developers prefer to focus on features that large customers are willing to pay for. Anyway, after 20 years we now have mathematical functions!</p>
+<p>Here is the full list:</p>
+<pre tabindex="0"><code>acos(X)
+acosh(X)
+asin(X)
+asinh(X)
+atan(X)
+atan2(X,Y)
+ceil(X)
+ceiling(X)
+cos(X)
+cosh(X)
+degrees(X)
+exp(X)
+floor(X)
+ln(X)
+log(B,X)
+log(X)
+log10(X)
+log2(X)
+mod(X,Y)
+pi()
+pow(X,Y)
+power(X,Y)
+radians(X)
+sin(X)
+sinh(X)
+sqrt(X)
+tan(X)
+tanh(X)
+trunc(X)
+</code></pre><h2 id="column-removal">Column removal</h2>
+<p>Probably the second most popular source of user suffering. It&rsquo;s incredibly annoying that you can create as many columns as you want, but there is no way to delete them. Want to delete a column? Make a copy of the table without it, and delete the old one.</p>
+<p>Now this pain is also going away! <code>ALTER TABLE DROP COLUMN</code>, how long have we been waiting for you.</p>
+<p>To delete a column, SQLite have to completely overwrite the table - so the operation is not fast. But it&rsquo;s still nice.</p>
+<h2 id="returning-clause">RETURNING clause</h2>
+<p><code>DELETE</code>, <code>INSERT</code> and <code>UPDATE</code> queries now can return the rows that they deleted, added, or changed respectively.</p>
+<p>E.g., return the <code>id</code> of a new record:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">create</span> <span style="color:#a90d91">table</span> <span style="color:#000">users</span> (
+  <span style="color:#000">id</span> <span style="color:#a90d91">integer</span> <span style="color:#a90d91">primary</span> <span style="color:#a90d91">key</span>,
+  <span style="color:#000">first_name</span> <span style="color:#a90d91">text</span>,
+  <span style="color:#000">last_name</span> <span style="color:#a90d91">text</span>
+);
+
+<span style="color:#a90d91">insert</span> <span style="color:#a90d91">into</span> <span style="color:#000">users</span> (<span style="color:#000">first_name</span>, <span style="color:#000">last_name</span>)
+<span style="color:#a90d91">values</span> (<span style="color:#c41a16">&#39;Jane&#39;</span>, <span style="color:#c41a16">&#39;Doe&#39;</span>)
+<span style="color:#000">returning</span> <span style="color:#000">id</span>;
+</code></pre></div><p>Or return products with increased price:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">update</span> <span style="color:#000">products</span> <span style="color:#a90d91">set</span> <span style="color:#000">price</span> <span style="color:#000">=</span> <span style="color:#000">price</span> <span style="color:#000">*</span> <span style="color:#1c01ce">1</span>.<span style="color:#1c01ce">10</span>
+<span style="color:#a90d91">where</span> <span style="color:#000">price</span> <span style="color:#000">&lt;=</span> <span style="color:#1c01ce">99</span>.<span style="color:#1c01ce">99</span>
+<span style="color:#000">returning</span> <span style="color:#000">name</span>, <span style="color:#000">price</span> <span style="color:#a90d91">as</span> <span style="color:#000">new_price</span>;
+</code></pre></div><h2 id="materialized-ctes">Materialized CTEs</h2>
+<p>CTE (Common Table Expression) is a great way to make a query more expressive. E.g., count the number of cities founded in each century:</p>
+<pre tabindex="0"><code>create table city(
+  city text,
+  timezone text,
+  geo_lat real,
+  geo_lon real,
+  population integer,
+  foundation_year integer
+);
+
+-- insert data ...
+
+with history as (
+  select
+    city,
+    (foundation_year/100)+1 as century
+  from city
+)
+select
+  century || ' century' as dates,
+  count(*) as city_count
+from history
+group by century
+order by century desc;
+</code></pre><p>If the same CTE occurs multiple times in a query, SQLite calculates it multiple times. For large tables this may not be fast.</p>
+<p>With a materialized CTE, SQLite executes the query once, remembers the result and does not recalculate it (within the same query):</p>
+<pre tabindex="0"><code>with history as materialized (
+  select ...
+)
+select ... from history where ...
+except
+select ... from history where ...
+;
+</code></pre><p>Four great features, all in the same release! Awesome ツ</p>
+<p><a href="https://sqlite.org/releaselog/3_35_0.html">SQLite 3.35 Release Notes</a></p>
+<p><a href="https://sqlite.org/download.html">Download latest version</a></p>
+<p><a href="https://news.ycombinator.com/item?id=26440397">Comments on Hacker News</a></p>
+<p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts!</em></p>
+]]></content:encoded>
+    </item>
+    
+  </channel>
+</rss>

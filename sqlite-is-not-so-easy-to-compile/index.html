@@ -1,0 +1,118 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>SQLite is not so easy to compile</title>
+<meta name=description content="But with GitHub Actions it is.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.47ee4414f88524dddca3750ff145f76d063e98533419d597b56ed0c385c01eab.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/sqlite-is-not-so-easy-to-compile/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:site_name" content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SQLite is not so easy to compile">
+<meta property="og:description" content="But with GitHub Actions it is.">
+<meta property="og:url" content="https://antonz.org/sqlite-is-not-so-easy-to-compile/">
+<meta property="og:image" content="https://antonz.org/">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="SQLite is not so easy to compile">
+<meta name=twitter:description content="But with GitHub Actions it is.">
+<meta name=twitter:url content="https://antonz.org/sqlite-is-not-so-easy-to-compile/">
+<meta name=twitter:site content="@nalgeon">
+<meta name=twitter:image content="https://antonz.org/"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/antonz.jpg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>SQLite is not so easy to compile</h1>
+</header>
+<p>SQLite shell is quite easy to compile, right?</p>
+<pre tabindex=0><code>curl -L http://sqlite.org/2021/sqlite-amalgamation-3350000.zip --output src.zip
+unzip src.zip
+mv sqlite-amalgamation-3350000 src
+gcc src/shell.c src/sqlite3.c -o sqlite3 -lpthread -ldl
+</code></pre><p>Well, unless you want all the cool features which are not included in the default build. Or unless you are using Windows and prefer 64-bit binary to 32-bit. Or unless you do not have <code>gcc</code> installed.</p>
+<p>I found myself in these situations a couple of times. So I decided to create reproducible builds for Windows, Ubuntu, and macOS — using GitHub Actions. Here they are:</p>
+<p class=big><a href=https://github.com/nalgeon/sqlite/releases/latest>SQLite shell builds</a></p>
+<p>Refer to <a href=https://github.com/nalgeon/sqlite/blob/main/.github/workflows/build.yml>build.yml</a> for build instructions if you prefer to build SQLite shell yourself.</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy>@ohmypy</a> on Twitter to keep up with new posts!</em></p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2021-03-15 11:45:00 +0000 UTC">15 Mar, 2021</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/sqlite/>sqlite</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/sqlite-3-35/>What's new in SQLite 3.35</a></p>
+</div>
+<div class="col-xs-12 col-sm-6">
+<p><a href=https://antonz.org/makefile-automation/>Automate your Python project with Makefile</a>&nbsp;&rarr;</p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sqlite-3-35/>What's new in SQLite 3.35</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/rss class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>

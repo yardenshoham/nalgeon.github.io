@@ -1,0 +1,236 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>How to create a 1M record table with a single query</title>
+<meta name=description content="With recursive CTE and randomized data.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.47ee4414f88524dddca3750ff145f76d063e98533419d597b56ed0c385c01eab.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/random-table/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:site_name" content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="How to create a 1M record table with a single query">
+<meta property="og:description" content="With recursive CTE and randomized data.">
+<meta property="og:url" content="https://antonz.org/random-table/">
+<meta property="og:image" content="https://antonz.org/">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="How to create a 1M record table with a single query">
+<meta name=twitter:description content="With recursive CTE and randomized data.">
+<meta name=twitter:url content="https://antonz.org/random-table/">
+<meta name=twitter:site content="@nalgeon">
+<meta name=twitter:image content="https://antonz.org/"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/antonz.jpg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>How to create a 1M record table with a single query</h1>
+</header>
+<p>Let&rsquo;s say you want to check how a query behaves on a large table - but there is no such table at hand. This is not a problem if your DBMS supports SQL recursion: lots of data can be generated with a single query. The <code>WITH RECURSIVE</code> clause comes to the rescue.</p>
+<p>I&rsquo;m going to use SQLite, but the same (or similar) queries will work for PostgreSQL and other DBMSs. Specifically, <code>WITH RECURSIVE</code> is supported in MariaDB 10.2+, MySQL 8.0+, PostgreSQL 8.4+ and SQLite 3.8+. Oracle 11.2+ and SQL Server 2005+ support recursive queries, but without the <code>RECURSIVE</code> keyword.</p>
+<h2 id=random-numbers>Random numbers</h2>
+<p>Let&rsquo;s create a table with 1 million random numbers:</p>
+<pre tabindex=0><code>create table random_data as
+with recursive tmp(x) as (
+    select random()
+    union all
+    select random() from tmp
+    limit 1000000
+)
+select * from tmp;
+</code></pre><p>Or, if your database supports <code>generate_series()</code> (and does not support <code>limit</code> in recursive queries, like PostgreSQL):</p>
+<pre tabindex=0><code>create table random_data as
+select random() as x
+from generate_series(1, 1000000);
+</code></pre><p>Validate:</p>
+<pre tabindex=0><code>sqlite&gt; select count(*) from random_data;
+1000000
+
+sqlite&gt; select avg(x) from random_data;
+1.000501737529e+16
+</code></pre><h2 id=numeric-sequence>Numeric sequence</h2>
+<p>Let&rsquo;s fill the table with numbers from one to a million instead of random numbers:</p>
+<pre tabindex=0><code>create table seq_data as
+with recursive tmp(x) as (
+    select 1
+    union all
+    select x+1 from tmp
+    limit 1000000
+)
+select * from tmp;
+</code></pre><p>Or with <code>generate_series()</code>:</p>
+<pre tabindex=0><code>create table seq_data as
+select value as x
+from generate_series(1, 1000000);
+</code></pre><p>Validate:</p>
+<pre tabindex=0><code>sqlite&gt; select count(*) from seq_data;
+1000000
+
+sqlite&gt; select avg(x) from seq_data;
+500000.5
+
+sqlite&gt; select min(x) from seq_data;
+1
+
+sqlite&gt; select max(x) from seq_data;
+1000000
+</code></pre><h2 id=randomized-data>Randomized data</h2>
+<p>Numbers are fine, but what if you need a large table filled with customer data? No sweat!</p>
+<p>Let&rsquo;s agree on some rules:</p>
+<ul>
+<li>customer has an ID, name, and age;</li>
+<li>ID is filled sequentially from 1 to 1000000;</li>
+<li>name is randomly selected from a fixed list;</li>
+<li>age is a random number from 1 to 80.</li>
+</ul>
+<p>Let&rsquo;s create a table of names:</p>
+<pre tabindex=0><code>create table names (
+    id integer primary key,
+    name text
+);
+
+insert into names(id, name)
+values
+(1, 'Ann'),
+(2, 'Bill'),
+(3, 'Cindy'),
+(4, 'Diane'),
+(5, 'Emma');
+</code></pre><p>And generate some customers:</p>
+<pre tabindex=0><code>create table person_data as
+with recursive tmp(id, idx, name, age) as (
+    select 1, 1, 'Ann', 20
+    union all
+    select
+        tmp.id + 1 as id,
+        abs(random() % 5) + 1 as idx,
+        (select name from names where id = idx) as name,
+        abs(random() % 80) + 1 as age
+    from tmp
+    limit 1000000
+)
+select id, name, age from tmp;
+</code></pre><p>Or with <code>generate_series()</code>:</p>
+<pre tabindex=0><code>create table person_data as
+with tmp as (
+    select
+        value as id,
+        abs(random() % 5) + 1 as idx,
+        abs(random() % 80) + 1 as age
+    from generate_series(1, 1000000)
+)
+select
+    id,
+    (select name from names where id = idx) as name,
+    age
+from tmp;
+</code></pre><p>Everything is according to the rules here:</p>
+<ul>
+<li><code>id</code> is calculated as the previous value + 1;</li>
+<li><code>idx</code> field contains a random number from 1 to 5;</li>
+<li><code>name</code> is selected from the <code>names</code> table according to <code>idx</code> value;</li>
+<li><code>age</code> is calculated as a random number from 1 to 80.</li>
+</ul>
+<p>Check it out:</p>
+<pre tabindex=0><code>sqlite&gt; select count(*) from person_data;
+1000000
+
+sqlite&gt; select * from person_data limit 10;
+┌────┬───────┬─────┐
+│ id │ name  │ age │
+├────┼───────┼─────┤
+│ 1  │ Ann   │ 20  │
+│ 2  │ Ann   │ 33  │
+│ 3  │ Ann   │ 26  │
+│ 4  │ Ann   │ 4   │
+│ 5  │ Diane │ 20  │
+│ 6  │ Diane │ 76  │
+│ 7  │ Bill  │ 42  │
+│ 8  │ Cindy │ 35  │
+│ 9  │ Diane │ 6   │
+│ 10 │ Ann   │ 29  │
+└────┴───────┴─────┘
+</code></pre><p>A single query has brought us a million customers. Not bad! It would be great to achieve such results in sales, wouldn&rsquo;t it? ツ</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy>@ohmypy</a> on Twitter to keep up with new posts!</em></p>
+<p><a href="https://news.ycombinator.com/item?id=26564168">Comments on Hacker News</a></p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2021-03-21 21:15:00 +0000 UTC">21 Mar, 2021</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/sqlite/>sqlite</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/makefile-automation/>Automate your Python project with Makefile</a></p>
+</div>
+<div class="col-xs-12 col-sm-6">
+<p><a href=https://antonz.org/sqlite-is-not-a-toy-database/>SQLite is not a toy database</a>&nbsp;&rarr;</p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sqlite-is-not-so-easy-to-compile/>SQLite is not so easy to compile</a></p>
+<p><a href=/sqlite-3-35/>What's new in SQLite 3.35</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/rss class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
