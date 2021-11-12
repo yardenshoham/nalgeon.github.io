@@ -1325,6 +1325,7 @@ pre {
     font-family: var(--font-monospace);
 }
 pre {
+    margin: 0 0 0.8em 0;
     background: #f5f5f5;
     padding: 1em 1.5em;
     overflow-x: auto;
@@ -1651,14 +1652,10 @@ body {
 }
 
 .article .boxed {
-    border: 0.25em solid #eaeaea;
     margin-bottom: 0.8em;
+    border: 0.25em solid #eaeaea;
     padding: 1.5em;
-}
-.article .boxed p,
-.article .boxed li,
-.article .boxed h3 {
-    color: var(--color-gray);
+    font-size: 90%;
 }
 .article .boxed > p:last-child {
     margin-bottom: 0;
