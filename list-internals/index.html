@@ -60,7 +60,7 @@
 <header>
 <h1>How Python list really works</h1>
 </header>
-<p><em>This post is largely about the arrays — the number one data structure in the world. If you are not a data structure guru yet, I guarantee that you will better understand Python lists, their advantages and limitations. If you already know everything — there is no harm in refreshing the key points.</em></p>
+<p><em>This post is largely about the arrays — the #1 data structure in the world. If you are not a data structure guru yet, I guarantee that you will better understand Python lists, their advantages and limitations. If you already know everything — there is no harm in refreshing the key points.</em></p>
 <p>Everybody knows how to work with lists in Python:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-py data-lang=py><span style=color:#000>&gt;&gt;&gt;</span> <span style=color:#000>guests</span> <span style=color:#000>=</span> [<span style=color:#c41a16>&#34;Frank&#34;</span>, <span style=color:#c41a16>&#34;Claire&#34;</span>, <span style=color:#c41a16>&#34;Zoe&#34;</span>]
 <span style=color:#000>&gt;&gt;&gt;</span> <span style=color:#000>guests</span>[<span style=color:#1c01ce>1</span>]
@@ -68,8 +68,8 @@
 </code></pre></div><p>Surely you know that selecting an item by index — <code>guests[idx]</code> — works instantly even on a million elements list. More precisely, selection by index takes constant time O(1) — that is, it does not depend on the number of items in the list.</p>
 <p>Do you know why it works so fast? Let&rsquo;s find out.</p>
 <h2 id=list--array>List = array?</h2>
-<p>The list is based on an array. An array is a set of elements ① of the same size and ② located in memory one after another, without gaps.</p>
-<p>Since the elements are the same size and placed adjacently, it is easy to get an array item by index. All we have to know is the address of the very first element (the &ldquo;head&rdquo; of the array).</p>
+<p>The list is based on an array. An array is a set of elements ① of the same size, ② located in memory one after another, without gaps.</p>
+<p>Since elements are the same size and placed contiguously, it is easy to get an array item by index. All we need is the memory address of the very first element (the &ldquo;head&rdquo; of the array).</p>
 <p>Let&rsquo;s say the head is located at the address <code>0×00001234</code>, and each item occupies 8 bytes. Then the element with the <code>idx</code> index is located at <code>0×00001234 + idx*8</code>:</p>
 <div class=row>
 <div class="col-xs-12 col-sm-6">

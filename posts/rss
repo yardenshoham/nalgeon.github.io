@@ -13,7 +13,7 @@
       <pubDate>Fri, 12 Nov 2021 17:55:00 +0000</pubDate>
       
       <guid>https://antonz.org/list-internals/</guid>
-      <description>This post is largely about the arrays — the number one data structure in the world. If you are not a data structure guru yet, I guarantee that you will better understand Python lists, their advantages and limitations. If you already know everything — there is no harm in refreshing the key points.
+      <description>This post is largely about the arrays — the #1 data structure in the world. If you are not a data structure guru yet, I guarantee that you will better understand Python lists, their advantages and limitations. If you already know everything — there is no harm in refreshing the key points.
 Everybody knows how to work with lists in Python:
 &amp;gt;&amp;gt;&amp;gt; guests = [&amp;#34;Frank&amp;#34;, &amp;#34;Claire&amp;#34;, &amp;#34;Zoe&amp;#34;] &amp;gt;&amp;gt;&amp;gt; guests[1] &amp;#39;Claire&amp;#39; Surely you know that selecting an item by index — guests[idx] — works instantly even on a million elements list.</description>
     </item>
