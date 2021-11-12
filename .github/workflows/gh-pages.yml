@@ -17,7 +17,9 @@ jobs:
                   hugo-version: "0.89.0"
 
             - name: Build
-              run: hugo --gc --minify
+              run: |
+                  hugo --gc --minify
+                  cp public/rss public/feed.xml
 
             - name: Deploy
               uses: peaceiris/actions-gh-pages@v3
