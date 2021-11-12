@@ -7,7 +7,7 @@ slug = "list-internals"
 tags = ["python"]
 +++
 
-_This post is largely about the arrays — the number one data structure in the world. If you are not a data structure guru yet, I guarantee that you will better understand Python lists, their advantages and limitations. If you already know everything — there is no harm in refreshing the key points._
+_This post is largely about the arrays — the #1 data structure in the world. If you are not a data structure guru yet, I guarantee that you will better understand Python lists, their advantages and limitations. If you already know everything — there is no harm in refreshing the key points._
 
 Everybody knows how to work with lists in Python:
 
@@ -23,9 +23,9 @@ Do you know why it works so fast? Let's find out.
 
 ## List = array?
 
-The list is based on an array. An array is a set of elements ① of the same size and ② located in memory one after another, without gaps.
+The list is based on an array. An array is a set of elements ① of the same size, ② located in memory one after another, without gaps.
 
-Since the elements are the same size and placed adjacently, it is easy to get an array item by index. All we have to know is the address of the very first element (the "head" of the array).
+Since elements are the same size and placed contiguously, it is easy to get an array item by index. All we need is the memory address of the very first element (the "head" of the array).
 
 Let's say the head is located at the address `0×00001234`, and each item occupies 8 bytes. Then the element with the `idx` index is located at `0×00001234 + idx*8`:
 
