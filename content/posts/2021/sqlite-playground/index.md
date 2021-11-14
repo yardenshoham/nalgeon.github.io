@@ -21,7 +21,7 @@ Here is what I wanted:
 
 So I've built **[SQLime](https://sqlime.org/)** — an online SQLite playground for debugging and sharing SQL snippets.
 
-![SQLime - SQLite Playground](sqlime.png)
+![SQLime - SQLite Playground](sqlime.jpg)
 
 First I'll show the results, then describe how everything works:
 
@@ -159,7 +159,7 @@ All the user needs is to specify the Github API token. Conveniently, the token i
 Modern frontend projects are full of tooling and infrastructure stuff. Honestly, I'm not interested in it at all (I'm not a JS developer). So I deliberately did not use UI frameworks and did everything with vanilla HTML + CSS + JS. It seems to be quite acceptable for a small project.
 
 <figure>
-    <img alt="SQLime on mobile" src="mobile.png">
+    <img alt="SQLime on mobile" src="mobile.jpg">
     <figcaption class="align-center">I took care of the mobile layout: the playground is perfectly usable on the phone. And there are command shortcuts for the desktop.</figcaption>
 </figure>
 
