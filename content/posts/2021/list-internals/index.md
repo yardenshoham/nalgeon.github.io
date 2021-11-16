@@ -216,3 +216,5 @@ Therefore, it is useful to know which list methods take constant time and which 
 I hope you'll see Python lists in a new way after this article. Thanks for reading!
 
 _Follow [@ohmypy](https://twitter.com/ohmypy) on Twitter to keep up with new posts 🚀_
+
+[Comments on Hacker News](https://news.ycombinator.com/item?id=29217038)
