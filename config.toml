@@ -16,13 +16,6 @@ unsafe = true
 [markup.highlight]
 style = "xcode"
 
-[outputFormats.RSS]
-mediatype = "application/rss+xml"
-baseName = "rss"
-
-[mediaTypes."application/rss+xml"]
-suffixes = [ ]
-
 [params]
 author = "Anton Zhiyanov"
 description = "Everything about SQLite, Python, open data and awesome software."
