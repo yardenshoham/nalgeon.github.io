@@ -1,25 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel>
-    <title>Anton Zhiyanov</title>
-    <description>Everything about SQLite, Python, open data and awesome software.</description>
-    <link>https://antonz.org/</link>
-    <image>
-      <url>https://antonz.org/assets/favicon/favicon.png</url>
-      <title>Anton Zhiyanov</title>
-      <link>https://antonz.org/</link>
-    </image>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <lastBuildDate>Fri, 12 Nov 2021 17:55:00 +0000</lastBuildDate><atom:link href="https://antonz.org/rss" rel="self" type="application/rss+xml" />
-    <item>
-      <title>How Python list really works</title>
-      <link>https://antonz.org/list-internals/</link>
-      <pubDate>Fri, 12 Nov 2021 17:55:00 +0000</pubDate>
-      
-      <guid>https://antonz.org/list-internals/</guid>
-      <description>And why some methods take constant time while others take linear.</description>
-      <content:encoded><![CDATA[<p><em>This post is largely about the arrays — the #1 data structure in the world. If you are not a data structure guru yet, I guarantee that you will better understand Python lists, their advantages and limitations. If you already know everything — there is no harm in refreshing the key points.</em></p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 12 Nov 2021 17:55:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>How Python list really works</title><link>https://antonz.org/list-internals/</link><pubDate>Fri, 12 Nov 2021 17:55:00 +0000</pubDate><guid>https://antonz.org/list-internals/</guid><description>And why some methods take constant time while others take linear.</description><content:encoded><![CDATA[<p><em>This post is largely about the arrays — the #1 data structure in the world. If you are not a data structure guru yet, I guarantee that you will better understand Python lists, their advantages and limitations. If you already know everything — there is no harm in refreshing the key points.</em></p>
 <p>Everybody knows how to work with lists in Python:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#000">&gt;&gt;&gt;</span> <span style="color:#000">guests</span> <span style="color:#000">=</span> [<span style="color:#c41a16">&#34;Frank&#34;</span>, <span style="color:#c41a16">&#34;Claire&#34;</span>, <span style="color:#c41a16">&#34;Zoe&#34;</span>]
 <span style="color:#000">&gt;&gt;&gt;</span> <span style="color:#000">guests</span>[<span style="color:#1c01ce">1</span>]
@@ -168,17 +147,7 @@
 <p>I hope you&rsquo;ll see Python lists in a new way after this article. Thanks for reading!</p>
 <p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
 <p><a href="https://news.ycombinator.com/item?id=29217038">Comments on Hacker News</a></p>
-]]></content:encoded>
-    </item>
-    
-    <item>
-      <title>SQLite playground in the browser</title>
-      <link>https://antonz.org/sqlite-playground/</link>
-      <pubDate>Mon, 04 Oct 2021 10:40:00 +0000</pubDate>
-      
-      <guid>https://antonz.org/sqlite-playground/</guid>
-      <description>I have built an online SQL playground with vanilla JS and a bit of GitHub API. Here&#39;s how.</description>
-      <content:encoded><![CDATA[<p>What I&rsquo;ve always lacked is something similar to JSFiddle, but for SQLite. An online playground to quickly test an SQL query and share it with others.</p>
+]]></content:encoded></item><item><title>SQLite playground in the browser</title><link>https://antonz.org/sqlite-playground/</link><pubDate>Mon, 04 Oct 2021 10:40:00 +0000</pubDate><guid>https://antonz.org/sqlite-playground/</guid><description>I have built an online SQL playground with vanilla JS and a bit of GitHub API. Here's how.</description><content:encoded><![CDATA[<p>What I&rsquo;ve always lacked is something similar to JSFiddle, but for SQLite. An online playground to quickly test an SQL query and share it with others.</p>
 <p>Here is what I wanted:</p>
 <ul>
 <li>Binary database import, not just SQL schema.</li>
@@ -291,17 +260,7 @@
 <p>Try <a href="https://sqlime.org/">SQLime</a> for yourself — see if you find it useful. Or, perhaps, you&rsquo;ll adopt the approach of creating serverless tools with vanilla JS and GitHub API. Constructive critique is also welcome, of course ツ</p>
 <p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
 <p><a href="https://news.ycombinator.com/item?id=28669703">Comments on Hacker News</a></p>
-]]></content:encoded>
-    </item>
-    
-    <item>
-      <title>Good Code Criterion</title>
-      <link>https://antonz.org/good-code/</link>
-      <pubDate>Wed, 02 Jun 2021 11:00:00 +0000</pubDate>
-      
-      <guid>https://antonz.org/good-code/</guid>
-      <description>Optimize T, keep an eye on R.</description>
-      <content:encoded><![CDATA[<p>Good code is understandable and non-greedy. Let&rsquo;s talk about it.</p>
+]]></content:encoded></item><item><title>Good Code Criterion</title><link>https://antonz.org/good-code/</link><pubDate>Wed, 02 Jun 2021 11:00:00 +0000</pubDate><guid>https://antonz.org/good-code/</guid><description>Optimize T, keep an eye on R.</description><content:encoded><![CDATA[<p>Good code is understandable and non-greedy. Let&rsquo;s talk about it.</p>
 <h2 id="time-to-understanding">Time to understanding</h2>
 <p>The main criterion for good code is the time T it takes for a non-author to understand the code. Not &ldquo;I sorta get it&rdquo;, but understand deep enough to make changes and not break anything.</p>
 <p>The smaller the T, the better the code.</p>
@@ -335,17 +294,7 @@ T↓ R&lt;R0
 </pre>
 <p>Optimize T, keep an eye on R. Your team will thank you.</p>
 <p><em>Thanks for reading! Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
-]]></content:encoded>
-    </item>
-    
-    <item>
-      <title>Data Visualization Guide</title>
-      <link>https://antonz.org/dataviz-guide/</link>
-      <pubDate>Sat, 10 Apr 2021 20:00:00 +0000</pubDate>
-      
-      <guid>https://antonz.org/dataviz-guide/</guid>
-      <description>CC-licensed design guide for presentations, reports, and dashboards.</description>
-      <content:encoded><![CDATA[<p>Today I&rsquo;ve come across a perfect information graphics / data visualization guide:</p>
+]]></content:encoded></item><item><title>Data Visualization Guide</title><link>https://antonz.org/dataviz-guide/</link><pubDate>Sat, 10 Apr 2021 20:00:00 +0000</pubDate><guid>https://antonz.org/dataviz-guide/</guid><description>CC-licensed design guide for presentations, reports, and dashboards.</description><content:encoded><![CDATA[<p>Today I&rsquo;ve come across a perfect information graphics / data visualization guide:</p>
 <ul>
 <li>Based on the works of Edward Tufte and Stephen Few.</li>
 <li>Comprehensive yet not too wordy (150 pages).</li>
@@ -368,17 +317,7 @@ T↓ R&lt;R0
 <p>Fortunately, IBCS published the guide under the permissive CC BY-SA license. So with some hard work and a bunch of Python I&rsquo;ve created a <a href="https://github.com/nalgeon/dataviz">web version</a>, <a href="https://github.com/nalgeon/dataviz/releases/download/1.1/data-visualization-guide.epub">EPUB</a> and <a href="https://github.com/nalgeon/dataviz/releases/download/1.1/data-visualization-guide.pdf">PDF</a>.</p>
 <p>IBCS Association put a lot of thought it the guide, and the result really impressed me. So I encourage you to try it out.</p>
 <p><em>Thanks for reading! Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
-]]></content:encoded>
-    </item>
-    
-    <item>
-      <title>How to make an awesome Python package in 2021</title>
-      <link>https://antonz.org/python-packaging/</link>
-      <pubDate>Tue, 06 Apr 2021 20:30:00 +0300</pubDate>
-      
-      <guid>https://antonz.org/python-packaging/</guid>
-      <description>The one to be proud of.</description>
-      <content:encoded><![CDATA[<p>If you are like me, every once in a while you write a useful python utility and want to share it with your colleagues. The best way to do this is to make a package: it easy to install and saves from copy-pasting.</p>
+]]></content:encoded></item><item><title>How to make an awesome Python package in 2021</title><link>https://antonz.org/python-packaging/</link><pubDate>Tue, 06 Apr 2021 20:30:00 +0300</pubDate><guid>https://antonz.org/python-packaging/</guid><description>The one to be proud of.</description><content:encoded><![CDATA[<p>If you are like me, every once in a while you write a useful python utility and want to share it with your colleagues. The best way to do this is to make a package: it easy to install and saves from copy-pasting.</p>
 <p>If you are like me, you might be thinking that creating packages is a real headache. Well, that&rsquo;s not the case anymore. And I am going to prove it with this step-by-step guide. Just three main steps (and a bunch of optional ones) accompanied by few GitHub links. See for yourself:</p>
 <h2 id="1-stub">1. Stub</h2>
 <p>We will create <code>podsearch</code> - a utility that searches for podcasts in iTunes. Let&rsquo;s create a directory and a virtual environment:</p>
@@ -673,17 +612,7 @@ help                 Show help message
 </ul>
 <p><em>Thanks for reading! Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
 <p><a href="https://news.ycombinator.com/item?id=26733423">Comments on Hacker News</a></p>
-]]></content:encoded>
-    </item>
-    
-    <item>
-      <title>SQLite is not a toy database</title>
-      <link>https://antonz.org/sqlite-is-not-a-toy-database/</link>
-      <pubDate>Thu, 25 Mar 2021 09:00:00 +0000</pubDate>
-      
-      <guid>https://antonz.org/sqlite-is-not-a-toy-database/</guid>
-      <description>Here is why SQLite is a perfect tool for you - whether you are a developer, data analyst, or geek.</description>
-      <content:encoded><![CDATA[<p><em>English • <a href="https://habr.com/ru/post/547448/">Russian</a> • <a href="https://sysarmy.com/blog/posts/sqlite-no-es-una-base-de-datos-de-juguete/">Spanish</a></em></p>
+]]></content:encoded></item><item><title>SQLite is not a toy database</title><link>https://antonz.org/sqlite-is-not-a-toy-database/</link><pubDate>Thu, 25 Mar 2021 09:00:00 +0000</pubDate><guid>https://antonz.org/sqlite-is-not-a-toy-database/</guid><description>Here is why SQLite is a perfect tool for you - whether you are a developer, data analyst, or geek.</description><content:encoded><![CDATA[<p><em>English • <a href="https://habr.com/ru/post/547448/">Russian</a> • <a href="https://sysarmy.com/blog/posts/sqlite-no-es-una-base-de-datos-de-juguete/">Spanish</a></em></p>
 <p>Whether you are a developer, data analyst, QA engineer, DevOps person, or product manager - SQLite is a perfect tool for you. Here is why.</p>
 <p>A few well-known facts to get started:</p>
 <ul>
@@ -970,17 +899,7 @@ select city, foundation_year, timezone from city limit 10;
 <p>I hope this article will inspire you to try SQLite. Thanks for reading!</p>
 <p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
 <p><a href="https://news.ycombinator.com/item?id=26580614">Comments on Hacker News</a></p>
-]]></content:encoded>
-    </item>
-    
-    <item>
-      <title>How to create a 1M record table with a single query</title>
-      <link>https://antonz.org/random-table/</link>
-      <pubDate>Sun, 21 Mar 2021 21:15:00 +0000</pubDate>
-      
-      <guid>https://antonz.org/random-table/</guid>
-      <description>With recursive CTE and randomized data.</description>
-      <content:encoded><![CDATA[<p>Let&rsquo;s say you want to check how a query behaves on a large table - but there is no such table at hand. This is not a problem if your DBMS supports SQL recursion: lots of data can be generated with a single query. The <code>WITH RECURSIVE</code> clause comes to the rescue.</p>
+]]></content:encoded></item><item><title>How to create a 1M record table with a single query</title><link>https://antonz.org/random-table/</link><pubDate>Sun, 21 Mar 2021 21:15:00 +0000</pubDate><guid>https://antonz.org/random-table/</guid><description>With recursive CTE and randomized data.</description><content:encoded><![CDATA[<p>Let&rsquo;s say you want to check how a query behaves on a large table - but there is no such table at hand. This is not a problem if your DBMS supports SQL recursion: lots of data can be generated with a single query. The <code>WITH RECURSIVE</code> clause comes to the rescue.</p>
 <p>I&rsquo;m going to use SQLite, but the same (or similar) queries will work for PostgreSQL and other DBMSs. Specifically, <code>WITH RECURSIVE</code> is supported in MariaDB 10.2+, MySQL 8.0+, PostgreSQL 8.4+ and SQLite 3.8+. Oracle 11.2+ and SQL Server 2005+ support recursive queries, but without the <code>RECURSIVE</code> keyword.</p>
 <h2 id="random-numbers">Random numbers</h2>
 <p>Let&rsquo;s create a table with 1 million random numbers:</p>
@@ -1107,17 +1026,7 @@ sqlite&gt; select * from person_data limit 10;
 </code></pre><p>A single query has brought us a million customers. Not bad! It would be great to achieve such results in sales, wouldn&rsquo;t it? ツ</p>
 <p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts!</em></p>
 <p><a href="https://news.ycombinator.com/item?id=26564168">Comments on Hacker News</a></p>
-]]></content:encoded>
-    </item>
-    
-    <item>
-      <title>Automate your Python project with Makefile</title>
-      <link>https://antonz.org/makefile-automation/</link>
-      <pubDate>Tue, 16 Mar 2021 17:15:00 +0000</pubDate>
-      
-      <guid>https://antonz.org/makefile-automation/</guid>
-      <description>Makefile is not just some relict from the 70s.</description>
-      <content:encoded><![CDATA[<p>When working on a library or application, certain tasks tend to show up over and over again:</p>
+]]></content:encoded></item><item><title>Automate your Python project with Makefile</title><link>https://antonz.org/makefile-automation/</link><pubDate>Tue, 16 Mar 2021 17:15:00 +0000</pubDate><guid>https://antonz.org/makefile-automation/</guid><description>Makefile is not just some relict from the 70s.</description><content:encoded><![CDATA[<p>When working on a library or application, certain tasks tend to show up over and over again:</p>
 <ul>
 <li>checking the code with linters,</li>
 <li>running tests with coverage,</li>
@@ -1230,17 +1139,7 @@ $ make serve
 </blockquote>
 <p>Makefiles are great for automating routine tasks, regardless of the language you prefer. Use them!</p>
 <p><em>And follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts</em></p>
-]]></content:encoded>
-    </item>
-    
-    <item>
-      <title>SQLite is not so easy to compile</title>
-      <link>https://antonz.org/sqlite-is-not-so-easy-to-compile/</link>
-      <pubDate>Mon, 15 Mar 2021 11:45:00 +0000</pubDate>
-      
-      <guid>https://antonz.org/sqlite-is-not-so-easy-to-compile/</guid>
-      <description>But with GitHub Actions it is.</description>
-      <content:encoded><![CDATA[<p>SQLite shell is quite easy to compile, right?</p>
+]]></content:encoded></item><item><title>SQLite is not so easy to compile</title><link>https://antonz.org/sqlite-is-not-so-easy-to-compile/</link><pubDate>Mon, 15 Mar 2021 11:45:00 +0000</pubDate><guid>https://antonz.org/sqlite-is-not-so-easy-to-compile/</guid><description>But with GitHub Actions it is.</description><content:encoded><![CDATA[<p>SQLite shell is quite easy to compile, right?</p>
 <pre tabindex="0"><code>curl -L http://sqlite.org/2021/sqlite-amalgamation-3350000.zip --output src.zip
 unzip src.zip
 mv sqlite-amalgamation-3350000 src
@@ -1250,17 +1149,7 @@ gcc src/shell.c src/sqlite3.c -o sqlite3 -lpthread -ldl
 <p class="big"><a href="https://github.com/nalgeon/sqlite/releases/latest">SQLite shell builds</a></p>
 <p>Refer to <a href="https://github.com/nalgeon/sqlite/blob/main/.github/workflows/build.yml">build.yml</a> for build instructions if you prefer to build SQLite shell yourself.</p>
 <p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts!</em></p>
-]]></content:encoded>
-    </item>
-    
-    <item>
-      <title>What&#39;s new in SQLite 3.35</title>
-      <link>https://antonz.org/sqlite-3-35/</link>
-      <pubDate>Fri, 12 Mar 2021 19:10:16 +0000</pubDate>
-      
-      <guid>https://antonz.org/sqlite-3-35/</guid>
-      <description>Math functions, column removal and RETURNING clause.</description>
-      <content:encoded><![CDATA[<p>SQLite developers often prefer to work on database internals. For an external observer nothing really changes. 2020 was a pleasant exception - SQLite received a bunch of nice features for ordinary users, such as generated columns, <code>UPDATE FROM</code> and fantastic <code>.mode box</code> in the shell.</p>
+]]></content:encoded></item><item><title>What's new in SQLite 3.35</title><link>https://antonz.org/sqlite-3-35/</link><pubDate>Fri, 12 Mar 2021 19:10:16 +0000</pubDate><guid>https://antonz.org/sqlite-3-35/</guid><description>Math functions, column removal and RETURNING clause.</description><content:encoded><![CDATA[<p>SQLite developers often prefer to work on database internals. For an external observer nothing really changes. 2020 was a pleasant exception - SQLite received a bunch of nice features for ordinary users, such as generated columns, <code>UPDATE FROM</code> and fantastic <code>.mode box</code> in the shell.</p>
 <p>There&rsquo;s every chance that 2021 will continue the tradition. Here&rsquo;s what shipped in the 3.35 release today:</p>
 <ol>
 <li>Math functions ‼️</li>
@@ -1365,8 +1254,4 @@ select ... from history where ...
 <p><a href="https://sqlite.org/download.html">Download latest version</a></p>
 <p><a href="https://news.ycombinator.com/item?id=26440397">Comments on Hacker News</a></p>
 <p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts!</em></p>
-]]></content:encoded>
-    </item>
-    
-  </channel>
-</rss>
+]]></content:encoded></item></channel></rss>
