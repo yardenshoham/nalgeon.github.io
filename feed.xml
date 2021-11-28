@@ -94,10 +94,11 @@ ACTIVE 1: employees.en.db
 <ul>
 <li>The query scheduler ignores <code>order by</code> on subqueries unless they change the overall semantics of the query.</li>
 <li>Function <code>generate_series(start, stop, step)</code> always requires the <code>start</code> parameter (<code>stop</code> and <code>step</code> remain optional).</li>
-<li>A bundle of changes in <a href="https://sqlite.org/releaselog/3_37_0.html">C API</a>.</li>
+<li>Some changes in C API.</li>
 </ul>
 <p>Overall, a great release! Strict tables offer a long-awaited alternative to flexible typing, <code>any</code> type makes flexibility explicit, and <code>table_list</code> pragma is just nice to have.</p>
-<p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts!</em></p>
+<p><a href="https://sqlite.org/releaselog/3_37_0.html">Official release notes</a> | <a href="https://sqlite.org/download.html">Download</a></p>
+<p><em>Follow <strong><a href="https://twitter.com/ohmypy">@ohmypy</a></strong> on Twitter to keep up with new posts 🚀</em></p>
 ]]></content:encoded></item><item><title>How Python list really works</title><link>https://antonz.org/list-internals/</link><pubDate>Fri, 12 Nov 2021 17:55:00 +0000</pubDate><guid>https://antonz.org/list-internals/</guid><description>And why some methods take constant time while others take linear.</description><content:encoded><![CDATA[<p><em>This post is largely about the arrays — the #1 data structure in the world. If you are not a data structure guru yet, I guarantee that you will better understand Python lists, their advantages and limitations. If you already know everything — there is no harm in refreshing the key points.</em></p>
 <p>Everybody knows how to work with lists in Python:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#000">&gt;&gt;&gt;</span> <span style="color:#000">guests</span> <span style="color:#000">=</span> [<span style="color:#c41a16">&#34;Frank&#34;</span>, <span style="color:#c41a16">&#34;Claire&#34;</span>, <span style="color:#c41a16">&#34;Zoe&#34;</span>]
