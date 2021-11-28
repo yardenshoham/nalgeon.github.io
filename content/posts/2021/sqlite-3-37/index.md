@@ -151,8 +151,10 @@ See [The --safe command-line option](https://sqlite.org/cli.html#safemode) for d
 
 -   The query scheduler ignores `order by` on subqueries unless they change the overall semantics of the query.
 -   Function `generate_series(start, stop, step)` always requires the `start` parameter (`stop` and `step` remain optional).
--   A bundle of changes in [C API](https://sqlite.org/releaselog/3_37_0.html).
+-   Some changes in C API.
 
 Overall, a great release! Strict tables offer a long-awaited alternative to flexible typing, `any` type makes flexibility explicit, and `table_list` pragma is just nice to have.
 
-_Follow [@ohmypy](https://twitter.com/ohmypy) on Twitter to keep up with new posts!_
+[Official release notes](https://sqlite.org/releaselog/3_37_0.html) | [Download](https://sqlite.org/download.html)
+
+_Follow **[@ohmypy](https://twitter.com/ohmypy)** on Twitter to keep up with new posts 🚀_
