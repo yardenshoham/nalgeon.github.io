@@ -1,0 +1,208 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>What's new in SQLite 3.37</title>
+<meta name=description content="Strict tables, any type and a new pragma.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.e6184ba015844ba539de86958bfe4288667bb47e8fed4c5bf3fb81e99f50b0be.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/sqlite-3-37/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:site_name" content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="What's new in SQLite 3.37">
+<meta property="og:description" content="Strict tables, any type and a new pragma.">
+<meta property="og:url" content="https://antonz.org/sqlite-3-37/">
+<meta property="og:image" content="https://antonz.org/sqlite-3-37/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="What's new in SQLite 3.37">
+<meta name=twitter:description content="Strict tables, any type and a new pragma.">
+<meta name=twitter:url content="https://antonz.org/sqlite-3-37/">
+<meta name=twitter:site content="@nalgeon">
+<meta name=twitter:image content="https://antonz.org/sqlite-3-37/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/antonz.jpg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>What's new in SQLite 3.37</h1>
+</header>
+<p>Unlike <a href=/sqlite-3-35/>3.35</a>, release 3.37 didn&rsquo;t bring many changes. But among them is one of the most important in the history of SQLite: the &ldquo;strict&rdquo; table mode, in which the engine makes sure that the data in the column matches the type.</p>
+<p>Perhaps now SQLite will no longer be called &ldquo;the JavaScript of the DBMS world&rdquo; ツ But let&rsquo;s take it one piece at a time.</p>
+<h2 id=the-problem-with-types>The problem with types</h2>
+<p>SQLite supports 5 data types:</p>
+<ul>
+<li><code>INTEGER</code> — integers,</li>
+<li><code>REAL</code> — real numbers,</li>
+<li><code>TEXT</code> — strings,</li>
+<li><code>BLOB</code> — binary data,</li>
+<li><code>NULL</code> — empty value.</li>
+</ul>
+<p>But, unlike other DBMSs, SQLite can store any type of data in a given cell — regardless of the column type.</p>
+<blockquote>
+<p>SQLite stores the type not only on the column itself, but also on each value in that column. That is why a given column can store values of different types without any problems. The type on the column is used as a hint: when inserting, SQLite tries to cast the value to the column type, but when it fails, it will save the value &ldquo;as is&rdquo;.</p>
+</blockquote>
+<p>On the one hand, it is convenient for exploratory data analysis — you can import everything first, and then use SQL to deal with problematic values. Any other DBMS will give an error when importing and force you to crunch the data with scripts or manually.</p>
+<p>On the other hand, it causes a constant flow of criticism against SQLite: you can write things into the production database that you will never be able to sort out.</p>
+<p>And now, in version 3.37, the problem is solved!</p>
+<h2 id=strict-tables>STRICT tables</h2>
+<p>Now the table can be declared &ldquo;strict&rdquo;. Strict tables do not allow saving arbitrary data:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>create</span> <span style=color:#a90d91>table</span> <span style=color:#000>employees</span> (
+    <span style=color:#000>id</span> <span style=color:#a90d91>integer</span> <span style=color:#a90d91>primary</span> <span style=color:#a90d91>key</span>,
+    <span style=color:#000>name</span> <span style=color:#a90d91>text</span>,
+    <span style=color:#000>salary</span> <span style=color:#a90d91>integer</span>
+) <span style=color:#a90d91>STRICT</span>;
+</code></pre></div><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>insert</span> <span style=color:#a90d91>into</span> <span style=color:#000>employees</span> (<span style=color:#000>id</span>, <span style=color:#000>name</span>, <span style=color:#000>salary</span>)
+<span style=color:#a90d91>values</span> (<span style=color:#1c01ce>22</span>, <span style=color:#c41a16>&#39;Emma&#39;</span>, <span style=color:#c41a16>&#39;hello&#39;</span>);
+<span style=color:#177500>-- Error: stepping, cannot store TEXT value in INTEGER column employees.salary (19)
+</span></code></pre></div><p>Emma clearly has a problem with her salary, which is what SQLite indicates. Someone has been waiting for this for twenty years ツ</p>
+<p>At the same time, the engine still tries to convert the value to the column type, and if it succeeds — there will be no error:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>insert</span> <span style=color:#a90d91>into</span> <span style=color:#000>employees</span> (<span style=color:#000>id</span>, <span style=color:#000>name</span>, <span style=color:#000>salary</span>)
+<span style=color:#a90d91>values</span> (<span style=color:#1c01ce>22</span>, <span style=color:#c41a16>&#39;Emma&#39;</span>, <span style=color:#c41a16>&#39;85&#39;</span>);
+
+<span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>;
+<span style=color:#000>┌────┬───────┬────────┐</span>
+<span style=color:#000>│</span> <span style=color:#000>id</span> <span style=color:#000>│</span> <span style=color:#000>name</span>  <span style=color:#000>│</span> <span style=color:#000>salary</span> <span style=color:#000>│</span>
+<span style=color:#000>├────┼───────┼────────┤</span>
+<span style=color:#000>│</span> <span style=color:#1c01ce>22</span> <span style=color:#000>│</span> <span style=color:#000>Emma</span>  <span style=color:#000>│</span> <span style=color:#1c01ce>85</span>     <span style=color:#000>│</span>
+<span style=color:#000>└────┴───────┴────────┘</span>
+</code></pre></div><p>See <a href=https://sqlite.org/stricttables.html>STRICT Tables</a> for details.</p>
+<h2 id=the-any-datatype>The ANY datatype</h2>
+<p><code>ANY</code> type provides the means to save arbitrary values into STRICT tables:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>create</span> <span style=color:#a90d91>table</span> <span style=color:#000>employees</span> (
+    <span style=color:#000>id</span> <span style=color:#a90d91>integer</span> <span style=color:#a90d91>primary</span> <span style=color:#a90d91>key</span>,
+    <span style=color:#000>name</span> <span style=color:#a90d91>text</span>,
+    <span style=color:#000>stuff</span> <span style=color:#a90d91>any</span>
+) <span style=color:#a90d91>strict</span>;
+
+<span style=color:#a90d91>insert</span> <span style=color:#a90d91>into</span> <span style=color:#000>employees</span> (<span style=color:#000>id</span>, <span style=color:#000>name</span>, <span style=color:#000>stuff</span>)
+<span style=color:#a90d91>values</span>
+(<span style=color:#1c01ce>21</span>, <span style=color:#c41a16>&#39;Emma&#39;</span>, <span style=color:#1c01ce>84</span>),
+(<span style=color:#1c01ce>22</span>, <span style=color:#c41a16>&#39;Grace&#39;</span>, <span style=color:#c41a16>&#39;hello&#39;</span>),
+(<span style=color:#1c01ce>23</span>, <span style=color:#c41a16>&#39;Henry&#39;</span>, <span style=color:#000>randomblob</span>(<span style=color:#1c01ce>8</span>));
+
+<span style=color:#a90d91>select</span> <span style=color:#000>id</span>, <span style=color:#000>name</span>, <span style=color:#000>typeof</span>(<span style=color:#000>stuff</span>) <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>;
+<span style=color:#000>┌────┬───────┬───────────────┐</span>
+<span style=color:#000>│</span> <span style=color:#000>id</span> <span style=color:#000>│</span> <span style=color:#000>name</span>  <span style=color:#000>│</span> <span style=color:#000>typeof</span>(<span style=color:#000>stuff</span>) <span style=color:#000>│</span>
+<span style=color:#000>├────┼───────┼───────────────┤</span>
+<span style=color:#000>│</span> <span style=color:#1c01ce>21</span> <span style=color:#000>│</span> <span style=color:#000>Emma</span>  <span style=color:#000>│</span> <span style=color:#a90d91>integer</span>       <span style=color:#000>│</span>
+<span style=color:#000>│</span> <span style=color:#1c01ce>22</span> <span style=color:#000>│</span> <span style=color:#000>Grace</span> <span style=color:#000>│</span> <span style=color:#a90d91>text</span>          <span style=color:#000>│</span>
+<span style=color:#000>│</span> <span style=color:#1c01ce>23</span> <span style=color:#000>│</span> <span style=color:#000>Henry</span> <span style=color:#000>│</span> <span style=color:#a90d91>blob</span>          <span style=color:#000>│</span>
+<span style=color:#000>└────┴───────┴───────────────┘</span>
+</code></pre></div><p>The STRICT table stores ANY value without any transformations. In a regular table, ANY works almost the same way, but converts strings to numbers whenever possible.</p>
+<p>See <a href=https://sqlite.org/stricttables.html#the_any_datatype>The ANY datatype</a> for details.</p>
+<h2 id=table_list-pragma>table_list pragma</h2>
+<p><code>table_list</code> pragma statement lists tables and views in the database:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#000>pragma</span> <span style=color:#000>table_list</span>;
+<span style=color:#000>┌────────┬────────────────────┬───────┬──────┬────┬────────┐</span>
+<span style=color:#000>│</span> <span style=color:#a90d91>schema</span> <span style=color:#000>│</span>        <span style=color:#000>name</span>        <span style=color:#000>│</span> <span style=color:#a90d91>type</span>  <span style=color:#000>│</span> <span style=color:#000>ncol</span> <span style=color:#000>│</span> <span style=color:#000>wr</span> <span style=color:#000>│</span> <span style=color:#a90d91>strict</span> <span style=color:#000>│</span>
+<span style=color:#000>├────────┼────────────────────┼───────┼──────┼────┼────────┤</span>
+<span style=color:#000>│</span> <span style=color:#000>main</span>   <span style=color:#000>│</span> <span style=color:#000>expenses</span>           <span style=color:#000>│</span> <span style=color:#a90d91>table</span> <span style=color:#000>│</span> <span style=color:#1c01ce>4</span>    <span style=color:#000>│</span> <span style=color:#1c01ce>0</span>  <span style=color:#000>│</span> <span style=color:#1c01ce>0</span>      <span style=color:#000>│</span>
+<span style=color:#000>│</span> <span style=color:#000>main</span>   <span style=color:#000>│</span> <span style=color:#000>employees</span>          <span style=color:#000>│</span> <span style=color:#a90d91>table</span> <span style=color:#000>│</span> <span style=color:#1c01ce>5</span>    <span style=color:#000>│</span> <span style=color:#1c01ce>0</span>  <span style=color:#000>│</span> <span style=color:#1c01ce>0</span>      <span style=color:#000>│</span>
+<span style=color:#000>│</span> <span style=color:#000>main</span>   <span style=color:#000>│</span> <span style=color:#000>sqlite_schema</span>      <span style=color:#000>│</span> <span style=color:#a90d91>table</span> <span style=color:#000>│</span> <span style=color:#1c01ce>5</span>    <span style=color:#000>│</span> <span style=color:#1c01ce>0</span>  <span style=color:#000>│</span> <span style=color:#1c01ce>0</span>      <span style=color:#000>│</span>
+<span style=color:#000>│</span> <span style=color:#000>temp</span>   <span style=color:#000>│</span> <span style=color:#000>sqlite_temp_schema</span> <span style=color:#000>│</span> <span style=color:#a90d91>table</span> <span style=color:#000>│</span> <span style=color:#1c01ce>5</span>    <span style=color:#000>│</span> <span style=color:#1c01ce>0</span>  <span style=color:#000>│</span> <span style=color:#1c01ce>0</span>      <span style=color:#000>│</span>
+<span style=color:#000>└────────┴────────────────────┴───────┴──────┴────┴────────┘</span>
+</code></pre></div><p>Previously, one had to query the <code>sqlite_schema</code> table for this. The pragma is more convenient.</p>
+<p>See <a href=https://sqlite.org/pragma.html#pragma_table_list>PRAGMA table_list</a> for details.</p>
+<h2 id=cli-changes>CLI changes</h2>
+<p>The CLI tool (<code>sqlite.exe</code>) now supports switching between multiple database connections using the dot command <code>.connection</code>:</p>
+<pre tabindex=0><code>sqlite&gt; .connection
+ACTIVE 0: :memory:
+</code></pre><pre tabindex=0><code>sqlite&gt; .open employees.ru.db
+sqlite&gt; .connection
+ACTIVE 0: employees.ru.db
+</code></pre><pre tabindex=0><code>sqlite&gt; .connection 1
+sqlite&gt; .open employees.en.db
+sqlite&gt; .connection
+       0: employees.ru.db
+ACTIVE 1: employees.en.db
+</code></pre><p>See <a href=https://sqlite.org/cli.html#dotconn>Working With Multiple Database Connections</a> for details.</p>
+<p>Also, there is now a <code>--safe</code> launch option. It disables commands that can make changes anywhere other than a specific database. Safe mode disables <code>.open</code>, <code>.shell</code>, <code>.import</code> and other &ldquo;dangerous&rdquo; commands.</p>
+<p>See <a href=https://sqlite.org/cli.html#safemode>The &ndash;safe command-line option</a> for details.</p>
+<h2 id=and-a-few-more-little-things>And a few more little things</h2>
+<ul>
+<li>The query scheduler ignores <code>order by</code> on subqueries unless they change the overall semantics of the query.</li>
+<li>Function <code>generate_series(start, stop, step)</code> always requires the <code>start</code> parameter (<code>stop</code> and <code>step</code> remain optional).</li>
+<li>A bundle of changes in <a href=https://sqlite.org/releaselog/3_37_0.html>C API</a>.</li>
+</ul>
+<p>Overall, a great release! Strict tables offer a long-awaited alternative to flexible typing, <code>any</code> type makes flexibility explicit, and <code>table_list</code> pragma is just nice to have.</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy>@ohmypy</a> on Twitter to keep up with new posts!</em></p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2021-11-28 15:25:00 +0000 UTC">28 Nov, 2021</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/sqlite/>sqlite</a>&nbsp;
+<a href=https://antonz.org/tags/data/>data</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/list-internals/>How Python list really works</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sqlite-playground/>SQLite playground in the browser</a></p>
+<p><a href=/dataviz-guide/>Data Visualization Guide</a></p>
+<p><a href=/sqlite-is-not-a-toy-database/>SQLite is not a toy database</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
