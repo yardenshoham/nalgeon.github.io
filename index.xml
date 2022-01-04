@@ -1,4 +1,75 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 28 Nov 2021 15:25:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>What's new in SQLite 3.37</title><link>https://antonz.org/sqlite-3-37/</link><pubDate>Sun, 28 Nov 2021 15:25:00 +0000</pubDate><guid>https://antonz.org/sqlite-3-37/</guid><description>Strict tables, any type and a new pragma.</description><content:encoded><![CDATA[<p>Unlike <a href="/sqlite-3-35/">3.35</a>, release 3.37 didn&rsquo;t bring many changes. But among them is one of the most important in the history of SQLite: the &ldquo;strict&rdquo; table mode, in which the engine makes sure that the data in the column matches the type.</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Tue, 04 Jan 2022 13:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>The ultimate SQLite extension set</title><link>https://antonz.org/sqlean/</link><pubDate>Tue, 04 Jan 2022 13:00:00 +0000</pubDate><guid>https://antonz.org/sqlean/</guid><description>Regexes, math, file IO and over 100 other functions.</description><content:encoded><![CDATA[<p>I really like SQLite. It&rsquo;s a miniature embedded database, perfect for both exploratory data analysis and as a storage for small apps (I&rsquo;ve <a href="/sqlite-is-not-a-toy-database/">blogged about that</a> previously).</p>
+<p>It has a minor drawback tough. There are few built-in functions compared to PostgreSQL or Oracle. Fortunately, the authors provided an extension mechanism, which allows doing almost anything. As a result, there are a lot of SQLite extensions out there, but they are incomplete, inconsistent and scattered across the internet.</p>
+<p>I wanted more consistency. So I started the <strong>sqlean</strong> project, which brings the extensions together, neatly packaged into domain modules, documented, tested, and built for Linux, Windows and macOS. Something like a standard library in Python or Go, only for SQLite.</p>
+<p>I plan to write in detail about each module in a separate article, but for now — here&rsquo;s a brief overview.</p>
+<h2 id="the-main-set">The main set</h2>
+<p>These are the most popular functions missing in SQLite:</p>
+<ul>
+<li><a href="docs/crypto.md">crypto</a>: secure hashes like MD5 or SHA-256.</li>
+<li><a href="docs/fileio.md">fileio</a>: read and write files and catalogs.</li>
+<li><a href="docs/fuzzy.md">fuzzy</a>: fuzzy string matching and phonetics.</li>
+<li><a href="docs/ipaddr.md">ipaddr</a>: IP address manipulation.</li>
+<li><a href="docs/json1.md">json1</a>: JSON functions.</li>
+<li><a href="docs/math.md">math</a>: math functions.</li>
+<li><a href="docs/re.md">re</a>: regular expressions.</li>
+<li><a href="docs/stats.md">stats</a>: math statistics — median, percentiles, etc.</li>
+<li><a href="docs/text.md">text</a>: string functions.</li>
+<li><a href="docs/unicode.md">unicode</a>: Unicode support.</li>
+<li><a href="docs/uuid.md">uuid</a>: Universally Unique IDentifiers.</li>
+<li><a href="docs/vsv.md">vsv</a>: CSV files as virtual tables.</li>
+</ul>
+<p>There are <a href="https://github.com/nalgeon/sqlean/releases/latest">precompiled binaries</a> for Windows, Linix and macOS.</p>
+<h2 id="the-incubator">The incubator</h2>
+<p>These extensions haven&rsquo;t yet made their way to the main set. They may be too broad, too narrow, or without a well-thought API. I&rsquo;m gradually refactoring and merging them into the main set:</p>
+<ul>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004109889">array</a>: one-dimensional arrays.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-999732640">besttype</a>: convert string value to numeric.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1002267134">bloom</a>: a fast way to tell if a value is already in a table.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-996605444">cbrt</a>: cube root function.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1001239676">classifier</a>: binary classifier via logistic regression.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1000937999">compress</a> and <a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1000938046">sqlar</a>: compress / uncompress data.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997427979">cron</a>: match dates against cron patterns.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004347222">define</a>: create scalar and table-valued functions from SQL.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997423609">envfuncs</a>: read environment variables.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-996432840">eval</a>: run arbitrary SQL statements.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997482625">fcmp</a>: floating-point numbers comparison and rounding.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-998138191">isodate</a>: additional date and time functions.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-999128539">math2</a>: even more math functions and bit arithmetics.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997417836">pearson</a>: Pearson correlation coefficient between two data sets.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997052157">pivotvtab</a>: pivot tables.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-999732907">recsize</a>: estimate total record size.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1002297477">spellfix</a>: search a large vocabulary for close matches.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1000902666">stats2</a> and <a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1002703581">stats3</a>: even more math statistics functions.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1003105288">text2</a>: even more string functions.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1001232670">uint</a>: natural string sorting and comparison.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997432989">unhex</a>: reverse for <code>hex()</code>.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997018486">xmltojson</a>: convert XML to JSON string.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1001190336">zipfile</a>: read and write zip files.</li>
+</ul>
+<p><a href="https://github.com/nalgeon/sqlean/issues/27">Vote for your favorites</a>! Popular ones will make their way into the main set faster.</p>
+<p>Incubator extensions are also available <a href="https://github.com/nalgeon/sqlean/releases/tag/incubator">for download</a>.</p>
+<h2 id="how-to-load-an-extension">How to load an extension</h2>
+<p>There are three ways to do it. If you are using SQLite CLI (<code>sqlite.exe</code>):</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#000">sqlite</span><span style="color:#000">&gt;</span> .<span style="color:#a90d91">load</span> .<span style="color:#000">/</span><span style="color:#000">stats</span>
+<span style="color:#000">sqlite</span><span style="color:#000">&gt;</span> <span style="color:#a90d91">select</span> <span style="color:#000">median</span>(<span style="color:#000">value</span>) <span style="color:#a90d91">from</span> <span style="color:#000">generate_series</span>(<span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">99</span>);
+</code></pre></div><p>If you are using a tool like DB Browser for SQLite, SQLite Expert or DBeaver:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">load_extension</span>(<span style="color:#c41a16">&#39;c:\Users\anton\sqlite\stats.dll&#39;</span>);
+<span style="color:#a90d91">select</span> <span style="color:#000">median</span>(<span style="color:#000">value</span>) <span style="color:#a90d91">from</span> <span style="color:#000">generate_series</span>(<span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">99</span>);
+</code></pre></div><p>If you are using Python (other languages provide similar means):</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">import</span> <span style="color:#000">sqlite3</span>
+
+<span style="color:#000">connection</span> <span style="color:#000">=</span> <span style="color:#000">sqlite3</span><span style="color:#000">.</span><span style="color:#000">connect</span>(<span style="color:#c41a16">&#34;:memory:&#34;</span>)
+<span style="color:#000">connection</span><span style="color:#000">.</span><span style="color:#000">enable_load_extension</span>(<span style="color:#a90d91">True</span>)
+<span style="color:#000">connection</span><span style="color:#000">.</span><span style="color:#000">load_extension</span>(<span style="color:#c41a16">&#34;./stats.so&#34;</span>)
+<span style="color:#000">connection</span><span style="color:#000">.</span><span style="color:#000">execute</span>(<span style="color:#c41a16">&#34;select median(value) from generate_series(1, 99)&#34;</span>)
+<span style="color:#000">connection</span><span style="color:#000">.</span><span style="color:#000">close</span>()
+</code></pre></div><h2 id="next-steps">Next steps</h2>
+<p>If you feel that you are missing some function in SQLite, check the <a href="https://github.com/nalgeon/sqlean"><strong>sqlean</strong></a> repository — you&rsquo;ll probably find one.</p>
+<p>If you want to participate, submit <a href="https://github.com/nalgeon/sqlean/blob/incubator/docs/submit.md">your own</a> or <a href="https://github.com/nalgeon/sqlean/blob/incubator/docs/external.md">third-party</a> extensions.</p>
+<p>I keep adding new extensions to the incubator. I also refactor the extensions from the incubator and merge them into the main set. I plan to write a separate article for each main module, so stay tuned.</p>
+<p>SQLite FTW!</p>
+<p><em>Follow <strong><a href="https://twitter.com/ohmypy">@ohmypy</a></strong> on Twitter to keep up with new posts 🚀</em></p>
+]]></content:encoded></item><item><title>What's new in SQLite 3.37</title><link>https://antonz.org/sqlite-3-37/</link><pubDate>Sun, 28 Nov 2021 15:25:00 +0000</pubDate><guid>https://antonz.org/sqlite-3-37/</guid><description>Strict tables, any type and a new pragma.</description><content:encoded><![CDATA[<p>Unlike <a href="/sqlite-3-35/">3.35</a>, release 3.37 didn&rsquo;t bring many changes. But among them is one of the most important in the history of SQLite: the &ldquo;strict&rdquo; table mode, in which the engine makes sure that the data in the column matches the type.</p>
 <p>Perhaps now SQLite will no longer be called &ldquo;the JavaScript of the DBMS world&rdquo; ツ But let&rsquo;s take it one piece at a time.</p>
 <h2 id="the-problem-with-types">The problem with types</h2>
 <p>SQLite supports 5 data types:</p>
@@ -1240,14 +1311,4 @@ $ make serve
 </blockquote>
 <p>Makefiles are great for automating routine tasks, regardless of the language you prefer. Use them!</p>
 <p><em>And follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts</em></p>
-]]></content:encoded></item><item><title>SQLite is not so easy to compile</title><link>https://antonz.org/sqlite-is-not-so-easy-to-compile/</link><pubDate>Mon, 15 Mar 2021 11:45:00 +0000</pubDate><guid>https://antonz.org/sqlite-is-not-so-easy-to-compile/</guid><description>But with GitHub Actions it is.</description><content:encoded><![CDATA[<p>SQLite shell is quite easy to compile, right?</p>
-<pre tabindex="0"><code>curl -L http://sqlite.org/2021/sqlite-amalgamation-3350000.zip --output src.zip
-unzip src.zip
-mv sqlite-amalgamation-3350000 src
-gcc src/shell.c src/sqlite3.c -o sqlite3 -lpthread -ldl
-</code></pre><p>Well, unless you want all the cool features which are not included in the default build. Or unless you are using Windows and prefer 64-bit binary to 32-bit. Or unless you do not have <code>gcc</code> installed.</p>
-<p>I found myself in these situations a couple of times. So I decided to create reproducible builds for Windows, Ubuntu, and macOS — using GitHub Actions. Here they are:</p>
-<p class="big"><a href="https://github.com/nalgeon/sqlite/releases/latest">SQLite shell builds</a></p>
-<p>Refer to <a href="https://github.com/nalgeon/sqlite/blob/main/.github/workflows/build.yml">build.yml</a> for build instructions if you prefer to build SQLite shell yourself.</p>
-<p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts!</em></p>
 ]]></content:encoded></item></channel></rss>
