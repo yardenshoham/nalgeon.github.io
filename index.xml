@@ -5,18 +5,18 @@
 <h2 id="the-main-set">The main set</h2>
 <p>These are the most popular functions missing in SQLite:</p>
 <ul>
-<li><a href="docs/crypto.md">crypto</a>: secure hashes like MD5 or SHA-256.</li>
-<li><a href="docs/fileio.md">fileio</a>: read and write files and catalogs.</li>
-<li><a href="docs/fuzzy.md">fuzzy</a>: fuzzy string matching and phonetics.</li>
-<li><a href="docs/ipaddr.md">ipaddr</a>: IP address manipulation.</li>
-<li><a href="docs/json1.md">json1</a>: JSON functions.</li>
-<li><a href="docs/math.md">math</a>: math functions.</li>
-<li><a href="docs/re.md">re</a>: regular expressions.</li>
-<li><a href="docs/stats.md">stats</a>: math statistics — median, percentiles, etc.</li>
-<li><a href="docs/text.md">text</a>: string functions.</li>
-<li><a href="docs/unicode.md">unicode</a>: Unicode support.</li>
-<li><a href="docs/uuid.md">uuid</a>: Universally Unique IDentifiers.</li>
-<li><a href="docs/vsv.md">vsv</a>: CSV files as virtual tables.</li>
+<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/crypto.md">crypto</a>: secure hashes like MD5 or SHA-256.</li>
+<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/fileio.md">fileio</a>: read and write files and catalogs.</li>
+<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/fuzzy.md">fuzzy</a>: fuzzy string matching and phonetics.</li>
+<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/ipaddr.md">ipaddr</a>: IP address manipulation.</li>
+<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/json1.md">json1</a>: JSON functions.</li>
+<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/math.md">math</a>: math functions.</li>
+<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/re.md">re</a>: regular expressions.</li>
+<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/stats.md">stats</a>: math statistics — median, percentiles, etc.</li>
+<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/text.md">text</a>: string functions.</li>
+<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/unicode.md">unicode</a>: Unicode support.</li>
+<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/uuid.md">uuid</a>: Universally Unique IDentifiers.</li>
+<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md">vsv</a>: CSV files as virtual tables.</li>
 </ul>
 <p>There are <a href="https://github.com/nalgeon/sqlean/releases/latest">precompiled binaries</a> for Windows, Linix and macOS.</p>
 <h2 id="the-incubator">The incubator</h2>
