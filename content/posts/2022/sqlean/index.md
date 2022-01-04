@@ -19,18 +19,18 @@ I plan to write in detail about each module in a separate article, but for now �
 
 These are the most popular functions missing in SQLite:
 
--   [crypto](docs/crypto.md): secure hashes like MD5 or SHA-256.
--   [fileio](docs/fileio.md): read and write files and catalogs.
--   [fuzzy](docs/fuzzy.md): fuzzy string matching and phonetics.
--   [ipaddr](docs/ipaddr.md): IP address manipulation.
--   [json1](docs/json1.md): JSON functions.
--   [math](docs/math.md): math functions.
--   [re](docs/re.md): regular expressions.
--   [stats](docs/stats.md): math statistics — median, percentiles, etc.
--   [text](docs/text.md): string functions.
--   [unicode](docs/unicode.md): Unicode support.
--   [uuid](docs/uuid.md): Universally Unique IDentifiers.
--   [vsv](docs/vsv.md): CSV files as virtual tables.
+-   [crypto](https://github.com/nalgeon/sqlean/blob/main/docs/crypto.md): secure hashes like MD5 or SHA-256.
+-   [fileio](https://github.com/nalgeon/sqlean/blob/main/docs/fileio.md): read and write files and catalogs.
+-   [fuzzy](https://github.com/nalgeon/sqlean/blob/main/docs/fuzzy.md): fuzzy string matching and phonetics.
+-   [ipaddr](https://github.com/nalgeon/sqlean/blob/main/docs/ipaddr.md): IP address manipulation.
+-   [json1](https://github.com/nalgeon/sqlean/blob/main/docs/json1.md): JSON functions.
+-   [math](https://github.com/nalgeon/sqlean/blob/main/docs/math.md): math functions.
+-   [re](https://github.com/nalgeon/sqlean/blob/main/docs/re.md): regular expressions.
+-   [stats](https://github.com/nalgeon/sqlean/blob/main/docs/stats.md): math statistics — median, percentiles, etc.
+-   [text](https://github.com/nalgeon/sqlean/blob/main/docs/text.md): string functions.
+-   [unicode](https://github.com/nalgeon/sqlean/blob/main/docs/unicode.md): Unicode support.
+-   [uuid](https://github.com/nalgeon/sqlean/blob/main/docs/uuid.md): Universally Unique IDentifiers.
+-   [vsv](https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md): CSV files as virtual tables.
 
 There are [precompiled binaries](https://github.com/nalgeon/sqlean/releases/latest) for Windows, Linix and macOS.
 
