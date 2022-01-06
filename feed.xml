@@ -5,7 +5,7 @@
 <h2 id="the-main-set">The main set</h2>
 <p>These are the most popular functions missing in SQLite:</p>
 <ul>
-<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/crypto.md">crypto</a>: secure hashes like MD5 or SHA-256.</li>
+<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/crypto.md">crypto</a>: cryptographic hashes like MD5 or SHA-256.</li>
 <li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/fileio.md">fileio</a>: read and write files and catalogs.</li>
 <li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/fuzzy.md">fuzzy</a>: fuzzy string matching and phonetics.</li>
 <li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/ipaddr.md">ipaddr</a>: IP address manipulation.</li>
@@ -25,10 +25,13 @@
 <li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004109889">array</a>: one-dimensional arrays.</li>
 <li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-999732640">besttype</a>: convert string value to numeric.</li>
 <li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1002267134">bloom</a>: a fast way to tell if a value is already in a table.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004896027">btreeinfo</a>: information about b-trees in the database.</li>
 <li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-996605444">cbrt</a>: cube root function.</li>
 <li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1001239676">classifier</a>: binary classifier via logistic regression.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004931771">closure</a>: navigate hierarchic tables with parent/child relationships.</li>
 <li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1000937999">compress</a> and <a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1000938046">sqlar</a>: compress / uncompress data.</li>
 <li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997427979">cron</a>: match dates against cron patterns.</li>
+<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1006791300">dbdump</a>: export database as SQL.</li>
 <li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004347222">define</a>: create scalar and table-valued functions from SQL.</li>
 <li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997423609">envfuncs</a>: read environment variables.</li>
 <li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-996432840">eval</a>: run arbitrary SQL statements.</li>
