@@ -41,29 +41,31 @@ These extensions haven't yet made their way to the main set. They may be too bro
 -   [array](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004109889): one-dimensional arrays.
 -   [besttype](https://github.com/nalgeon/sqlean/issues/27#issuecomment-999732640): convert string value to numeric.
 -   [bloom](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1002267134): a fast way to tell if a value is already in a table.
--   [btreeinfo](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004896027): information about b-trees in the database.
--   [cbrt](https://github.com/nalgeon/sqlean/issues/27#issuecomment-996605444): cube root function.
+-   [btreeinfo](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004896027), [memstat](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007421989), [recsize](https://github.com/nalgeon/sqlean/issues/27#issuecomment-999732907) and [stmt](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007654407): various database introspection features.
+-   [cbrt](https://github.com/nalgeon/sqlean/issues/27#issuecomment-996605444) and [math2](https://github.com/nalgeon/sqlean/issues/27#issuecomment-999128539): additional math functions and bit arithmetics.
 -   [classifier](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1001239676): binary classifier via logistic regression.
 -   [closure](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004931771): navigate hierarchic tables with parent/child relationships.
 -   [compress](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1000937999) and [sqlar](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1000938046): compress / uncompress data.
 -   [cron](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997427979): match dates against cron patterns.
 -   [dbdump](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1006791300): export database as SQL.
+-   [decimal](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007348326), [fcmp](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997482625) and [ieee754](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007375162): decimal and floating-point arithmetic.
 -   [define](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004347222): create scalar and table-valued functions from SQL.
 -   [envfuncs](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997423609): read environment variables.
 -   [eval](https://github.com/nalgeon/sqlean/issues/27#issuecomment-996432840): run arbitrary SQL statements.
--   [fcmp](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997482625): floating-point numbers comparison and rounding.
 -   [isodate](https://github.com/nalgeon/sqlean/issues/27#issuecomment-998138191): additional date and time functions.
--   [math2](https://github.com/nalgeon/sqlean/issues/27#issuecomment-999128539): even more math functions and bit arithmetics.
 -   [pearson](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997417836): Pearson correlation coefficient between two data sets.
 -   [pivotvtab](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997052157): pivot tables.
--   [recsize](https://github.com/nalgeon/sqlean/issues/27#issuecomment-999732907): estimate total record size.
+-   [prefixes](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007464840): generate string prefixes.
+-   [rotate](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007500659): string obfuscation.
 -   [spellfix](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1002297477): search a large vocabulary for close matches.
--   [stats2](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1000902666) and [stats3](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1002703581): even more math statistics functions.
--   [text2](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1003105288): even more string functions.
+-   [stats2](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1000902666) and [stats3](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1002703581): additional math statistics functions.
+-   [text2](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1003105288): additional string functions.
 -   [uint](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1001232670): natural string sorting and comparison.
 -   [unhex](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997432989): reverse for `hex()`.
+-   [unionvtab](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007687162): union similar tables into one.
 -   [xmltojson](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997018486): convert XML to JSON string.
 -   [zipfile](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1001190336): read and write zip files.
+-   [zorder](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007733209): map multidimensional data to a single dimension.
 
 [Vote for your favorites](https://github.com/nalgeon/sqlean/issues/27)! Popular ones will make their way into the main set faster.
 
