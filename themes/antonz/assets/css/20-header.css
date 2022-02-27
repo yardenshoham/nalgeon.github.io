@@ -9,3 +9,19 @@
     vertical-align: middle;
     width: 1.5em;
 }
+
+.nowar {
+    padding: 1em 0;
+    background-color: #000;
+    color: #fff;
+}
+.nowar a {
+    color: #fff;
+    border-bottom-color: #fff;
+}
+
+@media only screen and (min-width: 62em) {
+    .nowar {
+        text-align: center;
+    }
+}
