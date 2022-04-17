@@ -1,4 +1,25 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Tue, 04 Jan 2022 13:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>The ultimate SQLite extension set</title><link>https://antonz.org/sqlean/</link><pubDate>Tue, 04 Jan 2022 13:00:00 +0000</pubDate><guid>https://antonz.org/sqlean/</guid><description>Regexes, math, file IO and over 100 other functions.</description><content:encoded><![CDATA[<p>I really like SQLite. It&rsquo;s a miniature embedded database, perfect for both exploratory data analysis and as a storage for small apps (I&rsquo;ve <a href="/sqlite-is-not-a-toy-database/">blogged about that</a> previously).</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 17 Apr 2022 14:50:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>SQLite CLI command history</title><link>https://antonz.org/sqlite-history/</link><pubDate>Sun, 17 Apr 2022 14:50:00 +0000</pubDate><guid>https://antonz.org/sqlite-history/</guid><description>Search for the query instead of typing it by hand.</description><content:encoded><![CDATA[<p>SQLite command line tool (<code>sqlite3</code> or <code>sqlite3.exe</code>) remembers the last 2000 executed commands. To repeat the last command, just press the <code>↑</code> key, to search for older ones — use <code>Ctrl+R</code> shortcut.</p>
+<div class="row">
+<div class="col-xs-12 col-sm-8">
+<figure>
+  <img alt="History search" src="search.jpg">
+  <figcaption>It's faster to find a query than to type it again</figcaption>
+</figure>
+</div>
+</div>
+<p>By default, SQLite stores the history file in the user&rsquo;s home directory and names it <code>.sqlite_history</code>. It&rsquo;s in plain text, so you can view it in your favorite editor. If you prefer to save it elsewhere, specify the full path in the <code>SQLITE_HISTORY</code> environment variable.</p>
+<div class="row">
+<div class="col-xs-12 col-sm-8">
+<figure>
+  <img alt="History file" src="history.jpg">
+  <figcaption>Sync the history file (via Dropbox etc.) to search for queries on all devices</figcaption>
+</figure>
+</div>
+</div>
+<p>SQLite writes the history to a file when the console exits normally, so in case of the computer or CLI crash the commands executed since the last <code>sqlite3</code> launch will be lost.</p>
+<p>History recording is not the only feature of the console. SQLite CLI makes it easy to import and export data or work with several databases at the same time. Debugging multi-line queries is quite a challenge, though.</p>
+<p><em>Follow <strong><a href="https://twitter.com/ohmypy">@ohmypy</a></strong> on Twitter to keep up with new posts 🚀</em></p>
+]]></content:encoded></item><item><title>The ultimate SQLite extension set</title><link>https://antonz.org/sqlean/</link><pubDate>Tue, 04 Jan 2022 13:00:00 +0000</pubDate><guid>https://antonz.org/sqlean/</guid><description>Regexes, math, file IO and over 100 other functions.</description><content:encoded><![CDATA[<p>I really like SQLite. It&rsquo;s a miniature embedded database, perfect for both exploratory data analysis and as a storage for small apps (I&rsquo;ve <a href="/sqlite-is-not-a-toy-database/">blogged about that</a> previously).</p>
 <p>It has a minor drawback though. There are few built-in functions compared to PostgreSQL or Oracle. Fortunately, the authors provided an extension mechanism, which allows doing almost anything. As a result, there are a lot of SQLite extensions out there, but they are incomplete, inconsistent and scattered across the internet.</p>
 <p>I wanted more consistency. So I started the <strong>sqlean</strong> project, which brings the extensions together, neatly packaged into domain modules, documented, tested, and built for Linux, Windows and macOS. Something like a standard library in Python or Go, only for SQLite.</p>
 <p>I plan to write in detail about each module in a separate article, but for now — here&rsquo;s a brief overview.</p>
@@ -1203,117 +1224,4 @@ sqlite&gt; select * from person_data limit 10;
 </code></pre><p>A single query has brought us a million customers. Not bad! It would be great to achieve such results in sales, wouldn&rsquo;t it? ツ</p>
 <p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts!</em></p>
 <p><a href="https://news.ycombinator.com/item?id=26564168">Comments on Hacker News</a></p>
-]]></content:encoded></item><item><title>Automate your Python project with Makefile</title><link>https://antonz.org/makefile-automation/</link><pubDate>Tue, 16 Mar 2021 17:15:00 +0000</pubDate><guid>https://antonz.org/makefile-automation/</guid><description>Makefile is not just some relict from the 70s.</description><content:encoded><![CDATA[<p>When working on a library or application, certain tasks tend to show up over and over again:</p>
-<ul>
-<li>checking the code with linters,</li>
-<li>running tests with coverage,</li>
-<li>deploying with Docker,</li>
-<li>&hellip;</li>
-</ul>
-<p>JS developers are lucky (ha!): their <code>package.json</code> has a special <code>scripts</code> section for this stuff:</p>
-<pre tabindex="0"><code>{
-    ...
-    &quot;scripts&quot;: {
-        &quot;format&quot;: &quot;prettier --write \&quot;src/**/*.ts\&quot;&quot;,
-        &quot;lint&quot;: &quot;tslint -p tsconfig.json&quot;,
-        &quot;test&quot;: &quot;jest --coverage --config jestconfig.json&quot;,
-    },
-    ...
-}
-</code></pre><p>Nothing like this is provided with Python. You can, of course, make a <code>.sh</code> script for each task. But it litters the project directory, and it&rsquo;s better to keep all such tasks together. Installing a separate task runner or using the one built into IDE also seems weird.</p>
-<p>Good news: Linux and macOS already have a great task automation tool for any project - <code>Makefile</code>.</p>
-<h2 id="makefile-for-task-automation">Makefile for task automation</h2>
-<p>Perhaps you, like me, thought that Makefile is a relict from the 70s, useful for compiling <code>C</code> programs. True. But it is also perfectly suitable for automating any tasks in general.</p>
-<p>Here&rsquo;s what it might look like in a python project. Create a file named <code>Makefile</code>:</p>
-<pre tabindex="0"><code>coverage:  ## Run tests with coverage
-	coverage erase
-	coverage run --include=podsearch/* -m pytest -ra
-	coverage report -m
-
-deps:  ## Install dependencies
-	pip install black coverage flake8 mypy pylint pytest tox
-
-lint:  ## Lint and static-check
-	flake8 podsearch
-	pylint podsearch
-	mypy podsearch
-
-push:  ## Push code with tags
-	git push &amp;&amp; git push --tags
-
-test:  ## Run tests
-	pytest -ra
-</code></pre><p>And run linter with tests, for example:</p>
-<pre tabindex="0"><code>$ make lint coverage
-
-flake8 podsearch
-pylint podsearch
-...
-mypy podsearch
-...
-coverage erase
-coverage run —include=podsearch/* -m pytest -ra
-...
-coverage report -m
-Name                    Stmts   Miss  Cover   Missing
------------------------------------------------------
-podsearch/__init__.py       2      0   100%
-podsearch/http.py          17      0   100%
-podsearch/searcher.py      51      0   100%
------------------------------------------------------
-TOTAL                      70      0   100%
-</code></pre><h2 id="features">Features</h2>
-<h3 id="task-steps">Task steps</h3>
-<p>A task can include multiple steps, like <code>lint</code> in the example above:</p>
-<pre tabindex="0"><code>lint:
-	flake8 podsearch
-	pylint podsearch
-	mypy podsearch
-</code></pre><p>Each step is executed in a separate subprocess. To run a chain of actions (for example, <code>cd</code> and <code>git pull</code>) combine them through <code>&amp;&amp;</code>:</p>
-<pre tabindex="0"><code>push:
-	git push &amp;&amp; git push --tags
-</code></pre><h3 id="task-dependencies">Task dependencies</h3>
-<p>Consider the <code>test</code> task, which should first perform linting, and then run the tests. Specify <code>lint</code> as a dependency for <code>test</code>, and you&rsquo;re done:</p>
-<pre tabindex="0"><code>test: lint
-	pytest -ra
-</code></pre><p>You can specify multiple space-separated dependencies. Or tasks can explicitly call each other:</p>
-<pre tabindex="0"><code>lint:
-	flake8 podsearch
-	pylint podsearch
-	mypy podsearch
-
-test:
-	pytest -ra
-
-prepare:
-	make lint
-	make test
-</code></pre><h3 id="task-parameters">Task parameters</h3>
-<p>Consider the <code>serve</code> task which serves a static site, with IP and port specified as parameters. No problem:</p>
-<pre tabindex="0"><code>serve:
-	python -m http.server dist --bind $(bind) $(port)
-</code></pre><p>Run task with parameters:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ make serve <span style="color:#000">bind</span><span style="color:#000">=</span>localhost <span style="color:#000">port</span><span style="color:#000">=</span><span style="color:#1c01ce">3000</span>
-</code></pre></div><p>You can specify default parameter values:</p>
-<pre tabindex="0"><code>bind ?= localhost
-port ?= 3000
-serve:
-	python -m http.server dist --bind $(bind) $(port)
-</code></pre><p>Now they are optional when running <code>make</code>:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ make serve <span style="color:#000">bind</span><span style="color:#000">=</span>192.168.0.1
-$ make serve <span style="color:#000">port</span><span style="color:#000">=</span><span style="color:#1c01ce">8000</span>
-$ make serve
-</code></pre></div><h3 id="and-so-much-more">And so much more</h3>
-<p>If basic features are not enough, there are some great in-depth guides:</p>
-<ul>
-<li><a href="https://makefiletutorial.com">Learn Makefiles with the tastiest examples</a></li>
-<li><a href="https://swcarpentry.github.io/make-novice/reference.html">Automation and Make</a></li>
-</ul>
-<h2 id="in-the-wild">In the wild</h2>
-<p>Here is a Makefile from one of my projects (podcast search tool):</p>
-<blockquote>
-<p><a href="https://github.com/nalgeon/podsearch-py/blob/master/Makefile">podsearch</a></p>
-</blockquote>
-<p>Makefiles are great for automating routine tasks, regardless of the language you prefer. Use them!</p>
-<p><em>And follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts</em></p>
 ]]></content:encoded></item></channel></rss>

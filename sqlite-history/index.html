@@ -1,0 +1,128 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>SQLite CLI command history</title>
+<meta name=description content="Search for the query instead of typing it by hand.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.e6184ba015844ba539de86958bfe4288667bb47e8fed4c5bf3fb81e99f50b0be.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/sqlite-history/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:site_name" content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SQLite CLI command history">
+<meta property="og:description" content="Search for the query instead of typing it by hand.">
+<meta property="og:url" content="https://antonz.org/sqlite-history/">
+<meta property="og:image" content="https://antonz.org/sqlite-history/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="SQLite CLI command history">
+<meta name=twitter:description content="Search for the query instead of typing it by hand.">
+<meta name=twitter:url content="https://antonz.org/sqlite-history/">
+<meta name=twitter:site content="@nalgeon">
+<meta name=twitter:image content="https://antonz.org/sqlite-history/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/stopwar.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>SQLite CLI command history</h1>
+</header>
+<p>SQLite command line tool (<code>sqlite3</code> or <code>sqlite3.exe</code>) remembers the last 2000 executed commands. To repeat the last command, just press the <code>↑</code> key, to search for older ones — use <code>Ctrl+R</code> shortcut.</p>
+<div class=row>
+<div class="col-xs-12 col-sm-8">
+<figure>
+<img alt="History search" src=search.jpg>
+<figcaption>It's faster to find a query than to type it again</figcaption>
+</figure>
+</div>
+</div>
+<p>By default, SQLite stores the history file in the user&rsquo;s home directory and names it <code>.sqlite_history</code>. It&rsquo;s in plain text, so you can view it in your favorite editor. If you prefer to save it elsewhere, specify the full path in the <code>SQLITE_HISTORY</code> environment variable.</p>
+<div class=row>
+<div class="col-xs-12 col-sm-8">
+<figure>
+<img alt="History file" src=history.jpg>
+<figcaption>Sync the history file (via Dropbox etc.) to search for queries on all devices</figcaption>
+</figure>
+</div>
+</div>
+<p>SQLite writes the history to a file when the console exits normally, so in case of the computer or CLI crash the commands executed since the last <code>sqlite3</code> launch will be lost.</p>
+<p>History recording is not the only feature of the console. SQLite CLI makes it easy to import and export data or work with several databases at the same time. Debugging multi-line queries is quite a challenge, though.</p>
+<p><em>Follow <strong><a href=https://twitter.com/ohmypy>@ohmypy</a></strong> on Twitter to keep up with new posts 🚀</em></p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2022-04-17 14:50:00 +0000 UTC">17 Apr, 2022</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/sqlite/>sqlite</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/sqlean/>The ultimate SQLite extension set</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sqlean/>The ultimate SQLite extension set</a></p>
+<p><a href=/sqlite-3-37/>What's new in SQLite 3.37</a></p>
+<p><a href=/sqlite-playground/>SQLite playground in the browser</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
