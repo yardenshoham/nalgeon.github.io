@@ -11,19 +11,12 @@
                 </div>
 
                 <div class="posts">
-                    {{- range (where site.RegularPages "Section" "posts").GroupByDate "2006" | first 1 }}
+                    {{- range (where site.RegularPages "Section" "posts").GroupByDate "2006" }}
+                    <h2>{{ .Key }}</h2>
                     {{- range .Pages }}
-                    {{- if eq .Date.Year now.Year }}
                     {{- partial "post-stub.html" . -}}
                     {{- end }}
                     {{- end }}
-                    {{- end }}
-
-                    {{- range (where site.RegularPages "Section" "years") }}
-                    {{- if ne .Date.Year now.Year }}
-                    <h2><a href="{{ .RelPermalink}}">{{ .Title }}</a></h2>
-                    {{- end}}
-                    {{- end}}
                 </div>
             </div>
         </div>
