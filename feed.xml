@@ -1,4 +1,58 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 17 Apr 2022 14:50:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>SQLite CLI command history</title><link>https://antonz.org/sqlite-history/</link><pubDate>Sun, 17 Apr 2022 14:50:00 +0000</pubDate><guid>https://antonz.org/sqlite-history/</guid><description>Search for the query instead of typing it by hand.</description><content:encoded><![CDATA[<p>SQLite command line tool (<code>sqlite3</code> or <code>sqlite3.exe</code>) remembers the last 2000 executed commands. To repeat the last command, just press the <code>↑</code> key, to search for older ones — use <code>Ctrl+R</code> shortcut.</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 23 Apr 2022 19:10:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Caching slow functions in Python</title><link>https://antonz.org/functools-cache/</link><pubDate>Sat, 23 Apr 2022 19:10:00 +0000</pubDate><guid>https://antonz.org/functools-cache/</guid><description>With @lru_cache and @cache from the functools module</description><content:encoded><![CDATA[<p>Suppose you wrote a function that returns the user&rsquo;s email:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">get_user_email</span>(<span style="color:#000">user_id</span>):
+    <span style="color:#000">user</span> <span style="color:#000">=</span> <span style="color:#000">find_by_id</span>(<span style="color:#000">user_id</span>)
+    <span style="color:#a90d91">return</span> <span style="color:#000">user</span>[<span style="color:#c41a16">&#34;email&#34;</span>]
+</code></pre></div><p>But there is a problem. <code>find_by_id()</code> calls a terribly slow legacy system:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">find_by_id</span>(<span style="color:#000">user_id</span>):
+    <span style="color:#177500"># simulate a slow network request,</span>
+    <span style="color:#177500"># returning a user by their id</span>
+    <span style="color:#000">time</span><span style="color:#000">.</span><span style="color:#000">sleep</span>(<span style="color:#1c01ce">1</span>)
+    <span style="color:#a90d91">return</span> { <span style="color:#c41a16">&#34;email&#34;</span>: <span style="color:#c41a16">&#34;...&#34;</span> }
+</code></pre></div><p>100 calls for <code>get_user_email(42)</code> result in 100 slow requests. A single one should be quite enough, so let&rsquo;s attach a simple cache:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">cache</span> <span style="color:#000">=</span> {}
+
+<span style="color:#a90d91">def</span> <span style="color:#000">get_user_email</span>(<span style="color:#000">user_id</span>):
+    <span style="color:#a90d91">if</span> <span style="color:#000">user_id</span> <span style="color:#000">not</span> <span style="color:#000">in</span> <span style="color:#000">cache</span>:
+        <span style="color:#000">user</span> <span style="color:#000">=</span> <span style="color:#000">find_by_id</span>(<span style="color:#000">user_id</span>)
+        <span style="color:#000">cache</span>[<span style="color:#000">user_id</span>] <span style="color:#000">=</span> <span style="color:#000">user</span>[<span style="color:#c41a16">&#34;email&#34;</span>]
+    <span style="color:#a90d91">return</span> <span style="color:#000">cache</span>[<span style="color:#000">user_id</span>]
+</code></pre></div><p>Nothing too complicated (apart from the issue of cache expiration, let&rsquo;s not touch it). But imagine that there are a lot of slow functions, and you have to implement caching for every one of them. Not too inspiring.</p>
+<p>Fortunately, there is an <code>@lru_cache</code> decorator in the <code>functools</code> module. That&rsquo;s what we need. Add one line to the original function, and be done with it:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">@functools</span><span style="color:#000">.</span><span style="color:#000">lru_cache</span>(<span style="color:#000">maxsize</span><span style="color:#000">=</span><span style="color:#1c01ce">256</span>)
+<span style="color:#a90d91">def</span> <span style="color:#000">get_user_email</span>(<span style="color:#000">user_id</span>):
+    <span style="color:#000">user</span> <span style="color:#000">=</span> <span style="color:#000">find_by_id</span>(<span style="color:#000">user_id</span>)
+    <span style="color:#a90d91">return</span> <span style="color:#000">user</span>[<span style="color:#c41a16">&#34;email&#34;</span>]
+</code></pre></div><p>Now repeated calls to <code>get_user_email()</code> with the same <code>user_id</code> return the cached result without requesting <code>find_by_id()</code>.</p>
+<div class="row">
+<div class="col-xs-12 col-sm-6 col-md-5">
+<figure>
+  <img alt="Don't write your own cache" src="cache-1.png" class="img-bordered-thin">
+  <figcaption>Don't write your own cache...</figcaption>
+</figure>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-5">
+<figure>
+  <img alt="Use functools @lru_cache" src="cache-2.png" class="img-bordered-thin">
+  <figcaption>Use functools @lru_cache instead!</figcaption>
+</figure>
+</div>
+</div>
+<p><code>@lru_cache</code> automatically evicts old entries from the cache when there are more than <code>maxsize</code> entries. So the cache won&rsquo;t eat up all the memory.</p>
+<p>Python 3.9 received another decorator — <code>@functools.cache</code>. It&rsquo;s similar to <code>@lru_cache</code>, only without the cache entry limit (which makes it work a little faster).</p>
+<p>One can manage the cache — view hits/misses stats or clean it:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#177500"># cache management</span>
+
+<span style="color:#000">stats</span> <span style="color:#000">=</span> <span style="color:#000">get_user_email</span><span style="color:#000">.</span><span style="color:#000">cache_info</span>()
+<span style="color:#a90d91">print</span>(<span style="color:#000">stats</span>)
+<span style="color:#177500"># CacheInfo(hits=2, misses=3, maxsize=256, currsize=3)</span>
+
+<span style="color:#000">get_user_email</span><span style="color:#000">.</span><span style="color:#000">cache_clear</span>()
+<span style="color:#177500"># CacheInfo(hits=0, misses=0, maxsize=256, currsize=0)</span>
+</code></pre></div><p>The cache works in-process and will die with it. So if you need something more scalable, look at Redis or other external cache.</p>
+<p><a href="https://devdocs.io/python/library/functools#functools.lru_cache">Documentation</a> •
+<a href="https://replit.com/@antonz/functools-cache#main.py">Playground</a></p>
+<p><em>Follow <strong><a href="https://twitter.com/ohmypy">@ohmypy</a></strong> on Twitter to keep up with new posts 🚀</em></p>
+]]></content:encoded></item><item><title>SQLite CLI command history</title><link>https://antonz.org/sqlite-history/</link><pubDate>Sun, 17 Apr 2022 14:50:00 +0000</pubDate><guid>https://antonz.org/sqlite-history/</guid><description>Search for the query instead of typing it by hand.</description><content:encoded><![CDATA[<p>SQLite command line tool (<code>sqlite3</code> or <code>sqlite3.exe</code>) remembers the last 2000 executed commands. To repeat the last command, just press the <code>↑</code> key, to search for older ones — use <code>Ctrl+R</code> shortcut.</p>
 <div class="row">
 <div class="col-xs-12 col-sm-8">
 <figure>
@@ -1097,131 +1151,4 @@ select city, foundation_year, timezone from city limit 10;
 <p>I hope this article will inspire you to try SQLite. Thanks for reading!</p>
 <p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
 <p><a href="https://news.ycombinator.com/item?id=26580614">Comments on Hacker News</a></p>
-]]></content:encoded></item><item><title>How to create a 1M record table with a single query</title><link>https://antonz.org/random-table/</link><pubDate>Sun, 21 Mar 2021 21:15:00 +0000</pubDate><guid>https://antonz.org/random-table/</guid><description>With recursive CTE and randomized data.</description><content:encoded><![CDATA[<p>Let&rsquo;s say you want to check how a query behaves on a large table - but there is no such table at hand. This is not a problem if your DBMS supports SQL recursion: lots of data can be generated with a single query. The <code>WITH RECURSIVE</code> clause comes to the rescue.</p>
-<p>I&rsquo;m going to use SQLite, but the same (or similar) queries will work for PostgreSQL and other DBMSs. Specifically, <code>WITH RECURSIVE</code> is supported in MariaDB 10.2+, MySQL 8.0+, PostgreSQL 8.4+ and SQLite 3.8+. Oracle 11.2+ and SQL Server 2005+ support recursive queries, but without the <code>RECURSIVE</code> keyword.</p>
-<h2 id="random-numbers">Random numbers</h2>
-<p>Let&rsquo;s create a table with 1 million random numbers:</p>
-<pre tabindex="0"><code>create table random_data as
-with recursive tmp(x) as (
-    select random()
-    union all
-    select random() from tmp
-    limit 1000000
-)
-select * from tmp;
-</code></pre><p>Or, if your database supports <code>generate_series()</code> (and does not support <code>limit</code> in recursive queries, like PostgreSQL):</p>
-<pre tabindex="0"><code>create table random_data as
-select random() as x
-from generate_series(1, 1000000);
-</code></pre><p>Validate:</p>
-<pre tabindex="0"><code>sqlite&gt; select count(*) from random_data;
-1000000
-
-sqlite&gt; select avg(x) from random_data;
-1.000501737529e+16
-</code></pre><h2 id="numeric-sequence">Numeric sequence</h2>
-<p>Let&rsquo;s fill the table with numbers from one to a million instead of random numbers:</p>
-<pre tabindex="0"><code>create table seq_data as
-with recursive tmp(x) as (
-    select 1
-    union all
-    select x+1 from tmp
-    limit 1000000
-)
-select * from tmp;
-</code></pre><p>Or with <code>generate_series()</code>:</p>
-<pre tabindex="0"><code>create table seq_data as
-select value as x
-from generate_series(1, 1000000);
-</code></pre><p>Validate:</p>
-<pre tabindex="0"><code>sqlite&gt; select count(*) from seq_data;
-1000000
-
-sqlite&gt; select avg(x) from seq_data;
-500000.5
-
-sqlite&gt; select min(x) from seq_data;
-1
-
-sqlite&gt; select max(x) from seq_data;
-1000000
-</code></pre><h2 id="randomized-data">Randomized data</h2>
-<p>Numbers are fine, but what if you need a large table filled with customer data? No sweat!</p>
-<p>Let&rsquo;s agree on some rules:</p>
-<ul>
-<li>customer has an ID, name, and age;</li>
-<li>ID is filled sequentially from 1 to 1000000;</li>
-<li>name is randomly selected from a fixed list;</li>
-<li>age is a random number from 1 to 80.</li>
-</ul>
-<p>Let&rsquo;s create a table of names:</p>
-<pre tabindex="0"><code>create table names (
-    id integer primary key,
-    name text
-);
-
-insert into names(id, name)
-values
-(1, 'Ann'),
-(2, 'Bill'),
-(3, 'Cindy'),
-(4, 'Diane'),
-(5, 'Emma');
-</code></pre><p>And generate some customers:</p>
-<pre tabindex="0"><code>create table person_data as
-with recursive tmp(id, idx, name, age) as (
-    select 1, 1, 'Ann', 20
-    union all
-    select
-        tmp.id + 1 as id,
-        abs(random() % 5) + 1 as idx,
-        (select name from names where id = idx) as name,
-        abs(random() % 80) + 1 as age
-    from tmp
-    limit 1000000
-)
-select id, name, age from tmp;
-</code></pre><p>Or with <code>generate_series()</code>:</p>
-<pre tabindex="0"><code>create table person_data as
-with tmp as (
-    select
-        value as id,
-        abs(random() % 5) + 1 as idx,
-        abs(random() % 80) + 1 as age
-    from generate_series(1, 1000000)
-)
-select
-    id,
-    (select name from names where id = idx) as name,
-    age
-from tmp;
-</code></pre><p>Everything is according to the rules here:</p>
-<ul>
-<li><code>id</code> is calculated as the previous value + 1;</li>
-<li><code>idx</code> field contains a random number from 1 to 5;</li>
-<li><code>name</code> is selected from the <code>names</code> table according to <code>idx</code> value;</li>
-<li><code>age</code> is calculated as a random number from 1 to 80.</li>
-</ul>
-<p>Check it out:</p>
-<pre tabindex="0"><code>sqlite&gt; select count(*) from person_data;
-1000000
-
-sqlite&gt; select * from person_data limit 10;
-┌────┬───────┬─────┐
-│ id │ name  │ age │
-├────┼───────┼─────┤
-│ 1  │ Ann   │ 20  │
-│ 2  │ Ann   │ 33  │
-│ 3  │ Ann   │ 26  │
-│ 4  │ Ann   │ 4   │
-│ 5  │ Diane │ 20  │
-│ 6  │ Diane │ 76  │
-│ 7  │ Bill  │ 42  │
-│ 8  │ Cindy │ 35  │
-│ 9  │ Diane │ 6   │
-│ 10 │ Ann   │ 29  │
-└────┴───────┴─────┘
-</code></pre><p>A single query has brought us a million customers. Not bad! It would be great to achieve such results in sales, wouldn&rsquo;t it? ツ</p>
-<p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts!</em></p>
-<p><a href="https://news.ycombinator.com/item?id=26564168">Comments on Hacker News</a></p>
 ]]></content:encoded></item></channel></rss>

@@ -1,0 +1,161 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Caching slow functions in Python</title>
+<meta name=description content="With @lru_cache and @cache from the functools module">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.e6184ba015844ba539de86958bfe4288667bb47e8fed4c5bf3fb81e99f50b0be.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/functools-cache/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:site_name" content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Caching slow functions in Python">
+<meta property="og:description" content="With @lru_cache and @cache from the functools module">
+<meta property="og:url" content="https://antonz.org/functools-cache/">
+<meta property="og:image" content="https://antonz.org/functools-cache/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Caching slow functions in Python">
+<meta name=twitter:description content="With @lru_cache and @cache from the functools module">
+<meta name=twitter:url content="https://antonz.org/functools-cache/">
+<meta name=twitter:site content="@nalgeon">
+<meta name=twitter:image content="https://antonz.org/functools-cache/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/stopwar.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Caching slow functions in Python</h1>
+</header>
+<p>Suppose you wrote a function that returns the user&rsquo;s email:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>def</span> <span style=color:#000>get_user_email</span>(<span style=color:#000>user_id</span>):
+    <span style=color:#000>user</span> <span style=color:#000>=</span> <span style=color:#000>find_by_id</span>(<span style=color:#000>user_id</span>)
+    <span style=color:#a90d91>return</span> <span style=color:#000>user</span>[<span style=color:#c41a16>&#34;email&#34;</span>]
+</code></pre></div><p>But there is a problem. <code>find_by_id()</code> calls a terribly slow legacy system:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>def</span> <span style=color:#000>find_by_id</span>(<span style=color:#000>user_id</span>):
+    <span style=color:#177500># simulate a slow network request,</span>
+    <span style=color:#177500># returning a user by their id</span>
+    <span style=color:#000>time</span><span style=color:#000>.</span><span style=color:#000>sleep</span>(<span style=color:#1c01ce>1</span>)
+    <span style=color:#a90d91>return</span> { <span style=color:#c41a16>&#34;email&#34;</span>: <span style=color:#c41a16>&#34;...&#34;</span> }
+</code></pre></div><p>100 calls for <code>get_user_email(42)</code> result in 100 slow requests. A single one should be quite enough, so let&rsquo;s attach a simple cache:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>cache</span> <span style=color:#000>=</span> {}
+
+<span style=color:#a90d91>def</span> <span style=color:#000>get_user_email</span>(<span style=color:#000>user_id</span>):
+    <span style=color:#a90d91>if</span> <span style=color:#000>user_id</span> <span style=color:#000>not</span> <span style=color:#000>in</span> <span style=color:#000>cache</span>:
+        <span style=color:#000>user</span> <span style=color:#000>=</span> <span style=color:#000>find_by_id</span>(<span style=color:#000>user_id</span>)
+        <span style=color:#000>cache</span>[<span style=color:#000>user_id</span>] <span style=color:#000>=</span> <span style=color:#000>user</span>[<span style=color:#c41a16>&#34;email&#34;</span>]
+    <span style=color:#a90d91>return</span> <span style=color:#000>cache</span>[<span style=color:#000>user_id</span>]
+</code></pre></div><p>Nothing too complicated (apart from the issue of cache expiration, let&rsquo;s not touch it). But imagine that there are a lot of slow functions, and you have to implement caching for every one of them. Not too inspiring.</p>
+<p>Fortunately, there is an <code>@lru_cache</code> decorator in the <code>functools</code> module. That&rsquo;s what we need. Add one line to the original function, and be done with it:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>@functools</span><span style=color:#000>.</span><span style=color:#000>lru_cache</span>(<span style=color:#000>maxsize</span><span style=color:#000>=</span><span style=color:#1c01ce>256</span>)
+<span style=color:#a90d91>def</span> <span style=color:#000>get_user_email</span>(<span style=color:#000>user_id</span>):
+    <span style=color:#000>user</span> <span style=color:#000>=</span> <span style=color:#000>find_by_id</span>(<span style=color:#000>user_id</span>)
+    <span style=color:#a90d91>return</span> <span style=color:#000>user</span>[<span style=color:#c41a16>&#34;email&#34;</span>]
+</code></pre></div><p>Now repeated calls to <code>get_user_email()</code> with the same <code>user_id</code> return the cached result without requesting <code>find_by_id()</code>.</p>
+<div class=row>
+<div class="col-xs-12 col-sm-6 col-md-5">
+<figure>
+<img alt="Don't write your own cache" src=cache-1.png class=img-bordered-thin>
+<figcaption>Don't write your own cache...</figcaption>
+</figure>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-5">
+<figure>
+<img alt="Use functools @lru_cache" src=cache-2.png class=img-bordered-thin>
+<figcaption>Use functools @lru_cache instead!</figcaption>
+</figure>
+</div>
+</div>
+<p><code>@lru_cache</code> automatically evicts old entries from the cache when there are more than <code>maxsize</code> entries. So the cache won&rsquo;t eat up all the memory.</p>
+<p>Python 3.9 received another decorator — <code>@functools.cache</code>. It&rsquo;s similar to <code>@lru_cache</code>, only without the cache entry limit (which makes it work a little faster).</p>
+<p>One can manage the cache — view hits/misses stats or clean it:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#177500># cache management</span>
+
+<span style=color:#000>stats</span> <span style=color:#000>=</span> <span style=color:#000>get_user_email</span><span style=color:#000>.</span><span style=color:#000>cache_info</span>()
+<span style=color:#a90d91>print</span>(<span style=color:#000>stats</span>)
+<span style=color:#177500># CacheInfo(hits=2, misses=3, maxsize=256, currsize=3)</span>
+
+<span style=color:#000>get_user_email</span><span style=color:#000>.</span><span style=color:#000>cache_clear</span>()
+<span style=color:#177500># CacheInfo(hits=0, misses=0, maxsize=256, currsize=0)</span>
+</code></pre></div><p>The cache works in-process and will die with it. So if you need something more scalable, look at Redis or other external cache.</p>
+<p><a href=https://devdocs.io/python/library/functools#functools.lru_cache>Documentation</a> •
+<a href=https://replit.com/@antonz/functools-cache#main.py>Playground</a></p>
+<p><em>Follow <strong><a href=https://twitter.com/ohmypy>@ohmypy</a></strong> on Twitter to keep up with new posts 🚀</em></p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2022-04-23 19:10:00 +0000 UTC">23 Apr, 2022</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/python/>python</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/sqlite-history/>SQLite CLI command history</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/list-internals/>How Python list really works</a></p>
+<p><a href=/good-code/>Good Code Criterion</a></p>
+<p><a href=/python-packaging/>How to make an awesome Python package in 2021</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
