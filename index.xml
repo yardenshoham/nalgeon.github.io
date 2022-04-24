@@ -1,4 +1,20 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 23 Apr 2022 19:10:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Caching slow functions in Python</title><link>https://antonz.org/functools-cache/</link><pubDate>Sat, 23 Apr 2022 19:10:00 +0000</pubDate><guid>https://antonz.org/functools-cache/</guid><description>With @lru_cache and @cache from the functools module</description><content:encoded><![CDATA[<p>Suppose you wrote a function that returns the user&rsquo;s email:</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 24 Apr 2022 21:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Multi-line queries in SQLite shell</title><link>https://antonz.org/sqlite-multiline/</link><pubDate>Sun, 24 Apr 2022 21:30:00 +0000</pubDate><guid>https://antonz.org/sqlite-multiline/</guid><description>How to edit a big query without leaving the CLI</description><content:encoded><![CDATA[<p>Just after writing that debugging multi-line queries <a href="/sqlite-history/">in SQLite shell</a> is not easy, I discovered a cool trick on the sqlite forum:</p>
+<p>Use <code>Ctrl+V</code>, <code>Ctrl+J</code> instead of <code>Enter</code> for new lines. After that, edit the query with the <code>↑</code> button.</p>
+<div class="row">
+<div class="col-xs-12 col-sm-7">
+<figure>
+  <img alt="SQLite shell" src="multiline.png" class="img-bordered-thin">
+</figure>
+</div>
+</div>
+<p>And here are some more ways to edit multi-line queries:</p>
+<ul>
+<li>Use external editor (<code>.shell &lt;editor&gt; &lt;file&gt;</code>)</li>
+<li>Run query from file (<code>.read &lt;file&gt;</code>)</li>
+<li>Consider DBeaver, DataGrip or other UI tool</li>
+</ul>
+<p><em>Follow <strong><a href="https://twitter.com/ohmypy">@ohmypy</a></strong> on Twitter to keep up with new posts 🚀</em></p>
+]]></content:encoded></item><item><title>Caching slow functions in Python</title><link>https://antonz.org/functools-cache/</link><pubDate>Sat, 23 Apr 2022 19:10:00 +0000</pubDate><guid>https://antonz.org/functools-cache/</guid><description>With @lru_cache and @cache from the functools module</description><content:encoded><![CDATA[<p>Suppose you wrote a function that returns the user&rsquo;s email:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">get_user_email</span>(<span style="color:#000">user_id</span>):
     <span style="color:#000">user</span> <span style="color:#000">=</span> <span style="color:#000">find_by_id</span>(<span style="color:#000">user_id</span>)
     <span style="color:#a90d91">return</span> <span style="color:#000">user</span>[<span style="color:#c41a16">&#34;email&#34;</span>]
@@ -71,7 +87,7 @@
 </div>
 </div>
 <p>SQLite writes the history to a file when the console exits normally, so in case of the computer or CLI crash the commands executed since the last <code>sqlite3</code> launch will be lost.</p>
-<p>History recording is not the only feature of the console. SQLite CLI makes it easy to import and export data or work with several databases at the same time. Debugging multi-line queries is quite a challenge, though.</p>
+<p>History recording is not the only feature of the console. SQLite CLI makes it easy to import and export data or work with several databases at the same time. Debugging <a href="/sqlite-multiline/">multi-line queries</a> is quite a challenge, though.</p>
 <p><em>Follow <strong><a href="https://twitter.com/ohmypy">@ohmypy</a></strong> on Twitter to keep up with new posts 🚀</em></p>
 ]]></content:encoded></item><item><title>The ultimate SQLite extension set</title><link>https://antonz.org/sqlean/</link><pubDate>Tue, 04 Jan 2022 13:00:00 +0000</pubDate><guid>https://antonz.org/sqlean/</guid><description>Regexes, math, file IO and over 100 other functions.</description><content:encoded><![CDATA[<p>I really like SQLite. It&rsquo;s a miniature embedded database, perfect for both exploratory data analysis and as a storage for small apps (I&rsquo;ve <a href="/sqlite-is-not-a-toy-database/">blogged about that</a> previously).</p>
 <p>It has a minor drawback though. There are few built-in functions compared to PostgreSQL or Oracle. Fortunately, the authors provided an extension mechanism, which allows doing almost anything. As a result, there are a lot of SQLite extensions out there, but they are incomplete, inconsistent and scattered across the internet.</p>
@@ -864,291 +880,4 @@ help                 Show help message
 </ul>
 <p><em>Thanks for reading! Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
 <p><a href="https://news.ycombinator.com/item?id=26733423">Comments on Hacker News</a></p>
-]]></content:encoded></item><item><title>SQLite is not a toy database</title><link>https://antonz.org/sqlite-is-not-a-toy-database/</link><pubDate>Thu, 25 Mar 2021 09:00:00 +0000</pubDate><guid>https://antonz.org/sqlite-is-not-a-toy-database/</guid><description>Here is why SQLite is a perfect tool for you - whether you are a developer, data analyst, or geek.</description><content:encoded><![CDATA[<p><em>English • <a href="https://habr.com/ru/post/547448/">Russian</a> • <a href="https://sysarmy.com/blog/posts/sqlite-no-es-una-base-de-datos-de-juguete/">Spanish</a></em></p>
-<p>Whether you are a developer, data analyst, QA engineer, DevOps person, or product manager - SQLite is a perfect tool for you. Here is why.</p>
-<p>A few well-known facts to get started:</p>
-<ul>
-<li>SQLite is the most common DBMS in the world, shipped with all popular operating systems.</li>
-<li>SQLite is serverless.</li>
-<li>For developers, SQLite is embedded directly into the app.</li>
-<li>For everyone else, there is a convenient database console (REPL), provided as a single file (sqlite3.exe on Windows, sqlite3 on Linux / macOS).</li>
-</ul>
-<h2 id="console-import-and-export">Console, import, and export</h2>
-<p>The console is a killer SQLite feature for data analysis: more powerful than Excel and more simple than <code>pandas</code>. One can import CSV data with a single command, the table is created automatically:</p>
-<pre tabindex="0"><code>&gt; .import --csv city.csv city
-&gt; select count(*) from city;
-1117
-</code></pre><p>The console supports basic SQL features and shows query results in a nice ASCII-drawn table. Advanced SQL features are also supported, but more on that later.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">century</span> <span style="color:#000">||</span> <span style="color:#c41a16">&#39; century&#39;</span> <span style="color:#a90d91">as</span> <span style="color:#000">dates</span>,
-  <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#a90d91">as</span> <span style="color:#000">city_count</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">history</span>
-<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#000">century</span>
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">century</span> <span style="color:#a90d91">desc</span>;
-</code></pre></div><pre tabindex="0"><code>┌────────────┬────────────┐
-│   dates    │ city_count │
-├────────────┼────────────┤
-│ 21 century │ 1          │
-│ 20 century │ 263        │
-│ 19 century │ 189        │
-│ 18 century │ 191        │
-│ 17 century │ 137        │
-│ ...        │ ...        │
-└────────────┴────────────┘
-</code></pre><p>Data could be exported as SQL, CSV, JSON, even Markdown and HTML. Takes just a couple of commands:</p>
-<pre tabindex="0"><code>.mode json
-.output city.json
-select city, foundation_year, timezone from city limit 10;
-.shell cat city.json
-</code></pre><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">[
-    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Amsterdam&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1300</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+1&#34;</span> },
-    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Berlin&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1237</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+1&#34;</span> },
-    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Helsinki&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1548</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+2&#34;</span> },
-    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Monaco&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1215</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+1&#34;</span> },
-    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Moscow&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1147</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+3&#34;</span> },
-    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Reykjavik&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">874</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC&#34;</span> },
-    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Sarajevo&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1461</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+1&#34;</span> },
-    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Stockholm&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1252</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+1&#34;</span> },
-    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Tallinn&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1219</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+2&#34;</span> },
-    { <span style="color:#000">&#34;city&#34;</span>: <span style="color:#c41a16">&#34;Zagreb&#34;</span>, <span style="color:#000">&#34;foundation_year&#34;</span>: <span style="color:#1c01ce">1094</span>, <span style="color:#000">&#34;timezone&#34;</span>: <span style="color:#c41a16">&#34;UTC+1&#34;</span> }
-]
-</code></pre></div><p>If you are more of a BI than a console person - popular data exploration tools like <a href="https://www.metabase.com/">Metabase</a>, <a href="https://redash.io/">Redash</a>, and <a href="https://superset.apache.org/">Superset</a> all support SQLite.</p>
-<h2 id="native-json">Native JSON</h2>
-<p>There is nothing more convenient than SQLite for analyzing and transforming JSON. You can select data directly from a file as if it were a regular table. Or import data into the table and select from there.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">json_extract</span>(<span style="color:#000">value</span>, <span style="color:#c41a16">&#39;$.iso.code&#39;</span>) <span style="color:#a90d91">as</span> <span style="color:#000">code</span>,
-  <span style="color:#000">json_extract</span>(<span style="color:#000">value</span>, <span style="color:#c41a16">&#39;$.iso.number&#39;</span>) <span style="color:#a90d91">as</span> <span style="color:#000">num</span>,
-  <span style="color:#000">json_extract</span>(<span style="color:#000">value</span>, <span style="color:#c41a16">&#39;$.name&#39;</span>) <span style="color:#a90d91">as</span> <span style="color:#000">name</span>,
-  <span style="color:#000">json_extract</span>(<span style="color:#000">value</span>, <span style="color:#c41a16">&#39;$.units.major.name&#39;</span>) <span style="color:#a90d91">as</span> <span style="color:#000">unit</span>
-<span style="color:#a90d91">from</span>
-  <span style="color:#000">json_each</span>(<span style="color:#000">readfile</span>(<span style="color:#c41a16">&#39;currency.sample.json&#39;</span>))
-;
-</code></pre></div><pre tabindex="0"><code>┌──────┬─────┬─────────────────┬──────────┐
-│ code │ num │      name       │   unit   │
-├──────┼─────┼─────────────────┼──────────┤
-│ ARS  │ 032 │ Argentine peso  | peso     │
-│ CHF  │ 756 │ Swiss Franc     │ franc    │
-│ EUR  │ 978 │ Euro            │ euro     │
-│ GBP  │ 826 │ British Pound   │ pound    │
-│ INR  │ 356 │ Indian Rupee    │ rupee    │
-│ JPY  │ 392 │ Japanese yen    │ yen      │
-│ MAD  │ 504 │ Moroccan Dirham │ dirham   │
-│ RUR  │ 643 │ Russian Rouble  │ rouble   │
-│ SOS  │ 706 │ Somali Shilling │ shilling │
-│ USD  │ 840 │ US Dollar       │ dollar   │
-└──────┴─────┴─────────────────┴──────────┘
-</code></pre><p>Doesn&rsquo;t matter how deep the JSON is - you can extract any nested object:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">json_extract</span>(<span style="color:#000">value</span>, <span style="color:#c41a16">&#39;$.id&#39;</span>) <span style="color:#a90d91">as</span> <span style="color:#000">id</span>,
-  <span style="color:#000">json_extract</span>(<span style="color:#000">value</span>, <span style="color:#c41a16">&#39;$.name&#39;</span>) <span style="color:#a90d91">as</span> <span style="color:#000">name</span>
-<span style="color:#a90d91">from</span>
-  <span style="color:#000">json_tree</span>(<span style="color:#000">readfile</span>(<span style="color:#c41a16">&#39;industry.sample.json&#39;</span>))
-<span style="color:#a90d91">where</span>
-  <span style="color:#000">path</span> <span style="color:#a90d91">like</span> <span style="color:#c41a16">&#39;$[%].industries&#39;</span>
-;
-</code></pre></div><pre tabindex="0"><code>┌────────┬──────────────────────┐
-│   id   │         name         │
-├────────┼──────────────────────┤
-│ 7.538  │ Internet provider    │
-│ 7.539  │ IT consulting        │
-│ 7.540  │ Software development │
-│ 9.399  │ Mobile communication │
-│ 9.400  │ Fixed communication  │
-│ 9.401  │ Fiber-optics         │
-│ 43.641 │ Audit                │
-│ 43.646 │ Insurance            │
-│ 43.647 │ Bank                 │
-└────────┴──────────────────────┘
-</code></pre><h2 id="ctes-and-set-operations">CTEs and set operations</h2>
-<p>Of course, SQLite supports Common Table Expressions (<code>WITH</code> clause) and <code>JOIN</code>s, I won&rsquo;t even give examples here. If the data is hierarchical (the table refers to itself through a column like <code>parent_id</code>) - <code>WITH RECURSIVE</code> will come in handy. Any hierarchy, no matter how deep, can be &lsquo;unrolled&rsquo; with a single query.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#a90d91">recursive</span> <span style="color:#000">tmp</span>(<span style="color:#000">id</span>, <span style="color:#000">name</span>, <span style="color:#a90d91">level</span>) <span style="color:#a90d91">as</span> (
-  <span style="color:#a90d91">select</span> <span style="color:#000">id</span>, <span style="color:#000">name</span>, <span style="color:#1c01ce">1</span> <span style="color:#a90d91">as</span> <span style="color:#a90d91">level</span>
-  <span style="color:#a90d91">from</span> <span style="color:#000">area</span>
-  <span style="color:#a90d91">where</span> <span style="color:#000">parent_id</span> <span style="color:#a90d91">is</span> <span style="color:#a90d91">null</span>
-
-  <span style="color:#a90d91">union</span> <span style="color:#a90d91">all</span>
-
-  <span style="color:#a90d91">select</span>
-    <span style="color:#000">area</span>.<span style="color:#000">id</span>,
-    <span style="color:#000">tmp</span>.<span style="color:#000">name</span> <span style="color:#000">||</span> <span style="color:#c41a16">&#39;, &#39;</span> <span style="color:#000">||</span> <span style="color:#000">area</span>.<span style="color:#000">name</span> <span style="color:#a90d91">as</span> <span style="color:#000">name</span>,
-    <span style="color:#000">tmp</span>.<span style="color:#a90d91">level</span> <span style="color:#000">+</span> <span style="color:#1c01ce">1</span> <span style="color:#a90d91">as</span> <span style="color:#a90d91">level</span>
-  <span style="color:#a90d91">from</span> <span style="color:#000">area</span>
-    <span style="color:#a90d91">join</span> <span style="color:#000">tmp</span> <span style="color:#a90d91">on</span> <span style="color:#000">area</span>.<span style="color:#000">parent_id</span> <span style="color:#000">=</span> <span style="color:#000">tmp</span>.<span style="color:#000">id</span>
-)
-
-<span style="color:#a90d91">select</span> <span style="color:#000">*</span> <span style="color:#a90d91">from</span> <span style="color:#000">tmp</span>;
-</code></pre></div><pre tabindex="0"><code>┌──────┬──────────────────────────┬───────┐
-│  id  │           name           │ level │
-├──────┼──────────────────────────┼───────┤
-│ 93   │ US                       │ 1     │
-│ 768  │ US, Washington DC        │ 2     │
-│ 1833 │ US, Washington           │ 2     │
-│ 2987 │ US, Washington, Bellevue │ 3     │
-│ 3021 │ US, Washington, Everett  │ 3     │
-│ 3039 │ US, Washington, Kent     │ 3     │
-│ ...  │ ...                      │ ...   │
-└──────┴──────────────────────────┴───────┘
-</code></pre><p>Sets? No problem: <code>UNION</code>, <code>INTERSECT</code>, <code>EXCEPT</code> are at your service.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">employer_id</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employer_area</span>
-<span style="color:#a90d91">where</span> <span style="color:#000">area_id</span> <span style="color:#000">=</span> <span style="color:#1c01ce">1</span>
-
-<span style="color:#a90d91">except</span>
-
-<span style="color:#a90d91">select</span> <span style="color:#000">employer_id</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employer_area</span>
-<span style="color:#a90d91">where</span> <span style="color:#000">area_id</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2</span>;
-</code></pre></div><p>Calculate one column based on several others? Enter generated columns:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">alter</span> <span style="color:#a90d91">table</span> <span style="color:#000">vacancy</span>
-<span style="color:#a90d91">add</span> <span style="color:#a90d91">column</span> <span style="color:#000">salary_net</span> <span style="color:#a90d91">integer</span> <span style="color:#a90d91">as</span> (
-  <span style="color:#a90d91">case</span> <span style="color:#a90d91">when</span> <span style="color:#000">salary_gross</span> <span style="color:#000">=</span> <span style="color:#a90d91">true</span> <span style="color:#a90d91">then</span>
-    <span style="color:#000">round</span>(<span style="color:#000">salary_from</span><span style="color:#000">/</span><span style="color:#1c01ce">1</span>.<span style="color:#1c01ce">04</span>)
-  <span style="color:#a90d91">else</span>
-    <span style="color:#000">salary_from</span>
-  <span style="color:#a90d91">end</span>
-);
-</code></pre></div><p>Generated columns can be queried in the same way as &lsquo;normal&rsquo; ones:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">substr</span>(<span style="color:#000">name</span>, <span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">40</span>) <span style="color:#a90d91">as</span> <span style="color:#000">name</span>,
-  <span style="color:#000">salary_net</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">vacancy</span>
-<span style="color:#a90d91">where</span>
-  <span style="color:#000">salary_currency</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#39;JPY&#39;</span>
-  <span style="color:#a90d91">and</span> <span style="color:#000">salary_net</span> <span style="color:#a90d91">is</span> <span style="color:#a90d91">not</span> <span style="color:#a90d91">null</span>
-<span style="color:#a90d91">limit</span> <span style="color:#1c01ce">10</span>;
-</code></pre></div><h2 id="math-statistics">Math statistics</h2>
-<p>Descriptive statistics? Easy: mean, median, percentiles, standard deviation, you name it. You&rsquo;ll have to load an extension, but it&rsquo;s also a single command (and a single file).</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql">.<span style="color:#a90d91">load</span> <span style="color:#000">sqlite3</span><span style="color:#000">-</span><span style="color:#000">stats</span>
-
-<span style="color:#a90d91">select</span>
-  <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#a90d91">as</span> <span style="color:#000">book_count</span>,
-  <span style="color:#a90d91">cast</span>(<span style="color:#a90d91">avg</span>(<span style="color:#000">num_pages</span>) <span style="color:#a90d91">as</span> <span style="color:#a90d91">integer</span>) <span style="color:#a90d91">as</span> <span style="color:#000">mean</span>,
-  <span style="color:#a90d91">cast</span>(<span style="color:#000">median</span>(<span style="color:#000">num_pages</span>) <span style="color:#a90d91">as</span> <span style="color:#a90d91">integer</span>) <span style="color:#a90d91">as</span> <span style="color:#000">median</span>,
-  <span style="color:#a90d91">mode</span>(<span style="color:#000">num_pages</span>) <span style="color:#a90d91">as</span> <span style="color:#a90d91">mode</span>,
-  <span style="color:#000">percentile_90</span>(<span style="color:#000">num_pages</span>) <span style="color:#a90d91">as</span> <span style="color:#000">p90</span>,
-  <span style="color:#000">percentile_95</span>(<span style="color:#000">num_pages</span>) <span style="color:#a90d91">as</span> <span style="color:#000">p95</span>,
-  <span style="color:#000">percentile_99</span>(<span style="color:#000">num_pages</span>) <span style="color:#a90d91">as</span> <span style="color:#000">p99</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">books</span>;
-</code></pre></div><pre tabindex="0"><code>┌────────────┬──────┬────────┬──────┬─────┬─────┬──────┐
-│ book_count │ mean │ median │ mode │ p90 │ p95 │ p99  │
-├────────────┼──────┼────────┼──────┼─────┼─────┼──────┤
-│ 1483       │ 349  │ 295    │ 256  │ 640 │ 817 │ 1199 │
-└────────────┴──────┴────────┴──────┴─────┴─────┴──────┘
-</code></pre><blockquote>
-<p><strong>Note on extensions</strong>. SQLite is missing a lot of functions compared to other DBMSs like PostgreSQL. But they are easy to add, which is what people do - so it turns out quite a mess.</p>
-<p>Therefore, I decided to make a consistent set of extensions, divided by domain area and compiled for major operating systems. There are few of them there yet, but more are on their way:</p>
-<p><a href="https://github.com/nalgeon/sqlean/">sqlean @ GitHub</a></p>
-</blockquote>
-<p>More fun with statistics. You can plot the data distribution right in the console. Look how cute it is:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#000">slots</span> <span style="color:#a90d91">as</span> (
-  <span style="color:#a90d91">select</span>
-    <span style="color:#000">num_pages</span><span style="color:#000">/</span><span style="color:#1c01ce">100</span> <span style="color:#a90d91">as</span> <span style="color:#000">slot</span>,
-    <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#a90d91">as</span> <span style="color:#000">book_count</span>
-  <span style="color:#a90d91">from</span> <span style="color:#000">books</span>
-  <span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#000">slot</span>
-),
-<span style="color:#a90d91">max</span> <span style="color:#a90d91">as</span> (
-  <span style="color:#a90d91">select</span> <span style="color:#a90d91">max</span>(<span style="color:#000">book_count</span>) <span style="color:#a90d91">as</span> <span style="color:#000">value</span>
-  <span style="color:#a90d91">from</span> <span style="color:#000">slots</span>
-)
-<span style="color:#a90d91">select</span>
-  <span style="color:#000">slot</span>,
-  <span style="color:#000">book_count</span>,
-  <span style="color:#000">printf</span>(<span style="color:#c41a16">&#39;%.&#39;</span> <span style="color:#000">||</span> (<span style="color:#000">book_count</span> <span style="color:#000">*</span> <span style="color:#1c01ce">30</span> <span style="color:#000">/</span> <span style="color:#a90d91">max</span>.<span style="color:#000">value</span>) <span style="color:#000">||</span> <span style="color:#c41a16">&#39;c&#39;</span>, <span style="color:#c41a16">&#39;*&#39;</span>) <span style="color:#a90d91">as</span> <span style="color:#000">bar</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">slots</span>, <span style="color:#a90d91">max</span>
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">slot</span>;
-</code></pre></div><pre tabindex="0"><code>┌──────┬────────────┬────────────────────────────────┐
-│ slot │ book_count │              bar               │
-├──────┼────────────┼────────────────────────────────┤
-│ 0    │ 116        │ *********                      │
-│ 1    │ 254        │ ********************           │
-│ 2    │ 376        │ ****************************** │
-│ 3    │ 285        │ **********************         │
-│ 4    │ 184        │ **************                 │
-│ 5    │ 90         │ *******                        │
-│ 6    │ 54         │ ****                           │
-│ 7    │ 41         │ ***                            │
-│ 8    │ 31         │ **                             │
-│ 9    │ 15         │ *                              │
-│ 10   │ 11         │ *                              │
-│ 11   │ 12         │ *                              │
-│ 12   │ 2          │ *                              │
-└──────┴────────────┴────────────────────────────────┘
-</code></pre><h2 id="performance">Performance</h2>
-<p>SQLite works with hundreds of millions of records just fine. Regular <code>INSERT</code>s show about 240K records per second on my laptop. And if you connect the CSV file as a virtual table (there is an extension for that) - inserts become 2 times faster.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql">.<span style="color:#a90d91">load</span> <span style="color:#000">sqlite3</span><span style="color:#000">-</span><span style="color:#000">vsv</span>
-
-<span style="color:#a90d91">create</span> <span style="color:#000">virtual</span> <span style="color:#a90d91">table</span> <span style="color:#000">temp</span>.<span style="color:#000">blocks_csv</span> <span style="color:#a90d91">using</span> <span style="color:#000">vsv</span>(
-    <span style="color:#000">filename</span><span style="color:#000">=</span><span style="color:#c41a16">&#34;ipblocks.csv&#34;</span>,
-    <span style="color:#a90d91">schema</span><span style="color:#000">=</span><span style="color:#c41a16">&#34;create table x(network text, geoname_id integer, registered_country_geoname_id integer, represented_country_geoname_id integer, is_anonymous_proxy integer, is_satellite_provider integer, postal_code text, latitude real, longitude real, accuracy_radius integer)&#34;</span>,
-    <span style="color:#000">columns</span><span style="color:#000">=</span><span style="color:#1c01ce">10</span>,
-    <span style="color:#000">header</span><span style="color:#000">=</span><span style="color:#a90d91">on</span>,
-    <span style="color:#000">nulls</span><span style="color:#000">=</span><span style="color:#a90d91">on</span>
-);
-</code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql">.<span style="color:#000">timer</span> <span style="color:#a90d91">on</span>
-<span style="color:#a90d91">insert</span> <span style="color:#a90d91">into</span> <span style="color:#000">blocks</span>
-<span style="color:#a90d91">select</span> <span style="color:#000">*</span> <span style="color:#a90d91">from</span> <span style="color:#000">blocks_csv</span>;
-
-<span style="color:#000">Run</span> <span style="color:#000">Time</span>: <span style="color:#a90d91">real</span> <span style="color:#1c01ce">5</span>.<span style="color:#1c01ce">176</span> <span style="color:#a90d91">user</span> <span style="color:#1c01ce">4</span>.<span style="color:#1c01ce">716420</span> <span style="color:#000">sys</span> <span style="color:#1c01ce">0</span>.<span style="color:#1c01ce">403866</span>
-</code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#a90d91">from</span> <span style="color:#000">blocks</span>;
-<span style="color:#1c01ce">3386629</span>
-
-<span style="color:#000">Run</span> <span style="color:#000">Time</span>: <span style="color:#a90d91">real</span> <span style="color:#1c01ce">0</span>.<span style="color:#1c01ce">095</span> <span style="color:#a90d91">user</span> <span style="color:#1c01ce">0</span>.<span style="color:#1c01ce">021972</span> <span style="color:#000">sys</span> <span style="color:#1c01ce">0</span>.<span style="color:#1c01ce">063716</span>
-</code></pre></div><p>There is a popular opinion among developers that SQLite is not suitable for the web, because it doesn&rsquo;t support concurrent access. This is a myth. In the write-ahead log mode (available since long ago), there can be as many concurrent readers as you want. There can be only one concurrent writer, but often one is enough.</p>
-<p>SQLite is a perfect fit for small websites and applications. <a href="https://sqlite.org/">sqlite.org</a> uses SQLite as a database, not bothering with optimization (≈200 requests per page). It handles 700K visits per month and serves pages faster than 95% of websites I&rsquo;ve seen.</p>
-<h2 id="documents-graphs-and-search">Documents, graphs, and search</h2>
-<p>SQLite supports partial indexes and indexes on expressions, as &lsquo;big&rsquo; DBMSs do. You can build indexes on generated columns and even turn SQLite into a document database. Just store raw JSON and build indexes on <code>json_extract()</code>-ed columns:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">create</span> <span style="color:#a90d91">table</span> <span style="color:#000">currency</span>(
-  <span style="color:#000">body</span> <span style="color:#a90d91">text</span>,
-  <span style="color:#000">code</span> <span style="color:#a90d91">text</span> <span style="color:#a90d91">as</span> (<span style="color:#000">json_extract</span>(<span style="color:#000">body</span>, <span style="color:#c41a16">&#39;$.code&#39;</span>)),
-  <span style="color:#000">name</span> <span style="color:#a90d91">text</span> <span style="color:#a90d91">as</span> (<span style="color:#000">json_extract</span>(<span style="color:#000">body</span>, <span style="color:#c41a16">&#39;$.name&#39;</span>))
-);
-
-<span style="color:#a90d91">create</span> <span style="color:#a90d91">index</span> <span style="color:#000">currency_code_idx</span> <span style="color:#a90d91">on</span> <span style="color:#000">currency</span>(<span style="color:#000">code</span>);
-
-<span style="color:#a90d91">insert</span> <span style="color:#a90d91">into</span> <span style="color:#000">currency</span>
-<span style="color:#a90d91">select</span> <span style="color:#000">value</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">json_each</span>(<span style="color:#000">readfile</span>(<span style="color:#c41a16">&#39;currency.sample.json&#39;</span>));
-</code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">explain</span> <span style="color:#000">query</span> <span style="color:#000">plan</span>
-<span style="color:#a90d91">select</span> <span style="color:#000">name</span> <span style="color:#a90d91">from</span> <span style="color:#000">currency</span> <span style="color:#a90d91">where</span> <span style="color:#000">code</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#39;EUR&#39;</span>;
-
-<span style="color:#000">QUERY</span> <span style="color:#000">PLAN</span>
-<span style="color:#000">`</span><span style="color:#177500">--SEARCH TABLE currency USING INDEX currency_code_idx (code=?)
-</span></code></pre></div><blockquote>
-<p>You can also use SQLite as a graph database. A bunch of complex <code>WITH RECURSIVE</code> will do the trick, or maybe you&rsquo;ll prefer to add a bit of Python:</p>
-<p><a href="https://github.com/dpapathanasiou/simple-graph">simple-graph @ GitHub</a></p>
-</blockquote>
-<p>Full-text search works out of the box:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">create</span> <span style="color:#000">virtual</span> <span style="color:#a90d91">table</span> <span style="color:#000">books_fts</span>
-<span style="color:#a90d91">using</span> <span style="color:#000">fts5</span>(<span style="color:#000">title</span>, <span style="color:#000">author</span>, <span style="color:#000">publisher</span>);
-
-<span style="color:#a90d91">insert</span> <span style="color:#a90d91">into</span> <span style="color:#000">books_fts</span>
-<span style="color:#a90d91">select</span> <span style="color:#000">title</span>, <span style="color:#000">author</span>, <span style="color:#000">publisher</span> <span style="color:#a90d91">from</span> <span style="color:#000">books</span>;
-
-<span style="color:#a90d91">select</span>
-  <span style="color:#000">author</span>,
-  <span style="color:#000">substr</span>(<span style="color:#000">title</span>, <span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">30</span>) <span style="color:#a90d91">as</span> <span style="color:#000">title</span>,
-  <span style="color:#000">substr</span>(<span style="color:#000">publisher</span>, <span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">10</span>) <span style="color:#a90d91">as</span> <span style="color:#000">publisher</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">books_fts</span>
-<span style="color:#a90d91">where</span> <span style="color:#000">books_fts</span> <span style="color:#a90d91">match</span> <span style="color:#c41a16">&#39;ann&#39;</span>
-<span style="color:#a90d91">limit</span> <span style="color:#1c01ce">5</span>;
-</code></pre></div><pre tabindex="0"><code>┌─────────────────────┬────────────────────────────────┬────────────┐
-│       author        │             title              │ publisher  │
-├─────────────────────┼────────────────────────────────┼────────────┤
-│ Ruby Ann Boxcar     │ Ruby Ann's Down Home Trailer P │ Citadel    │
-│ Ruby Ann Boxcar     │ Ruby Ann's Down Home Trailer P │ Citadel    │
-│ Lynne Ann DeSpelder │ The Last Dance: Encountering D │ McGraw-Hil │
-│ Daniel Defoe        │ Robinson Crusoe                │ Ann Arbor  │
-│ Ann Thwaite         │ Waiting for the Party: The Lif │ David R. G │
-└─────────────────────┴────────────────────────────────┴────────────┘
-</code></pre><p>Maybe you need an in-memory database for intermediate computations? Single line of python code:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">db</span> <span style="color:#000">=</span> <span style="color:#000">sqlite3</span><span style="color:#000">.</span><span style="color:#000">connect</span>(<span style="color:#c41a16">&#34;:memory:&#34;</span>)
-</code></pre></div><p>You can even access it from multiple connections:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">db</span> <span style="color:#000">=</span> <span style="color:#000">sqlite3</span><span style="color:#000">.</span><span style="color:#000">connect</span>(<span style="color:#c41a16">&#34;file::memory:?cache=shared&#34;</span>)
-</code></pre></div><h2 id="and-so-much-more">And so much more</h2>
-<p>There are fancy window functions (just like in PostgreSQL). <code>UPSERT</code>, <code>UPDATE FROM</code>, and <code>generate_series()</code>. R-Tree indexes. Regular expressions, fuzzy-search, and geo. In terms of features, SQLite can compete with any &lsquo;big&rsquo; DBMS.</p>
-<p>There is also great tooling around SQLite. I especially like <a href="https://datasette.io/">Datasette</a> - an open-source tool for exploring and publishing SQLite datasets. And <a href="https://dbeaver.io/">DBeaver</a> is an excellent open-source database IDE with the latest SQLite versions support.</p>
-<p>I hope this article will inspire you to try SQLite. Thanks for reading!</p>
-<p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
-<p><a href="https://news.ycombinator.com/item?id=26580614">Comments on Hacker News</a></p>
 ]]></content:encoded></item></channel></rss>
