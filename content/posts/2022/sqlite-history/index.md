@@ -31,6 +31,6 @@ By default, SQLite stores the history file in the user's home directory and name
 
 SQLite writes the history to a file when the console exits normally, so in case of the computer or CLI crash the commands executed since the last `sqlite3` launch will be lost.
 
-History recording is not the only feature of the console. SQLite CLI makes it easy to import and export data or work with several databases at the same time. Debugging multi-line queries is quite a challenge, though.
+History recording is not the only feature of the console. SQLite CLI makes it easy to import and export data or work with several databases at the same time. Debugging [multi-line queries](/sqlite-multiline/) is quite a challenge, though.
 
 _Follow **[@ohmypy](https://twitter.com/ohmypy)** on Twitter to keep up with new posts 🚀_
