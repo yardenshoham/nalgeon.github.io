@@ -1,4 +1,103 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 24 Apr 2022 21:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Multi-line queries in SQLite shell</title><link>https://antonz.org/sqlite-multiline/</link><pubDate>Sun, 24 Apr 2022 21:30:00 +0000</pubDate><guid>https://antonz.org/sqlite-multiline/</guid><description>How to edit a big query without leaving the CLI</description><content:encoded><![CDATA[<p>Just after writing that debugging multi-line queries <a href="/sqlite-history/">in SQLite shell</a> is not easy, I discovered a cool trick on the sqlite forum:</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Mon, 02 May 2022 13:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Page iterator in Python</title><link>https://antonz.org/page-iterator/</link><pubDate>Mon, 02 May 2022 13:00:00 +0000</pubDate><guid>https://antonz.org/page-iterator/</guid><description>Traverse dataset in pages for faster batch processing.</description><content:encoded><![CDATA[<p>Suppose you are counting stats for a huge dataset of toys sold across the country over the past year:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">reader</span> <span style="color:#000">=</span> <span style="color:#000">fetch_toys</span>()
+<span style="color:#a90d91">for</span> <span style="color:#000">item</span> <span style="color:#000">in</span> <span style="color:#000">reader</span>:
+    <span style="color:#000">process_single</span>(<span style="color:#000">item</span>)
+</code></pre></div><p><code>process_single()</code> takes 10 ms, so 400 million toys will be processed in 46 days 😱</p>
+<p>After a number of intense conversations, you manage to convince the developers that it&rsquo;s not very fast. <code>process_batch()</code> function enters the scene. It processes 10,000 toys in 1 second. It means 11 hours for all the toys — much nicer.</p>
+<p>Now we need to iterate over the dataset in batches of 10 thousand records. This is where the page iterator comes in handy!</p>
+<h2 id="naive-paginator">Naive paginator</h2>
+<p>Let&rsquo;s go through the initial sequence, gradually filling the page. As soon as it is filled, return it through <code>yield</code> and start filling in the next one. Continue until the original sequence is exhausted:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">paginate</span>(<span style="color:#000">iterable</span>, <span style="color:#000">page_size</span>):
+    <span style="color:#000">page</span> <span style="color:#000">=</span> []
+    <span style="color:#a90d91">for</span> <span style="color:#000">item</span> <span style="color:#000">in</span> <span style="color:#000">iterable</span>:
+        <span style="color:#000">page</span><span style="color:#000">.</span><span style="color:#000">append</span>(<span style="color:#000">item</span>)
+        <span style="color:#a90d91">if</span> <span style="color:#a90d91">len</span>(<span style="color:#000">page</span>) <span style="color:#000">==</span> <span style="color:#000">page_size</span>:
+            <span style="color:#a90d91">yield</span> <span style="color:#000">page</span>
+            <span style="color:#000">page</span> <span style="color:#000">=</span> []
+    <span style="color:#a90d91">yield</span> <span style="color:#000">page</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">reader</span> <span style="color:#000">=</span> <span style="color:#000">fetch_toys</span>()
+<span style="color:#000">page_size</span> <span style="color:#000">=</span> <span style="color:#1c01ce">10_000</span>
+<span style="color:#a90d91">for</span> <span style="color:#000">page</span> <span style="color:#000">in</span> <span style="color:#000">paginate</span>(<span style="color:#000">reader</span>, <span style="color:#000">page_size</span>):
+    <span style="color:#000">process_batch</span>(<span style="color:#000">page</span>)
+</code></pre></div><p>The implementation is working, but there is a problem. Such page-by-page traversal is noticeably slower than the one-by-one iteration.</p>
+<h2 id="iteration-speed">Iteration speed</h2>
+<p>Let&rsquo;s compare two traversals — one-by-one and paginated:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">one_by_one</span>(<span style="color:#000">a</span>, <span style="color:#000">b</span>):
+    <span style="color:#c41a16">&#34;&#34;&#34;Processes records one-by-one, without pagination&#34;&#34;&#34;</span>
+    <span style="color:#000">rdr</span> <span style="color:#000">=</span> <span style="color:#000">reader</span>(<span style="color:#000">a</span>, <span style="color:#000">b</span>)
+    <span style="color:#a90d91">for</span> <span style="color:#000">record</span> <span style="color:#000">in</span> <span style="color:#000">rdr</span>:
+        <span style="color:#000">process_single</span>(<span style="color:#000">record</span>)
+
+<span style="color:#a90d91">def</span> <span style="color:#000">batch</span>(<span style="color:#000">page_size</span>, <span style="color:#000">a</span>, <span style="color:#000">b</span>):
+    <span style="color:#c41a16">&#34;&#34;&#34;Processes records in batches, with pagination&#34;&#34;&#34;</span>
+    <span style="color:#000">rdr</span> <span style="color:#000">=</span> <span style="color:#000">reader</span>(<span style="color:#000">a</span>, <span style="color:#000">b</span>)
+    <span style="color:#a90d91">for</span> <span style="color:#000">page</span> <span style="color:#000">in</span> <span style="color:#000">paginate</span>(<span style="color:#000">rdr</span>, <span style="color:#000">page_size</span>):
+        <span style="color:#000">process_batch</span>(<span style="color:#000">page</span>)
+
+<span style="color:#000">times</span> <span style="color:#000">=</span> <span style="color:#1c01ce">10</span>
+
+<span style="color:#000">page_size</span> <span style="color:#000">=</span> <span style="color:#1c01ce">10_000</span>
+<span style="color:#000">a</span> <span style="color:#000">=</span> <span style="color:#1c01ce">1_000_000</span>
+<span style="color:#000">b</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2_000_000</span>
+
+<span style="color:#000">fn</span> <span style="color:#000">=</span> <span style="color:#a90d91">lambda</span>: <span style="color:#000">one_by_one</span>(<span style="color:#000">a</span>, <span style="color:#000">b</span>)
+<span style="color:#000">total</span> <span style="color:#000">=</span> <span style="color:#000">timeit</span><span style="color:#000">.</span><span style="color:#000">timeit</span>(<span style="color:#000">fn</span>, <span style="color:#000">number</span><span style="color:#000">=</span><span style="color:#000">times</span>)
+<span style="color:#000">it_time</span> <span style="color:#000">=</span> <span style="color:#a90d91">round</span>(<span style="color:#000">total</span> <span style="color:#000">*</span> <span style="color:#1c01ce">1000</span> <span style="color:#000">/</span> <span style="color:#000">times</span>)
+<span style="color:#a90d91">print</span>(<span style="color:#c41a16">f</span><span style="color:#c41a16">&#34;One-by-one (baseline): </span><span style="color:#c41a16">{</span><span style="color:#000">it_time</span><span style="color:#c41a16">}</span><span style="color:#c41a16"> ms&#34;</span>)
+
+<span style="color:#000">fn</span> <span style="color:#000">=</span> <span style="color:#a90d91">lambda</span>: <span style="color:#000">batch</span>(<span style="color:#000">page_size</span>, <span style="color:#000">a</span>, <span style="color:#000">b</span>)
+<span style="color:#000">total</span> <span style="color:#000">=</span> <span style="color:#000">timeit</span><span style="color:#000">.</span><span style="color:#000">timeit</span>(<span style="color:#000">fn</span>, <span style="color:#000">number</span><span style="color:#000">=</span><span style="color:#000">times</span>)
+<span style="color:#000">it_time</span> <span style="color:#000">=</span> <span style="color:#a90d91">round</span>(<span style="color:#000">total</span> <span style="color:#000">*</span> <span style="color:#1c01ce">1000</span> <span style="color:#000">/</span> <span style="color:#000">times</span>)
+<span style="color:#a90d91">print</span>(<span style="color:#c41a16">f</span><span style="color:#c41a16">&#34;Fill page with append(): </span><span style="color:#c41a16">{</span><span style="color:#000">it_time</span><span style="color:#c41a16">}</span><span style="color:#c41a16"> ms&#34;</span>)
+</code></pre></div><p>Here is the result for 1 million records and a page size of 10 thousand:</p>
+<pre tabindex="0"><code>One-by-one (baseline):   161 ms
+Fill page with append(): 227 ms
+</code></pre><p>Page-by-page iteration is almost 1.5 times slower!</p>
+<p>At each iteration of the loop, we create a new empty list and then gradually fill it in. Python has to constantly increase the size of the underlying array, and this is an expensive operation — O(n) of the number of elements in the list.</p>
+<h2 id="fixed-page-size">Fixed page size</h2>
+<p>Let&rsquo;s create a list of the required size in advance and use it for all pages:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">paginate</span>(<span style="color:#000">iterable</span>, <span style="color:#000">page_size</span>):
+    <span style="color:#000">page</span> <span style="color:#000">=</span> [<span style="color:#a90d91">None</span>] <span style="color:#000">*</span> <span style="color:#000">page_size</span>
+    <span style="color:#000">idx</span> <span style="color:#000">=</span> <span style="color:#1c01ce">0</span>
+    <span style="color:#a90d91">for</span> <span style="color:#000">item</span> <span style="color:#000">in</span> <span style="color:#000">iterable</span>:
+        <span style="color:#000">page</span>[<span style="color:#000">idx</span>] <span style="color:#000">=</span> <span style="color:#000">item</span>
+        <span style="color:#000">idx</span> <span style="color:#000">+=</span> <span style="color:#1c01ce">1</span>
+        <span style="color:#a90d91">if</span> <span style="color:#000">idx</span> <span style="color:#000">==</span> <span style="color:#000">page_size</span>:
+            <span style="color:#a90d91">yield</span> <span style="color:#000">page</span>
+            <span style="color:#000">idx</span> <span style="color:#000">=</span> <span style="color:#1c01ce">0</span>
+    <span style="color:#a90d91">yield</span> <span style="color:#000">page</span>[:<span style="color:#000">idx</span>]
+</code></pre></div><p>Compare once again:</p>
+<pre tabindex="0"><code>One-by-one (baseline):   161 ms
+Fill page with append(): 227 ms
+Use fixed-size page:     162 ms
+</code></pre><p>Much faster! Fixed page algorithm is as fast as the ordinary one-by-one traversal.</p>
+<h2 id="slicing-iterator">Slicing iterator</h2>
+<p>Can we do even better? Algorithmically, no. But practically, yes — if we move most of the operations from Python code to C library code. The <code>itertools()</code> module and its <code>islice()</code> function may help:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">paginate</span>(<span style="color:#000">iterable</span>, <span style="color:#000">page_size</span>):
+    <span style="color:#000">it</span> <span style="color:#000">=</span> <span style="color:#a90d91">iter</span>(<span style="color:#000">iterable</span>)
+    <span style="color:#000">slicer</span> <span style="color:#000">=</span> <span style="color:#a90d91">lambda</span>: <span style="color:#a90d91">list</span>(<span style="color:#000">itertools</span><span style="color:#000">.</span><span style="color:#000">islice</span>(<span style="color:#000">it</span>, <span style="color:#000">page_size</span>))
+    <span style="color:#a90d91">return</span> <span style="color:#a90d91">iter</span>(<span style="color:#000">slicer</span>, [])
+</code></pre></div><p>Here is what&rsquo;s going on:</p>
+<ul>
+<li><code>islice()</code> creates an iterator (let&rsquo;s call it a slicer) that traverses the passed sequence until it yields <code>page_size</code> elements;</li>
+<li><code>list()</code> fetches elements from the slicer, thus creating a page;</li>
+<li>since <code>islice()</code> runs on top of the main iterator, the next time it is called, it will continue from the same place where it left off before;</li>
+<li>the <code>iter(slicer, [])</code> expression creates an iterator that calls the slicer at each step;</li>
+<li>thus, the <code>paginate()</code> function returns an iterator, which at each step yields the next page through the slicer, traversing the main sequence until it ends.</li>
+</ul>
+<p>Look how good this implementation is:</p>
+<pre tabindex="0"><code>One-by-one (baseline):   161 ms
+Fill page with append(): 227 ms
+Use fixed-size page:     162 ms
+Use islice:               93 ms
+</code></pre><p>40% faster than the one-by-one iterator!</p>
+<h2 id="summary">Summary</h2>
+<p>Page-by-page traversal works fine whenever a batch operation is much faster than a sequence of single operations. In order not to implement such traversal every time from scratch, it is convenient to use a <em>page iterator</em>.</p>
+<p>Filling the page with <code>.append()</code> is slow due to array resizing. It is better to use a fixed-size list, or even better, iteration based on <code>itertools.islice()</code></p>
+<p>Totally recommend it.</p>
+<p><a href="https://replit.com/@antonz/page-iterator#main.py">Playground</a></p>
+<p><em>Follow <strong><a href="https://twitter.com/ohmypy">@ohmypy</a></strong> on Twitter to keep up with new posts 🚀</em></p>
+]]></content:encoded></item><item><title>Multi-line queries in SQLite shell</title><link>https://antonz.org/sqlite-multiline/</link><pubDate>Sun, 24 Apr 2022 21:30:00 +0000</pubDate><guid>https://antonz.org/sqlite-multiline/</guid><description>How to edit a big query without leaving the CLI</description><content:encoded><![CDATA[<p>Just after writing that debugging multi-line queries <a href="/sqlite-history/">in SQLite shell</a> is not easy, I discovered a cool trick on the sqlite forum:</p>
 <p>Use <code>Ctrl+V</code>, <code>Ctrl+J</code> instead of <code>Enter</code> for new lines. After that, edit the query with the <code>↑</code> button.</p>
 <div class="row">
 <div class="col-xs-12 col-sm-7">
@@ -585,299 +684,4 @@ T↓ R&lt;R0
 <p>Fortunately, IBCS published the guide under the permissive CC BY-SA license. So with some hard work and a bunch of Python I&rsquo;ve created a <a href="https://github.com/nalgeon/dataviz">web version</a>, <a href="https://github.com/nalgeon/dataviz/releases/download/1.1/data-visualization-guide.epub">EPUB</a> and <a href="https://github.com/nalgeon/dataviz/releases/download/1.1/data-visualization-guide.pdf">PDF</a>.</p>
 <p>IBCS Association put a lot of thought it the guide, and the result really impressed me. So I encourage you to try it out.</p>
 <p><em>Thanks for reading! Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
-]]></content:encoded></item><item><title>How to make an awesome Python package in 2021</title><link>https://antonz.org/python-packaging/</link><pubDate>Tue, 06 Apr 2021 20:30:00 +0300</pubDate><guid>https://antonz.org/python-packaging/</guid><description>The one to be proud of.</description><content:encoded><![CDATA[<p>If you are like me, every once in a while you write a useful python utility and want to share it with your colleagues. The best way to do this is to make a package: it easy to install and saves from copy-pasting.</p>
-<p>If you are like me, you might be thinking that creating packages is a real headache. Well, that&rsquo;s not the case anymore. And I am going to prove it with this step-by-step guide. Just three main steps (and a bunch of optional ones) accompanied by few GitHub links. See for yourself:</p>
-<h2 id="1-stub">1. Stub</h2>
-<p>We will create <code>podsearch</code> - a utility that searches for podcasts in iTunes. Let&rsquo;s create a directory and a virtual environment:</p>
-<pre tabindex="0"><code>$ mkdir podsearch
-$ cd podsearch
-$ python3 -m venv env
-$ . env/bin/activate
-</code></pre><p>Define a minimal package structure:</p>
-<pre tabindex="0"><code>.
-├── .gitignore
-└── podsearch
-    └── __init__.py
-</code></pre><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#c41a16">&#34;&#34;&#34;Let&#39;s find some podcasts!&#34;&#34;&#34;</span>
-
- <span style="color:#000">__version__</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#34;0.1.0&#34;</span>
-
-
- <span style="color:#a90d91">def</span> <span style="color:#000">search</span>(<span style="color:#000">name</span>, <span style="color:#000">count</span><span style="color:#000">=</span><span style="color:#1c01ce">5</span>):
-     <span style="color:#c41a16">&#34;&#34;&#34;Search podcast by name.&#34;&#34;&#34;</span>
-     <span style="color:#a90d91">raise</span> <span style="color:#000">NotImplementedError</span>()
-</code></pre></div><h2 id="2-test-package">2. Test package</h2>
-<p>Creating a package in Python used to be a troublesome task. Fortunately, nowadays there is a great little <a href="https://flit.readthedocs.io/en/latest/">flit</a> utility which simplifies everything. Let&rsquo;s install it:</p>
-<pre tabindex="0"><code>pip install flit
-</code></pre><p>And create package description:</p>
-<pre tabindex="0"><code>$ flit init
-Module name [podsearch]:
-Author [Anton Zhiyanov]:
-Author email [m@antonz.org]:
-Home page [https://github.com/nalgeon/podsearch-py]:
-Choose a license (see http://choosealicense.com/ for more info)
-1. MIT - simple and permissive
-2. Apache - explicitly grants patent rights
-3. GPL - ensures that code based on this is shared with the same terms
-4. Skip - choose a license later
-Enter 1-4 [1]: 1
-
-Written pyproject.toml; edit that file to add optional extra info.
-</code></pre><p><a href="https://github.com/nalgeon/podsearch-py/blob/main/pyproject.toml">pyproject.toml</a></p>
-<p>Flit has created <code>pyproject.toml</code> - the project metadata file. It already has everything you need to publish the package to the public repository - PyPI.</p>
-<p>Sign up for <a href="https://test.pypi.org/">TestPyPi</a> (test repository) and <a href="http://pypi.org/">PyPI</a> (the main one). They are completely independent, so you will need two accounts.</p>
-<p>Setup access to repositories in the <code>~/.pypirc</code>:</p>
-<pre tabindex="0"><code>[distutils]
-index-servers =
-  pypi
-  pypitest
-
-[pypi]
-username: nalgeon  # replace with your PyPI username
-
-[pypitest]
-repository: https://test.pypi.org/legacy/
-username: nalgeon  # replace with your TestPyPI username
-</code></pre><p>And publish the package to the test repository:</p>
-<pre tabindex="0"><code>$ flit publish --repository pypitest
-Found 4 files tracked in git
-...
-Package is at https://test.pypi.org/project/podsearch/
-</code></pre><p>Done! The package is available on <a href="https://test.pypi.org/project/podsearch/">TestPyPi</a>.</p>
-<h2 id="3-public-package">3. Public package</h2>
-<p>Let&rsquo;s improve the code so that it actually searches for podcasts:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#177500"># ...</span>
-
-<span style="color:#000">SEARCH_URL</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#34;https://itunes.apple.com/search&#34;</span>
-
-<span style="color:#000">@dataclass</span>
-<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Podcast</span>:
-    <span style="color:#c41a16">&#34;&#34;&#34;Podcast metadata.&#34;&#34;&#34;</span>
-
-    <span style="color:#a90d91">id</span>: <span style="color:#a90d91">str</span>
-    <span style="color:#000">name</span>: <span style="color:#a90d91">str</span>
-    <span style="color:#000">author</span>: <span style="color:#a90d91">str</span>
-    <span style="color:#000">url</span>: <span style="color:#a90d91">str</span>
-    <span style="color:#000">feed</span>: <span style="color:#000">Optional</span>[<span style="color:#a90d91">str</span>] <span style="color:#000">=</span> <span style="color:#a90d91">None</span>
-    <span style="color:#000">category</span>: <span style="color:#000">Optional</span>[<span style="color:#a90d91">str</span>] <span style="color:#000">=</span> <span style="color:#a90d91">None</span>
-    <span style="color:#000">image</span>: <span style="color:#000">Optional</span>[<span style="color:#a90d91">str</span>] <span style="color:#000">=</span> <span style="color:#a90d91">None</span>
-
-
-<span style="color:#a90d91">def</span> <span style="color:#000">search</span>(<span style="color:#000">name</span>: <span style="color:#a90d91">str</span>, <span style="color:#000">limit</span>: <span style="color:#a90d91">int</span> <span style="color:#000">=</span> <span style="color:#1c01ce">5</span>) <span style="color:#000">-&gt;</span> <span style="color:#000">List</span>[<span style="color:#000">Podcast</span>]:
-    <span style="color:#c41a16">&#34;&#34;&#34;Search podcast by name.&#34;&#34;&#34;</span>
-    <span style="color:#000">params</span> <span style="color:#000">=</span> {<span style="color:#c41a16">&#34;term&#34;</span>: <span style="color:#000">name</span>, <span style="color:#c41a16">&#34;limit&#34;</span>: <span style="color:#000">limit</span>, <span style="color:#c41a16">&#34;media&#34;</span>: <span style="color:#c41a16">&#34;podcast&#34;</span>}
-    <span style="color:#000">response</span> <span style="color:#000">=</span> <span style="color:#000">_get</span>(<span style="color:#000">url</span><span style="color:#000">=</span><span style="color:#000">SEARCH_URL</span>, <span style="color:#000">params</span><span style="color:#000">=</span><span style="color:#000">params</span>)
-    <span style="color:#a90d91">return</span> <span style="color:#000">_parse</span>(<span style="color:#000">response</span>)
-</code></pre></div><p>And publish to the main repository - PyPI. Perform this step only after your package has working code that does something useful. Do not publish non-working packages and stubs.</p>
-<pre tabindex="0"><code>flit publish
-</code></pre><p>Done! Time to <a href="https://pypi.org/project/podsearch/">share it with colleagues</a>.</p>
-<p>To make the package a pleasure to use, I recommend that you follow a few more steps.</p>
-<h2 id="a-readme-and-changelog">A. Readme and changelog</h2>
-<p>No one likes to write documentation. But without docs, it is unlikely that people will want to install your package, so let&rsquo;s add <code>README.md</code> and <code>CHANGELOG.md</code>.</p>
-<ul>
-<li><a href="https://github.com/nalgeon/podsearch-py/blob/main/README.md">README.md</a></li>
-<li><a href="https://github.com/nalgeon/podsearch-py/blob/main/CHANGELOG.md">CHANGELOG.md</a></li>
-</ul>
-<p>Add readme to the <code>pyproject.toml</code>, so that PyPI shows it on the package page:</p>
-<pre tabindex="0"><code>description-file = &quot;README.md&quot;
-</code></pre><p>Also specify the minimal supported Python version:</p>
-<pre tabindex="0"><code>requires-python = &quot;&gt;=3.7&quot;
-</code></pre><p>Update the version in <code>__init__.py</code> and publish the package via <code>flit publish</code>:</p>
-<p><img src="pypi.jpg" alt="Package on PyPi"></p>
-<p>Mmm, nice.</p>
-<h2 id="b-linters-and-tests">B. Linters and tests</h2>
-<p>Let&rsquo;s take care of formatting (<code>black</code>), test coverage (<code>coverage</code>), code quality (<code>flake8</code>, <code>pylint</code>, <code>mccabe</code>), and static analysis (<code>mypy</code>). We will run everything through <code>tox</code>.</p>
-<pre tabindex="0"><code>$ pip install black coverage flake8 mccabe mypy pylint pytest tox
-</code></pre><p>Create <code>tox</code> configuration in <code>tox.ini</code>:</p>
-<pre tabindex="0"><code>[tox]
-isolated_build = True
-envlist = py37,py38,py39
-
-[testenv]
-deps =
-    black
-    coverage
-    flake8
-    mccabe
-    mypy
-    pylint
-    pytest
-commands =
-    black podsearch
-    flake8 podsearch
-    pylint podsearch
-    mypy podsearch
-    coverage erase
-    coverage run --include=podsearch/* -m pytest -ra
-    coverage report -m
-</code></pre><p><a href="https://github.com/nalgeon/podsearch-py/blob/main/tox.ini">tox.ini</a></p>
-<p>And run all the checks:</p>
-<pre tabindex="0"><code>$ tox -e py39
-...
-py39 run-test: commands[0] | black podsearch
-All done! ✨ 🍰 ✨
-...
-py39 run-test: commands[2] | pylint podsearch
-Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
-...
-py39 run-test: commands[6] | coverage report -m
-TOTAL 100%
-...
-py39: commands succeeded
-congratulations :)
-</code></pre><p>Lovely! The linters are happy, the tests passed, the coverage is 100%.</p>
-<h2 id="c-cloud-build">C. Cloud build</h2>
-<p>Every solid open-source project runs cloud tests after each commit, so we will too. A nice side effect is having beautiful badges in the readme ツ</p>
-<p>Let&rsquo;s build the project with <a href="https://github.com/features/actions">GitHub Actions</a>, check test coverage with <a href="https://about.codecov.io/">Codecov</a> and code quality with <a href="https://codeclimate.com/">Code Climate</a>.</p>
-<p>You will have to sign up for Codecov and Code Climate (both support GitHub login) and enable package repository in the settings.</p>
-<p>After that, add the GitHub Actions build config to <code>.github/workflows/build.yml</code>:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#177500"># ...</span>
-<span style="color:#000">jobs</span>:
-    <span style="color:#000">build</span>:
-        <span style="color:#000">runs-on</span>: <span style="color:#1c01ce">ubuntu-latest</span>
-        <span style="color:#000">strategy</span>:
-            <span style="color:#000">matrix</span>:
-                <span style="color:#000">python-version</span>: [<span style="color:#1c01ce">3.7</span>, <span style="color:#1c01ce">3.8</span>, <span style="color:#1c01ce">3.9</span>]
-
-        <span style="color:#000">env</span>:
-            <span style="color:#000">USING_COVERAGE</span>: <span style="color:#c41a16">&#34;3.9&#34;</span>
-
-        <span style="color:#000">steps</span>:
-            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Checkout sources</span>
-              <span style="color:#000">uses</span>: <span style="color:#1c01ce">actions/checkout@v2</span>
-
-            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Set up Python</span>
-              <span style="color:#000">uses</span>: <span style="color:#1c01ce">actions/setup-python@v2</span>
-              <span style="color:#000">with</span>:
-                  <span style="color:#000">python-version</span>: <span style="color:#1c01ce">${{ matrix.python-version }}</span>
-
-            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Install dependencies</span>
-              <span style="color:#000">run</span>: |<span style="color:#c41a16">
-</span><span style="color:#c41a16">                  python -m pip install --upgrade pip
-</span><span style="color:#c41a16">                  python -m pip install black coverage flake8 flit mccabe mypy pylint pytest tox tox-gh-actions</span>                  
-
-            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Run tox</span>
-              <span style="color:#000">run</span>: |<span style="color:#c41a16">
-</span><span style="color:#c41a16">                  </span>                  <span style="color:#1c01ce">python -m tox</span>
-
-            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Upload coverage to Codecov</span>
-              <span style="color:#000">uses</span>: <span style="color:#1c01ce">codecov/codecov-action@v1</span>
-              <span style="color:#000">if</span>: <span style="color:#1c01ce">contains(env.USING_COVERAGE, matrix.python-version)</span>
-              <span style="color:#000">with</span>:
-                  <span style="color:#000">fail_ci_if_error</span>: <span style="color:#a90d91">true</span>
-</code></pre></div><p><a href="https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/build.yml">build.yml</a></p>
-<p>GitHub runs tests via <code>tox</code> - just as we did. <code>tox-gh-actions</code> package and <code>USING_COVERAGE</code> settings ensure that <code>tox</code> uses the same Python version as GitHub Actions themself, as required by <code>strategy.matrix</code> (I learned this clever trick from <a href="https://hynek.me/articles/python-github-actions/">Hynek Schlawak</a>).</p>
-<p>The last step sends test coverage to Codecov. Code Climate does not need a separate step - it spots repository changes automatically.</p>
-<p>Now commit, push, and enjoy the result in a minute. And let everyone enjoy as well - add badges to <code>README.md</code>:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-markdown" data-lang="markdown">[![PyPI Version][pypi-image]][pypi-url]
-[![Build Status][build-image]][build-url]
-[![Code Coverage][coverage-image]][coverage-url]
-[![Code Quality][quality-image]][quality-url]
-
-...
-
-<span style="color:#177500">&lt;!-- Badges --&gt;</span>
-
-[pypi-image]: https://img.shields.io/pypi/v/podsearch
-[pypi-url]: https://pypi.org/project/podsearch/
-[build-image]: https://github.com/nalgeon/podsearch-py/actions/workflows/build.yml/badge.svg
-[build-url]: https://github.com/nalgeon/podsearch-py/actions/workflows/build.yml
-[coverage-image]: https://codecov.io/gh/nalgeon/podsearch-py/branch/main/graph/badge.svg
-[coverage-url]: https://codecov.io/gh/nalgeon/podsearch-py
-[quality-image]: https://api.codeclimate.com/v1/badges/3130fa0ba3b7993fbf0a/maintainability
-[quality-url]: https://codeclimate.com/github/nalgeon/podsearch-py
-</code></pre></div><p>Aren&rsquo;t they cute?</p>
-<p><img class="img-bordered-thin" alt="Readme badges" src="badges.png"></p>
-<h2 id="d-task-automation">D. Task automation</h2>
-<p><code>tox</code> is fine, but not very handy for development. It&rsquo;s faster to run individual commands like <code>pylint</code>, <code>coverage</code> etc. But they are quite verbose, so we&rsquo;ll automate the boring stuff.</p>
-<p>Let&rsquo;s create short aliases for frequent actions with <a href="/makefile-automation/">Makefile</a>:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Makefile" data-lang="Makefile"><span style="color:#000">.DEFAULT_GOAL</span> <span style="color:#000">:=</span> <span style="color:#a90d91">help</span>
-<span style="color:#000">.PHONY</span><span style="color:#000">:</span> <span style="color:#000">coverage</span> <span style="color:#000">deps</span> <span style="color:#000">help</span> <span style="color:#000">lint</span> <span style="color:#000">push</span> <span style="color:#000">test</span>
-
-<span style="color:#000">coverage</span><span style="color:#000">:</span>  <span style="color:#177500">## Run tests with coverage
-</span><span style="color:#177500"></span>	coverage erase
-	coverage run --include<span style="color:#000">=</span>podsearch/* -m pytest -ra
-	coverage report -m
-
-<span style="color:#000">deps</span><span style="color:#000">:</span>  <span style="color:#177500">## Install dependencies
-</span><span style="color:#177500"></span>	pip install black coverage flake8 mccabe mypy pylint pytest tox
-
-<span style="color:#000">lint</span><span style="color:#000">:</span>  <span style="color:#177500">## Lint and static-check
-</span><span style="color:#177500"></span>	flake8 podsearch
-	pylint podsearch
-	mypy podsearch
-
-<span style="color:#000">push</span><span style="color:#000">:</span>  <span style="color:#177500">## Push code with tags
-</span><span style="color:#177500"></span>	git push <span style="color:#000">&amp;&amp;</span> git push --tags
-
-<span style="color:#000">test</span><span style="color:#000">:</span>  <span style="color:#177500">## Run tests
-</span><span style="color:#177500"></span>	pytest -ra
-</code></pre></div><p><a href="https://github.com/nalgeon/podsearch-py/blob/main/Makefile">Makefile</a></p>
-<p>Here are our tasks:</p>
-<pre tabindex="0"><code>$ make help
-Usage: make [task]
-
-task                 help
-------               ----
-coverage             Run tests with coverage
-deps                 Install dependencies
-lint                 Lint and static-check
-push                 Push code with tags
-test                 Run tests
-help                 Show help message
-</code></pre><p>To make the code more DRY, replace raw <code>build.yml</code> steps with <code>make</code> calls:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">- <span style="color:#000">name</span>: <span style="color:#1c01ce">Install dependencies</span>
-  <span style="color:#000">run</span>: |<span style="color:#c41a16">
-</span><span style="color:#c41a16">      </span>      <span style="color:#1c01ce">make deps</span>
-
-- <span style="color:#000">name</span>: <span style="color:#1c01ce">Run tox</span>
-  <span style="color:#000">run</span>: |<span style="color:#c41a16">
-</span><span style="color:#c41a16">      </span>      <span style="color:#1c01ce">make tox</span>
-</code></pre></div><h2 id="e-cloud-publish">E. Cloud publish</h2>
-<p>GitHub is quite capable of running <code>flit publish</code> for us. Let&rsquo;s create a separate workflow:</p>
-<!-- {% raw %} -->
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#000">name</span>: <span style="color:#1c01ce">publish</span>
-
-<span style="color:#000">on</span>:
-    <span style="color:#000">release</span>:
-        <span style="color:#000">types</span>: [<span style="color:#1c01ce">created]</span>
-
-<span style="color:#000">jobs</span>:
-    <span style="color:#000">publish</span>:
-        <span style="color:#000">runs-on</span>: <span style="color:#1c01ce">ubuntu-latest</span>
-        <span style="color:#000">steps</span>:
-            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Checkout sources</span>
-              <span style="color:#000">uses</span>: <span style="color:#1c01ce">actions/checkout@v2</span>
-
-            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Set up Python</span>
-              <span style="color:#000">uses</span>: <span style="color:#1c01ce">actions/setup-python@v2</span>
-              <span style="color:#000">with</span>:
-                  <span style="color:#000">python-version</span>: <span style="color:#c41a16">&#34;3.9&#34;</span>
-
-            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Install dependencies</span>
-              <span style="color:#000">run</span>: |<span style="color:#c41a16">
-</span><span style="color:#c41a16">                  </span>                  <span style="color:#1c01ce">make deps</span>
-
-            - <span style="color:#000">name</span>: <span style="color:#1c01ce">Publish to PyPi</span>
-              <span style="color:#000">env</span>:
-                  <span style="color:#000">FLIT_USERNAME</span>: <span style="color:#1c01ce">${{ secrets.PYPI_USERNAME }}</span>
-                  <span style="color:#000">FLIT_PASSWORD</span>: <span style="color:#1c01ce">${{ secrets.PYPI_PASSWORD }}</span>
-              <span style="color:#000">run</span>: |<span style="color:#c41a16">
-</span><span style="color:#c41a16">                  </span>                  <span style="color:#1c01ce">make publish</span>
-</code></pre></div><!-- {% endraw %} -->
-<p><a href="https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/publish.yml">publish.yml</a></p>
-<p><code>PYPI_USERNAME</code> and <code>PYPI_PASSWORD</code> are set in repository settings (Settings &gt; Secrets &gt; New repository secret). Use your PyPi username and password, or even better - an <a href="https://pypi.org/manage/account/token/">API token</a>.</p>
-<p>Now GitHub will automatically publish the package as soon as you create a new release. Sweet!</p>
-<p class="align-center">⌘&nbsp;⌘&nbsp;⌘</p>
-<p>Your perfect package is ready! It has everything one could dream of: clean code, clear documentation, tests, and cloud builds. Time to tell your colleagues and friends.</p>
-<p>These settings will make your package awesome:</p>
-<ul>
-<li><a href="https://github.com/nalgeon/podsearch-py/blob/main/pyproject.toml">pyproject.toml</a></li>
-<li><a href="https://github.com/nalgeon/podsearch-py/blob/main/tox.ini">tox.ini</a></li>
-<li><a href="https://github.com/nalgeon/podsearch-py/blob/main/Makefile">Makefile</a></li>
-<li><a href="https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/build.yml">build.yml</a></li>
-<li><a href="https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/publish.yml">publish.yml</a></li>
-</ul>
-<p><em>Thanks for reading! Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
-<p><a href="https://news.ycombinator.com/item?id=26733423">Comments on Hacker News</a></p>
 ]]></content:encoded></item></channel></rss>
