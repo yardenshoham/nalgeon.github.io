@@ -245,7 +245,7 @@ from books;
 
 > **Note on extensions**. SQLite is missing a lot of functions compared to other DBMSs like PostgreSQL. But they are easy to add, which is what people do - so it turns out quite a mess.
 >
-> Therefore, I decided to make a consistent set of extensions, divided by domain area and compiled for major operating systems. There are few of them there yet, but more are on their way:
+> Therefore, I decided to make a consistent set of extensions, divided by domain area and compiled for major operating systems:
 >
 > [sqlean @ GitHub](https://github.com/nalgeon/sqlean/)
 
@@ -406,6 +406,6 @@ There is also great tooling around SQLite. I especially like [Datasette](https:/
 
 I hope this article will inspire you to try SQLite. Thanks for reading!
 
-_Follow [@ohmypy](https://twitter.com/ohmypy) on Twitter to keep up with new posts 🚀_
+_Follow **[@ohmypy](https://twitter.com/ohmypy)** on Twitter to keep up with new posts 🚀_
 
 [Comments on Hacker News](https://news.ycombinator.com/item?id=26580614)
