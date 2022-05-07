@@ -1,6 +1,6 @@
 +++
 date = "2021-04-06 20:30:00 +0300"
-title = "How to make an awesome Python package in 2021"
+title = "How to make an awesome Python package"
 description = "The one to be proud of."
 image = "/python-packaging/cover.png"
 slug = "python-packaging"
@@ -417,6 +417,6 @@ These settings will make your package awesome:
 -   [build.yml](https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/build.yml)
 -   [publish.yml](https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/publish.yml)
 
-_Thanks for reading! Follow [@ohmypy](https://twitter.com/ohmypy) on Twitter to keep up with new posts 🚀_
+_Thanks for reading! Follow **[@ohmypy](https://twitter.com/ohmypy)** on Twitter to keep up with new posts 🚀_
 
 [Comments on Hacker News](https://news.ycombinator.com/item?id=26733423)
