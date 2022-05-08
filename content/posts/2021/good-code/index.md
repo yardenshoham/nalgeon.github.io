@@ -4,7 +4,7 @@ title = "Good Code Criterion"
 description = "Optimize T, keep an eye on R."
 image = "/good-code/cover.png"
 slug = "good-code"
-tags = ["python"]
+tags = ["software"]
 +++
 
 Good code is understandable and non-greedy. Let's talk about it.
@@ -57,4 +57,4 @@ T↓ R&lt;R0
 
 Optimize T, keep an eye on R. Your team will thank you.
 
-_Thanks for reading! Follow [@ohmypy](https://twitter.com/ohmypy) on Twitter to keep up with new posts 🚀_
+_Thanks for reading! Follow **[@ohmypy](https://twitter.com/ohmypy)** on Twitter to keep up with new posts 🚀_
