@@ -1,4 +1,64 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 07 May 2022 17:10:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Generated columns in SQLite</title><link>https://antonz.org/generated-columns/</link><pubDate>Sat, 07 May 2022 17:10:00 +0000</pubDate><guid>https://antonz.org/generated-columns/</guid><description>Simplify queries without storing additional data.</description><content:encoded><![CDATA[<p>Sometimes an SQL query field is calculated based on other table columns. Imagine a table with <code>income</code> and <code>tax_rate</code> columns:</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 08 May 2022 11:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Storing state in the URL</title><link>https://antonz.org/storing-state/</link><pubDate>Sun, 08 May 2022 11:30:00 +0000</pubDate><guid>https://antonz.org/storing-state/</guid><description>So that the app does not reset to zero after page refresh.</description><content:encoded><![CDATA[<p>If you are developing a web application, sooner or later you will face the problem of saving the local system state for the user.</p>
+<p>Imagine you sell elite potatoes over the Internet. The buyer visits the website and enters the search criteria:</p>
+<ul>
+<li>strictly from Bolivia or South Africa,</li>
+<li>harvest of 2022,</li>
+<li>tuber size from 3 to 7 cm,</li>
+<li>preferably in the form of a sea seal.</li>
+</ul>
+<p>The buyer then receives a list of 300 items (seal-shaped potatoes are quite popular in South Africa), split into 6 pages of 50 items each. They load the third page, open the potato card and freeze in silent admiration for a few seconds. And then accidentally refresh the page. What will your application do?</p>
+<h2 id="dont-store-state-at-all">Don&rsquo;t store state at all</h2>
+<p>Let&rsquo;s say you didn&rsquo;t bother with the state or store it in memory. Then after page reload the current context will be lost. The user will be redirected to the main page, where they will stare in disbelief at the giant &ldquo;ELITE POTATOES&rdquo; heading.</p>
+<p>This is how Google calendar used to behave. No matter how you navigate around the calendar, no matter what filters you apply, the URL always stayed the same:</p>
+<pre><code>https://www.google.com/calendar/render
+</code></pre>
+<p>Refresh the page — and the calendar happily resets to the current week. Ouch.</p>
+<h2 id="store-state-locally">Store state locally</h2>
+<p>Most services understand that it is not OK to lose context after page refresh. They store the state on the client side (using Web Storage, IndexedDB or other means). This solves the problem with page refreshes, but still won&rsquo;t help with bookmarking.</p>
+<p>Plus, such approach creates a problem with conflicting state changes. I opened two browser tabs, went to your potato website, searched for &ldquo;young potatoes&rdquo; in the first tab and for &ldquo;bushy leaves&rdquo; in the second one. Which query will the app remember?</p>
+<h2 id="store-a-set-of-get-parameters">Store a set of GET parameters</h2>
+<p>Ever since the days when the dynamic nature of websites was limited to the <code>&lt;blink&gt;</code> tag, some considered a best practice to store the state in the URL. Such URL is great for emailing or bookmarking — there is no problem restoring the context:</p>
+<pre><code>https://potato.shop/catalog/?search=wild+potatoes&amp;country=bo,za&amp;size=3-7&amp;page=5
+</code></pre>
+<p>URL state makes each browser tab completely independent. No shared data in the local storage means no conflicts. It simplifies developer&rsquo;s life, and the user does not have to scratch their head over the mysterious system glitches.</p>
+<h2 id="store-serialized-state">Store serialized state</h2>
+<p>GET parameters do an excellent job with scalar values (strings, numbers, booleans). But they are less suitable for collections and more complex structures. That&rsquo;s why programmers sometimes do this:</p>
+<ul>
+<li>represent the state in the form of a dictionary;</li>
+<li>serialize it to Base64;</li>
+<li>pass it as the single URL parameter.</li>
+</ul>
+<p>For example, for this state:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+    <span style="color:#000">&#34;search&#34;</span>: <span style="color:#c41a16">&#34;wild potatoes&#34;</span>,
+    <span style="color:#000">&#34;country&#34;</span>: [<span style="color:#c41a16">&#34;bo&#34;</span>, <span style="color:#c41a16">&#34;za&#34;</span>],
+    <span style="color:#000">&#34;size&#34;</span>: { <span style="color:#000">&#34;min&#34;</span>: <span style="color:#1c01ce">3</span>, <span style="color:#000">&#34;max&#34;</span>: <span style="color:#1c01ce">7</span> },
+    <span style="color:#000">&#34;page&#34;</span>: <span style="color:#1c01ce">5</span>
+}
+</code></pre></div><p>One will get this URL:</p>
+<pre><code>https://potato.shop/catalog/?state=eyJzZWFyY2giOiJ3aWxkIHBvdGF0b2VzIiwiY291bnRyeSI6WyJibyIsInphIl0sInNpemUiOnsibWluIjozLCJtYXgiOjd9LCJwYWdlIjo1fQ==
+</code></pre>
+<h2 id="hybrid-approaches">Hybrid approaches</h2>
+<p>One can store only the main parameters in the URL, and additional ones in the local storage:</p>
+<pre><code>https://potato.shop/catalog/?search=wild+potatoes&amp;page=10
+</code></pre>
+<p>One can pass the main parameters explicitly, and the additional ones as the serialized blob:</p>
+<pre><code>https://potato.shop/catalog/?search=wild+potatoes&amp;state=eyJjb3VudHJ5IjpbImJvIiwiemEiXSwic2l6ZSI6eyJtaW4iOjMsIm1heCI6N30sInBhZ2UiOjV9
+</code></pre>
+<p>There are also more creative options.</p>
+<p>For example, one can store the state of the potato list locally. When a visitor requests a specific potato item, open it in a new tab — to not bother restoring the list state later.</p>
+<p>Or one can implement an URL shortener of sorts. Store the full state on the server, generate a unique link like <code>https://potato.shop/catalog/xKda7</code> and serve it to the client.</p>
+<h2 id="summary">Summary</h2>
+<p>The main ways of storing the local state on the web are:</p>
+<ul>
+<li>no storage at all;</li>
+<li>local storage;</li>
+<li>URL parameters;</li>
+<li>serialized dictionary.</li>
+</ul>
+<p>Personally, I prefer URL parameters. But whatever approach you choose — make sure to save and restore the context transparently for the user.</p>
+<p><em>Follow <strong><a href="https://twitter.com/ohmypy">@ohmypy</a></strong> on Twitter to keep up with new posts 🚀</em></p>
+]]></content:encoded></item><item><title>Generated columns in SQLite</title><link>https://antonz.org/generated-columns/</link><pubDate>Sat, 07 May 2022 17:10:00 +0000</pubDate><guid>https://antonz.org/generated-columns/</guid><description>Simplify queries without storing additional data.</description><content:encoded><![CDATA[<p>Sometimes an SQL query field is calculated based on other table columns. Imagine a table with <code>income</code> and <code>tax_rate</code> columns:</p>
 <pre tabindex="0"><code>┌────────┬──────────┐
 │ income │ tax_rate │
 ├────────┼──────────┤
@@ -658,38 +718,4 @@ ACTIVE 1: employees.en.db
 <p>Try <a href="https://sqlime.org/">SQLime</a> for yourself — see if you find it useful. Or, perhaps, you&rsquo;ll adopt the approach of creating serverless tools with vanilla JS and GitHub API. Constructive critique is also welcome, of course ツ</p>
 <p><em>Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
 <p><a href="https://news.ycombinator.com/item?id=28669703">Comments on Hacker News</a></p>
-]]></content:encoded></item><item><title>Good Code Criterion</title><link>https://antonz.org/good-code/</link><pubDate>Wed, 02 Jun 2021 11:00:00 +0000</pubDate><guid>https://antonz.org/good-code/</guid><description>Optimize T, keep an eye on R.</description><content:encoded><![CDATA[<p>Good code is understandable and non-greedy. Let&rsquo;s talk about it.</p>
-<h2 id="time-to-understanding">Time to understanding</h2>
-<p>The main criterion for good code is the time T it takes for a non-author to understand the code. Not &ldquo;I sorta get it&rdquo;, but understand deep enough to make changes and not break anything.</p>
-<p>The smaller the T, the better the code.</p>
-<p>Let&rsquo;s say Alice and Bob implemented the same feature, and you want to modify it. If you understand Alice&rsquo;s code in 10 minutes, and Bob&rsquo;s code in 30 minutes - Alice&rsquo;s code is better. It doesn&rsquo;t matter how layered Bob&rsquo;s architecture is, whether he used a functional approach, a modern framework, etc.</p>
-<p>The T-metric is different for a beginner and an experienced programmer. Therefore, it makes sense to focus on the average level of devs who will use the code. If you have a team of people working for 10+ years, and everyone writes compilers in their spare time - even very complex code will have a low T. If you have a huge turnover and hire yesterday&rsquo;s students — the code should be rather primitive so that T does not shoot through the roof.</p>
-<p>It&rsquo;s not easy to measure T directly, so usually, teams track secondary metrics that affect T:</p>
-<ul>
-<li>code style (<code>black</code> for Python),</li>
-<li>code smells (<code>pylint</code>, <code>flake8</code>),</li>
-<li>cyclomatic complexity (<code>mccabe</code>),</li>
-<li>module dependencies (<code>import-linter</code>).</li>
-</ul>
-<p>Plus code review.</p>
-<h2 id="resource-usage">Resource usage</h2>
-<p>The second criterion for good code is the amount of resources R it consumes (time, CPU, memory, disk). The smaller the R, the better the code.</p>
-<p>If Alice and Bob implemented a feature with the same T, but Alice&rsquo;s code time complexity is O(n), and Bob&rsquo;s is O(n²) (with the same consumption of other resources) - Alice&rsquo;s code is better.</p>
-<p>Note about the notorious &ldquo;sacrifice readability for efficiency&rdquo;. For each task, there is a resource consumption threshold R0, which the solution should not exceed. If R &lt; R0, do not degrade T for the sake of further reducing R.</p>
-<p>If a non-critical service processes a request in 50ms, you don&rsquo;t need to rewrite it from Python to C to reduce the time to 5ms. The thing is already fast enough.</p>
-<p>If the code has a high T and a low R, in most cases you can reduce T while keeping R &lt; R0.</p>
-<p>But sometimes, if resources are limited, or the input data is huge, it may not possible to reach R &lt; R0 without degrading T. Then you really have to sacrifice clarity. But make sure that:</p>
-<ol>
-<li>This is the last resort when all the other options have failed.</li>
-<li>The code sections where T is traded for R are well isolated.</li>
-<li>There are few such sections.</li>
-<li>They are well-documented.</li>
-</ol>
-<h2 id="summary">Summary</h2>
-<p>Here is the mnemonics for good code:</p>
-<pre class="big">
-T↓ R&lt;R0
-</pre>
-<p>Optimize T, keep an eye on R. Your team will thank you.</p>
-<p><em>Thanks for reading! Follow <a href="https://twitter.com/ohmypy">@ohmypy</a> on Twitter to keep up with new posts 🚀</em></p>
 ]]></content:encoded></item></channel></rss>
