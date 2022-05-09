@@ -231,6 +231,30 @@ The main ways of storing the local state are:
 
 Personally, I prefer URL parameters. They are self-evident and allow one to pass rather complex data structures.
 
+<div class="row">
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="String or number" src="state-scalar.png"></figure>
+</div>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="Boolean value" src="state-bool.png"></figure>
+</div>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="Date and time" src="state-date.png"></figure>
+</div>
+</div>
+
+<div class="row">
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="Empty value" src="state-empty.png"></figure>
+</div>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="List (array)" src="state-list.png"></figure>
+</div>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="Dictionary (map)" src="state-dict.png"></figure>
+</div>
+</div>
+
 Most importantly, whichever approach you choose — make sure to save and restore the context transparently for the user.
 
 _Follow **[@ohmypy](https://twitter.com/ohmypy)** on Twitter to keep up with new posts 🚀_
