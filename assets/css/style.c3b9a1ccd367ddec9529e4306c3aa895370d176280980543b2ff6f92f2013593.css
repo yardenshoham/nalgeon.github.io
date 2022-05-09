@@ -1506,6 +1506,9 @@ abbr[title] {
 .fa-file::before {
     content: "\f15b";
 }
+.fa-github::before {
+    content: "\f09b";
+}
 .fa-kiwi-bird::before {
     content: "\f535";
 }
