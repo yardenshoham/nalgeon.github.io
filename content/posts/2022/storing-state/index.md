@@ -229,7 +229,7 @@ The main ways of storing the local state are:
 -   URL parameters;
 -   serialized blob.
 
-Personally, I prefer URL parameters. They are self-evident and allow one to pass quite complex data structures.
+Personally, I prefer URL parameters. They are self-evident and allow one to pass rather complex data structures.
 
 Most importantly, whichever approach you choose — make sure to save and restore the context transparently for the user.
 
