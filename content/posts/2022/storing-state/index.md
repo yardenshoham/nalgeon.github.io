@@ -22,7 +22,7 @@ It depends on how the application stores the filter state. Let's look at the opt
 
 ## How to store state
 
-JavaScript applications traditionally work with local state in the form of in-memory objects. This is convenient because one does not have to deal with serialization/deserialization, server synchronization and other unpleasant issues. But will it suit our potato shop? Let's figure this out.
+JavaScript applications traditionally work with local state in the form of in-memory objects. This is convenient because it supports complex data structures without storage limits, and one does not have to deal with serialization. But will it suit our potato shop? Let's figure it out.
 
 ### Don't store state at all
 
@@ -229,7 +229,7 @@ The main ways of storing the local state are:
 -   URL parameters;
 -   serialized blob.
 
-Personally, I prefer URL parameters. They are self-evident and allow one to pass rather complex data structures.
+Memory and local storage are great for "private" state — settings, caches, history. URL parameters are good for the "public" state, so that one could bookmark or forward the stateful link. URLs with parameters are self-evident and allow one to pass rather complex data structures.
 
 <div class="row">
 <div class="col-xs-12 col-sm-4">
