@@ -9,7 +9,7 @@
 <p>The buyer then receives a list of 300 items (seal-shaped potatoes are quite popular in South Africa), split into 6 pages of 50 items each. They load the third page, open the potato card and freeze in silent admiration for a few seconds. And then accidentally refresh the page. What will your application do?</p>
 <p>It depends on how the application stores the filter state. Let&rsquo;s look at the options, and then consider one of them in more detail.</p>
 <h2 id="how-to-store-state">How to store state</h2>
-<p>JavaScript applications traditionally work with local state in the form of in-memory objects. This is convenient because one does not have to deal with serialization/deserialization, server synchronization and other unpleasant issues. But will it suit our potato shop? Let&rsquo;s figure this out.</p>
+<p>JavaScript applications traditionally work with local state in the form of in-memory objects. This is convenient because it supports complex data structures without storage limits, and one does not have to deal with serialization. But will it suit our potato shop? Let&rsquo;s figure it out.</p>
 <h3 id="dont-store-state-at-all">Don&rsquo;t store state at all</h3>
 <p>Let&rsquo;s say you didn&rsquo;t bother to store the state and keep it in memory. Then after page reload the current context will be lost. The user will be redirected to the main page, where they will stare in disbelief at the giant &ldquo;ELITE POTATOES&rdquo; heading.</p>
 <p>This is how Google calendar used to behave. No matter how you navigate around the calendar, no matter what filters you apply, the URL always stayed the same:</p>
@@ -142,7 +142,7 @@
 <li>URL parameters;</li>
 <li>serialized blob.</li>
 </ul>
-<p>Personally, I prefer URL parameters. They are self-evident and allow one to pass rather complex data structures.</p>
+<p>Memory and local storage are great for &ldquo;private&rdquo; state — settings, caches, history. URL parameters are good for the &ldquo;public&rdquo; state, so that one could bookmark or forward the stateful link. URLs with parameters are self-evident and allow one to pass rather complex data structures.</p>
 <div class="row">
 <div class="col-xs-12 col-sm-4">
 <figure><img alt="String or number" src="state-scalar.png"></figure>
