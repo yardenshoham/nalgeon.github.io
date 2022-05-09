@@ -7,22 +7,25 @@
 <li>preferably in the form of a sea seal.</li>
 </ul>
 <p>The buyer then receives a list of 300 items (seal-shaped potatoes are quite popular in South Africa), split into 6 pages of 50 items each. They load the third page, open the potato card and freeze in silent admiration for a few seconds. And then accidentally refresh the page. What will your application do?</p>
-<h2 id="dont-store-state-at-all">Don&rsquo;t store state at all</h2>
-<p>Let&rsquo;s say you didn&rsquo;t bother with the state or store it in memory. Then after page reload the current context will be lost. The user will be redirected to the main page, where they will stare in disbelief at the giant &ldquo;ELITE POTATOES&rdquo; heading.</p>
+<p>It depends on how the application stores the filter state. Let&rsquo;s look at the options, and then consider one of them in more detail.</p>
+<h2 id="how-to-store-state">How to store state</h2>
+<p>JavaScript applications traditionally work with local state in the form of in-memory objects. This is convenient because one does not have to deal with serialization/deserialization, server synchronization and other unpleasant issues. But will it suit our potato shop? Let&rsquo;s figure this out.</p>
+<h3 id="dont-store-state-at-all">Don&rsquo;t store state at all</h3>
+<p>Let&rsquo;s say you didn&rsquo;t bother to store the state and keep it in memory. Then after page reload the current context will be lost. The user will be redirected to the main page, where they will stare in disbelief at the giant &ldquo;ELITE POTATOES&rdquo; heading.</p>
 <p>This is how Google calendar used to behave. No matter how you navigate around the calendar, no matter what filters you apply, the URL always stayed the same:</p>
 <pre><code>https://www.google.com/calendar/render
 </code></pre>
 <p>Refresh the page — and the calendar happily resets to the current week. Ouch.</p>
-<h2 id="store-state-locally">Store state locally</h2>
+<h3 id="store-state-locally">Store state locally</h3>
 <p>Most services understand that it is not OK to lose context after page refresh. They store the state on the client side (using Web Storage, IndexedDB or other means). This solves the problem with page refreshes, but still won&rsquo;t help with bookmarking.</p>
 <p>Plus, such approach creates a problem with conflicting state changes. I opened two browser tabs, went to your potato website, searched for &ldquo;young potatoes&rdquo; in the first tab and for &ldquo;bushy leaves&rdquo; in the second one. Which query will the app remember?</p>
-<h2 id="store-a-set-of-get-parameters">Store a set of GET parameters</h2>
-<p>Ever since the days when the dynamic nature of websites was limited to the <code>&lt;blink&gt;</code> tag, some considered a best practice to store the state in the URL. Such URL is great for emailing or bookmarking — there is no problem restoring the context:</p>
+<h3 id="store-a-set-of-url-parameters">Store a set of URL parameters</h3>
+<p>Ever since the days when the dynamic nature of websites was limited to the <code>&lt;blink&gt;</code> tag, some considered a best practice to store the state in the URL (<em>URL parameters</em>, also known as <em>GET parameters</em> or <em>query string</em>). Such URL is great for emailing or bookmarking — there is no problem restoring the context:</p>
 <pre><code>https://potato.shop/catalog/?search=wild+potatoes&amp;country=bo,za&amp;size=3-7&amp;page=5
 </code></pre>
 <p>URL state makes each browser tab completely independent. No shared data in the local storage means no conflicts. It simplifies developer&rsquo;s life, and the user does not have to scratch their head over the mysterious system glitches.</p>
-<h2 id="store-serialized-state">Store serialized state</h2>
-<p>GET parameters do an excellent job with scalar values (strings, numbers, booleans). But they are less suitable for collections and more complex structures. That&rsquo;s why programmers sometimes do this:</p>
+<h3 id="store-serialized-state">Store serialized state</h3>
+<p>URL parameters do an excellent job with scalar values (strings, numbers, booleans). But they are less suitable for collections and more complex structures. That&rsquo;s why programmers sometimes do this:</p>
 <ul>
 <li>represent the state in the form of a dictionary;</li>
 <li>serialize it to Base64;</li>
@@ -38,7 +41,7 @@
 </code></pre></div><p>One will get this URL:</p>
 <pre><code>https://potato.shop/catalog/?state=eyJzZWFyY2giOiJ3aWxkIHBvdGF0b2VzIiwiY291bnRyeSI6WyJibyIsInphIl0sInNpemUiOnsibWluIjozLCJtYXgiOjd9LCJwYWdlIjo1fQ==
 </code></pre>
-<h2 id="hybrid-approaches">Hybrid approaches</h2>
+<h3 id="hybrid-approaches">Hybrid approaches</h3>
 <p>One can store only the main parameters in the URL, and additional ones in the local storage:</p>
 <pre><code>https://potato.shop/catalog/?search=wild+potatoes&amp;page=10
 </code></pre>
@@ -48,15 +51,99 @@
 <p>There are also more creative options.</p>
 <p>For example, one can store the state of the potato list locally. When a visitor requests a specific potato item, open it in a new tab — to not bother restoring the list state later.</p>
 <p>Or one can implement an URL shortener of sorts. Store the full state on the server, generate a unique link like <code>https://potato.shop/catalog/xKda7</code> and serve it to the client.</p>
+<p>We have sorted out the options, now let&rsquo;s look at one of them in more detail.</p>
+<h2 id="how-to-store-state-in-url-parameters">How to store state in URL parameters</h2>
+<p>At first glance, storing the state as a set of URL parameters is all nice and easy.</p>
+<p>State:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+    <span style="color:#000">&#34;search&#34;</span>: <span style="color:#c41a16">&#34;wild potatoes&#34;</span>,
+    <span style="color:#000">&#34;page&#34;</span>: <span style="color:#1c01ce">5</span>
+}
+</code></pre></div><p>URL params (this and further examples do not use url escaping):</p>
+<pre><code>?search=wild+potatoes&amp;page=5
+</code></pre>
+<p>Indeed, it is easy to pass strings and numbers in the parameters. It gets more interesting with other data types.</p>
+<h3 id="boolean-value">Boolean value</h3>
+<p>Booleans are typically passed as <code>true</code> / <code>false</code> or <code>1</code> / <code>0</code>.</p>
+<p>State:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+    <span style="color:#000">&#34;search&#34;</span>: <span style="color:#c41a16">&#34;potatoes&#34;</span>,
+    <span style="color:#000">&#34;popular&#34;</span>: <span style="color:#a90d91">true</span>
+}
+</code></pre></div><p>URL params:</p>
+<pre><code>?search=potatoes&amp;popular=true
+?search=potatoes&amp;popular=1
+</code></pre>
+<h3 id="date-and-time">Date and time</h3>
+<p>Date/time typically uses <a href="https://datatracker.ietf.org/doc/html/rfc3339">RFC 3339</a> (<code>2020-01-02T10:11:12Z</code>) or <a href="https://en.wikipedia.org/wiki/Unix_time">Unix Time</a> (seconds after midnight 01/01/1970).</p>
+<p>State (since the example is in JSON, I pass the date in RFC3339; your language has a native representation):</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+    <span style="color:#000">&#34;search&#34;</span>: <span style="color:#c41a16">&#34;potatoes&#34;</span>,
+    <span style="color:#000">&#34;after&#34;</span>: <span style="color:#c41a16">&#34;2020-01-02T10:11:12Z&#34;</span>
+}
+</code></pre></div><p>URL params:</p>
+<pre><code>?search=potatoes&amp;after=2020-01-02T10:11:12Z
+?search=potatoes&amp;after=1577959872
+</code></pre>
+<p>Unix time in milliseconds is less common:</p>
+<pre><code>?search=potatoes&amp;after=1577959872000
+</code></pre>
+<h3 id="empty-value">Empty value</h3>
+<p>If some property is not set, it is usually passed empty, or not passed at all.</p>
+<p>State:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+    <span style="color:#000">&#34;search&#34;</span>: <span style="color:#c41a16">&#34;potatoes&#34;</span>,
+    <span style="color:#000">&#34;country&#34;</span>: <span style="color:#a90d91">null</span>
+}
+</code></pre></div><p>URL params:</p>
+<pre><code>?search=potatoes&amp;country=
+?search=potatoes
+</code></pre>
+<p>Sometimes devs use a special empty value (e.g. <code>null</code>):</p>
+<pre><code>?search=potatoes&amp;country=null
+</code></pre>
+<h3 id="list-array">List (array)</h3>
+<p>So far we have been dealing with scalar values. It becomes more fun with lists.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+    <span style="color:#000">&#34;search&#34;</span>: <span style="color:#c41a16">&#34;potatoes&#34;</span>,
+    <span style="color:#000">&#34;country&#34;</span>: [<span style="color:#c41a16">&#34;bo&#34;</span>, <span style="color:#c41a16">&#34;za&#34;</span>]
+}
+</code></pre></div><p>The classic option is to repeat the property name for each value, as dictated by <a href="https://datatracker.ietf.org/doc/html/rfc6570#section-2.4.2">RFC 6570</a>:</p>
+<pre><code>?search=potatoes&amp;country=bo&amp;country=za
+</code></pre>
+<p>Sometimes a <code>[]</code> is added to stress the list nature:</p>
+<pre><code>?search=potatoes&amp;country[]=bo&amp;country[]=za
+</code></pre>
+<p>Sometimes even with an index:</p>
+<pre><code>?search=potatoes&amp;country[0]=bo&amp;country[1]=za
+</code></pre>
+<p>Brevity fans pass the property name once, and separate the values with a comma:</p>
+<pre><code>?search=potatoes&amp;country=bo,za
+</code></pre>
+<h3 id="dictionary-map">Dictionary (map)</h3>
+<p>A list includes a set of values. A dictionary contains nested properties:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+    <span style="color:#000">&#34;search&#34;</span>: <span style="color:#c41a16">&#34;potatoes&#34;</span>,
+    <span style="color:#000">&#34;size&#34;</span>: { <span style="color:#000">&#34;min&#34;</span>: <span style="color:#1c01ce">3</span>, <span style="color:#000">&#34;max&#34;</span>: <span style="color:#1c01ce">7</span> }
+}
+</code></pre></div><p>Internet standards do not mention passing composite objects in the URL. So the developers have invented their own options.</p>
+<p>Most often people repeat the top-level property name and pass nested property names in <code>[]</code>:</p>
+<pre><code>?search=potatoes&amp;size[min]=3&amp;size[max]=7
+</code></pre>
+<p>Dot notation is more rare:</p>
+<pre><code>?search=potatoes&amp;size.min=3&amp;size.max=7
+</code></pre>
+<p>Deeper nesting is not typically used. It would be very nontrivial to deserialize such URL parameters back into the object.</p>
 <h2 id="summary">Summary</h2>
-<p>The main ways of storing the local state on the web are:</p>
+<p>The main ways of storing the local state are:</p>
 <ul>
-<li>no storage at all;</li>
+<li>no storage;</li>
 <li>local storage;</li>
 <li>URL parameters;</li>
-<li>serialized dictionary.</li>
+<li>serialized blob.</li>
 </ul>
-<p>Personally, I prefer URL parameters. But whatever approach you choose — make sure to save and restore the context transparently for the user.</p>
+<p>Personally, I prefer URL parameters. They are self-evident and allow one to pass quite complex data structures.</p>
+<p>Most importantly, whichever approach you choose — make sure to save and restore the context transparently for the user.</p>
 <p><em>Follow <strong><a href="https://twitter.com/ohmypy">@ohmypy</a></strong> on Twitter to keep up with new posts 🚀</em></p>
 ]]></content:encoded></item><item><title>Generated columns in SQLite</title><link>https://antonz.org/generated-columns/</link><pubDate>Sat, 07 May 2022 17:10:00 +0000</pubDate><guid>https://antonz.org/generated-columns/</guid><description>Simplify queries without storing additional data.</description><content:encoded><![CDATA[<p>Sometimes an SQL query field is calculated based on other table columns. Imagine a table with <code>income</code> and <code>tax_rate</code> columns:</p>
 <pre tabindex="0"><code>┌────────┬──────────┐
