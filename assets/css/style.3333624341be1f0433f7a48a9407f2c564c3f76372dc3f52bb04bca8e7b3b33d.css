@@ -1494,6 +1494,9 @@ abbr[title] {
 .fa-dot-circle::before {
     content: "\f192";
 }
+.fa-envelope::before {
+    content: "\f0e0";
+}
 .fa-facebook::before {
     content: "\f09a";
 }
