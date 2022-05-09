@@ -8,6 +8,7 @@
                         <h1>{{ .Title }}</h1>
                     </header>
                     {{ .Content }}
+                    {{- partial "post-subscribe.html" . -}}
                 </div>
             </div>
             {{- partial "post-footer.html" . -}}
