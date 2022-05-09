@@ -58,5 +58,3 @@ add column COLUMN TYPE as (EXPRESSION);
 Generated column expression can include any table columns, but not other tables or subquery results. It's for the best: for more complex combinations, there are _views_ and _temp tables_. Let's talk about them some other time.
 
 [Documentation](https://sqlite.org/gencol.html) • [Playground](https://sqlime.org/#gist:5208177f89a0e38ccfae8ead90a35631)
-
-_Follow **[@ohmypy](https://twitter.com/ohmypy)** on Twitter to keep up with new posts 🚀_

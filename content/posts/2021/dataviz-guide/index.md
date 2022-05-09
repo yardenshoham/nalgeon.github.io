@@ -31,5 +31,3 @@ While the guide itself is great, the authors - IBCS Association - made some ques
 Fortunately, IBCS published the guide under the permissive CC BY-SA license. So with some hard work and a bunch of Python I've created a [web version](https://github.com/nalgeon/dataviz), [EPUB](https://github.com/nalgeon/dataviz/releases/download/1.1/data-visualization-guide.epub) and [PDF](https://github.com/nalgeon/dataviz/releases/download/1.1/data-visualization-guide.pdf).
 
 IBCS Association put a lot of thought it the guide, and the result really impressed me. So I encourage you to try it out.
-
-_Thanks for reading! Follow [@ohmypy](https://twitter.com/ohmypy) on Twitter to keep up with new posts 🚀_

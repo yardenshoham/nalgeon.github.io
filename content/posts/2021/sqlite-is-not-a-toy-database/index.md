@@ -406,6 +406,4 @@ There is also great tooling around SQLite. I especially like [Datasette](https:/
 
 I hope this article will inspire you to try SQLite. Thanks for reading!
 
-_Follow **[@ohmypy](https://twitter.com/ohmypy)** on Twitter to keep up with new posts 🚀_
-
 [Comments on Hacker News](https://news.ycombinator.com/item?id=26580614)

@@ -171,6 +171,4 @@ The playground is hosted on GitHub Pages, and the deployment is a basic `git pus
 
 Try [SQLime](https://sqlime.org/) for yourself — see if you find it useful. Or, perhaps, you'll adopt the approach of creating serverless tools with vanilla JS and GitHub API. Constructive critique is also welcome, of course ツ
 
-_Follow [@ohmypy](https://twitter.com/ohmypy) on Twitter to keep up with new posts 🚀_
-
 [Comments on Hacker News](https://news.ycombinator.com/item?id=28669703)

@@ -156,5 +156,3 @@ Filling the page with `.append()` is slow due to array resizing. It is better to
 Totally recommend it.
 
 [Playground](https://replit.com/@antonz/page-iterator#main.py)
-
-_Follow **[@ohmypy](https://twitter.com/ohmypy)** on Twitter to keep up with new posts 🚀_

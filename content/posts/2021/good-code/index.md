@@ -56,5 +56,3 @@ T↓ R&lt;R0
 </pre>
 
 Optimize T, keep an eye on R. Your team will thank you.
-
-_Thanks for reading! Follow **[@ohmypy](https://twitter.com/ohmypy)** on Twitter to keep up with new posts 🚀_

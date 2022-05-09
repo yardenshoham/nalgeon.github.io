@@ -417,6 +417,4 @@ These settings will make your package awesome:
 -   [build.yml](https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/build.yml)
 -   [publish.yml](https://github.com/nalgeon/podsearch-py/blob/main/.github/workflows/publish.yml)
 
-_Thanks for reading! Follow **[@ohmypy](https://twitter.com/ohmypy)** on Twitter to keep up with new posts 🚀_
-
 [Comments on Hacker News](https://news.ycombinator.com/item?id=26733423)

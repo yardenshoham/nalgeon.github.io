@@ -24,5 +24,3 @@ And here are some more ways to edit multi-line queries:
 -   Use external editor (`.shell <editor> <file>`)
 -   Run query from file (`.read <file>`)
 -   Consider DBeaver, DataGrip or other UI tool
-
-_Follow **[@ohmypy](https://twitter.com/ohmypy)** on Twitter to keep up with new posts 🚀_

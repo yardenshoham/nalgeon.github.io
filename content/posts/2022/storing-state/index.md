@@ -256,5 +256,3 @@ Memory and local storage are great for "private" state — settings, caches, his
 </div>
 
 Most importantly, whichever approach you choose — make sure to save and restore the context transparently for the user.
-
-_Follow **[@ohmypy](https://twitter.com/ohmypy)** on Twitter to keep up with new posts 🚀_

@@ -108,5 +108,3 @@ If you want to participate, submit [your own](https://github.com/nalgeon/sqlean/
 I keep adding new extensions to the incubator. I also refactor the extensions from the incubator and merge them into the main set. I plan to write a separate article for each main module, so stay tuned.
 
 SQLite FTW!
-
-_Follow **[@ohmypy](https://twitter.com/ohmypy)** on Twitter to keep up with new posts 🚀_

@@ -173,5 +173,3 @@ Here is a Makefile from one of my projects (podcast search tool):
 > [podsearch](https://github.com/nalgeon/podsearch-py/blob/master/Makefile)
 
 Makefiles are great for automating routine tasks, regardless of the language you prefer. Use them!
-
-_And follow [@ohmypy](https://twitter.com/ohmypy) on Twitter to keep up with new posts_

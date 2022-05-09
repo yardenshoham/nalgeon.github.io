@@ -86,5 +86,3 @@ The cache works in-process and will die with it. So if you need something more s
 
 [Documentation](https://devdocs.io/python/library/functools#functools.lru_cache) •
 [Playground](https://replit.com/@antonz/functools-cache#main.py)
-
-_Follow **[@ohmypy](https://twitter.com/ohmypy)** on Twitter to keep up with new posts 🚀_
