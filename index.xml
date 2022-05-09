@@ -143,6 +143,28 @@
 <li>serialized blob.</li>
 </ul>
 <p>Personally, I prefer URL parameters. They are self-evident and allow one to pass rather complex data structures.</p>
+<div class="row">
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="String or number" src="state-scalar.png"></figure>
+</div>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="Boolean value" src="state-bool.png"></figure>
+</div>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="Date and time" src="state-date.png"></figure>
+</div>
+</div>
+<div class="row">
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="Empty value" src="state-empty.png"></figure>
+</div>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="List (array)" src="state-list.png"></figure>
+</div>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="Dictionary (map)" src="state-dict.png"></figure>
+</div>
+</div>
 <p>Most importantly, whichever approach you choose — make sure to save and restore the context transparently for the user.</p>
 <p><em>Follow <strong><a href="https://twitter.com/ohmypy">@ohmypy</a></strong> on Twitter to keep up with new posts 🚀</em></p>
 ]]></content:encoded></item><item><title>Generated columns in SQLite</title><link>https://antonz.org/generated-columns/</link><pubDate>Sat, 07 May 2022 17:10:00 +0000</pubDate><guid>https://antonz.org/generated-columns/</guid><description>Simplify queries without storing additional data.</description><content:encoded><![CDATA[<p>Sometimes an SQL query field is calculated based on other table columns. Imagine a table with <code>income</code> and <code>tax_rate</code> columns:</p>
