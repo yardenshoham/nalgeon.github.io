@@ -61,7 +61,7 @@
 </header>
 <p>Python is an object language. This is nice and cozy until you are out of memory holding 10 million objects at once. Let&rsquo;s talk about how to reduce appetite.</p>
 <p>Imagine you have a simple <code>Pet</code> object with the <code>name</code> (string) and <code>price</code> (integer) attributes. Intuitively, it seems that the most compact representation is a tuple:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>(<span style=color:#c41a16>&#34;Francis II&#34;</span>, <span style=color:#1c01ce>50000</span>)
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>(<span style=color:#c41a16>&#34;Frank the Pigeon&#34;</span>, <span style=color:#1c01ce>50000</span>)
 </code></pre></div><p>Let&rsquo;s measure how much memory this beauty eats:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>import</span> <span style=color:#000>random</span>
 <span style=color:#a90d91>from</span> <span style=color:#000>pympler.asizeof</span> <span style=color:#a90d91>import</span> <span style=color:#000>asizeof</span>
