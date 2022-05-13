@@ -1,0 +1,207 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Compact objects in Python</title>
+<meta name=description content="Tuple vs dataclass, until numpy interferes">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.65f0a52d2e69e5dbfd825b3072b88215fc0b75fca7c9690febf6b43535d86a5e.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/compact-objects/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Compact objects in Python">
+<meta property="og:description" content="Tuple vs dataclass, until numpy interferes">
+<meta property="og:url" content="https://antonz.org/compact-objects/">
+<meta property="og:image" content="https://antonz.org/compact-objects/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Compact objects in Python">
+<meta name=twitter:description content="Tuple vs dataclass, until numpy interferes">
+<meta name=twitter:url content="https://antonz.org/compact-objects/">
+<meta name=twitter:site content="@nalgeon">
+<meta name=twitter:image content="https://antonz.org/compact-objects/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/stopwar.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Compact objects in Python</h1>
+</header>
+<p>Python is an object language. This is nice and cozy until you are out of memory holding 10 million objects at once. Let&rsquo;s talk about how to reduce appetite.</p>
+<p>Imagine you have a simple <code>Pet</code> object with the <code>name</code> (string) and <code>price</code> (integer) attributes. Intuitively, it seems that the most compact representation is a tuple:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>(<span style=color:#c41a16>&#34;Pigeon Frank&#34;</span>, <span style=color:#1c01ce>50000</span>)
+</code></pre></div><p>Let&rsquo;s measure how much memory this beauty eats:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>import</span> <span style=color:#000>random</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>pympler.asizeof</span> <span style=color:#a90d91>import</span> <span style=color:#000>asizeof</span>
+
+<span style=color:#a90d91>def</span> <span style=color:#000>fields</span>():
+    <span style=color:#000>name_gen</span> <span style=color:#000>=</span> (<span style=color:#000>random</span><span style=color:#000>.</span><span style=color:#000>choice</span>(<span style=color:#000>string</span><span style=color:#000>.</span><span style=color:#000>ascii_uppercase</span>) <span style=color:#a90d91>for</span> <span style=color:#000>_</span> <span style=color:#000>in</span> <span style=color:#a90d91>range</span>(<span style=color:#1c01ce>10</span>))
+    <span style=color:#000>name</span> <span style=color:#000>=</span> <span style=color:#c41a16>&#34;&#34;</span><span style=color:#000>.</span><span style=color:#000>join</span>(<span style=color:#000>name_gen</span>)
+    <span style=color:#000>price</span> <span style=color:#000>=</span> <span style=color:#000>random</span><span style=color:#000>.</span><span style=color:#000>randint</span>(<span style=color:#1c01ce>10000</span>, <span style=color:#1c01ce>99999</span>)
+    <span style=color:#a90d91>return</span> (<span style=color:#000>name</span>, <span style=color:#000>price</span>)
+
+<span style=color:#a90d91>def</span> <span style=color:#000>measure</span>(<span style=color:#000>name</span>, <span style=color:#000>fn</span>, <span style=color:#000>n</span><span style=color:#000>=</span><span style=color:#1c01ce>10_000</span>):
+    <span style=color:#000>pets</span> <span style=color:#000>=</span> [<span style=color:#000>fn</span>() <span style=color:#a90d91>for</span> <span style=color:#000>_</span> <span style=color:#000>in</span> <span style=color:#a90d91>range</span>(<span style=color:#000>n</span>)]
+    <span style=color:#000>size</span> <span style=color:#000>=</span> <span style=color:#a90d91>round</span>(<span style=color:#000>asizeof</span>(<span style=color:#000>pets</span>) <span style=color:#000>/</span> <span style=color:#000>n</span>)
+    <span style=color:#a90d91>print</span>(<span style=color:#c41a16>f</span><span style=color:#c41a16>&#34;Pet size (</span><span style=color:#c41a16>{</span><span style=color:#000>name</span><span style=color:#c41a16>}</span><span style=color:#c41a16>) = </span><span style=color:#c41a16>{</span><span style=color:#000>size</span><span style=color:#c41a16>}</span><span style=color:#c41a16> bytes&#34;</span>)
+    <span style=color:#a90d91>return</span> <span style=color:#000>size</span>
+
+<span style=color:#000>baseline</span> <span style=color:#000>=</span> <span style=color:#000>measure</span>(<span style=color:#c41a16>&#34;tuple&#34;</span>, <span style=color:#000>fields</span>)
+</code></pre></div><pre tabindex=0><code>Pet size (tuple) = 161 bytes
+</code></pre><p>161 bytes. Let&rsquo;s use it as a baseline for further comparison.</p>
+<p>But who works with tuples these days? You would probably choose a dataclass:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>from</span> <span style=color:#000>dataclasses</span> <span style=color:#a90d91>import</span> <span style=color:#000>dataclass</span>
+
+<span style=color:#000>@dataclass</span>
+<span style=color:#a90d91>class</span> <span style=color:#3f6e75>PetData</span>:
+    <span style=color:#000>name</span>: <span style=color:#a90d91>str</span>
+    <span style=color:#000>price</span>: <span style=color:#a90d91>int</span>
+
+<span style=color:#000>fn</span> <span style=color:#000>=</span> <span style=color:#a90d91>lambda</span>: <span style=color:#000>PetData</span>(<span style=color:#000>*</span><span style=color:#000>fields</span>())
+<span style=color:#000>measure</span>(<span style=color:#c41a16>&#34;dataclass&#34;</span>, <span style=color:#000>fn</span>)
+</code></pre></div><pre tabindex=0><code>Pet size (dataclass) = 257 bytes
+x1.60 to baseline
+</code></pre><p>Thing is, it&rsquo;s 1.6 times larger than a tuple.</p>
+<p>Let&rsquo;s try a named tuple then:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>from</span> <span style=color:#000>typing</span> <span style=color:#a90d91>import</span> <span style=color:#000>NamedTuple</span>
+
+<span style=color:#a90d91>class</span> <span style=color:#3f6e75>PetTuple</span>(<span style=color:#000>NamedTuple</span>):
+    <span style=color:#000>name</span>: <span style=color:#a90d91>str</span>
+    <span style=color:#000>price</span>: <span style=color:#a90d91>int</span>
+
+
+<span style=color:#000>fn</span> <span style=color:#000>=</span> <span style=color:#a90d91>lambda</span>: <span style=color:#000>PetTuple</span>(<span style=color:#000>*</span><span style=color:#000>fields</span>())
+<span style=color:#000>measure</span>(<span style=color:#c41a16>&#34;named tuple&#34;</span>, <span style=color:#000>fn</span>)
+</code></pre></div><pre tabindex=0><code>Pet size (named tuple) = 161 bytes
+x1.00 to baseline
+</code></pre><p>Looks like a dataclass, works like a tuple. Perfect.</p>
+<p>Or not? Python 3.10 received dataclasses with slots:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>@dataclass</span>(<span style=color:#000>slots</span><span style=color:#000>=</span><span style=color:#a90d91>True</span>)
+<span style=color:#a90d91>class</span> <span style=color:#3f6e75>PetData</span>:
+    <span style=color:#000>name</span>: <span style=color:#a90d91>str</span>
+    <span style=color:#000>price</span>: <span style=color:#a90d91>int</span>
+
+
+<span style=color:#000>fn</span> <span style=color:#000>=</span> <span style=color:#a90d91>lambda</span>: <span style=color:#000>PetData</span>(<span style=color:#000>*</span><span style=color:#000>fields</span>())
+<span style=color:#000>measure</span>(<span style=color:#c41a16>&#34;dataclass w/slots&#34;</span>, <span style=color:#000>fn</span>)
+</code></pre></div><pre tabindex=0><code>Pet size (dataclass w/slots) = 153 bytes
+x0.95 to baseline
+</code></pre><p>Wow! Slots magic creates special skinny objects without an underlying dictionary, unlike regular Python objects. Such dataclass is even lighter than a tuple.</p>
+<p>What if 3.10 is out of the question yet? Use <code>NamedTuple</code>. Or add a slots dunder manually:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>@dataclass</span>
+<span style=color:#a90d91>class</span> <span style=color:#3f6e75>PetData</span>:
+    <span style=color:#000>__slots__</span> <span style=color:#000>=</span> (<span style=color:#c41a16>&#34;name&#34;</span>, <span style=color:#c41a16>&#34;price&#34;</span>)
+    <span style=color:#000>name</span>: <span style=color:#a90d91>str</span>
+    <span style=color:#000>price</span>: <span style=color:#a90d91>int</span>
+</code></pre></div><p>Slot objects have their own shortcomings. But they are great for simple cases (without inheritance and other complex stuff).</p>
+<p>P.S. The real winner, of course, is the <code>numpy</code> array. But there is no fun in competing with it  ツ</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>import</span> <span style=color:#000>string</span>
+<span style=color:#a90d91>import</span> <span style=color:#000>numpy</span> <span style=color:#a90d91>as</span> <span style=color:#000>np</span>
+
+<span style=color:#000>PetNumpy</span> <span style=color:#000>=</span> <span style=color:#000>np</span><span style=color:#000>.</span><span style=color:#000>dtype</span>([(<span style=color:#c41a16>&#34;name&#34;</span>, <span style=color:#c41a16>&#34;S10&#34;</span>), (<span style=color:#c41a16>&#34;price&#34;</span>, <span style=color:#c41a16>&#34;i4&#34;</span>)])
+<span style=color:#000>generator</span> <span style=color:#000>=</span> (<span style=color:#000>fields</span>() <span style=color:#a90d91>for</span> <span style=color:#000>_</span> <span style=color:#000>in</span> <span style=color:#a90d91>range</span>(<span style=color:#000>n</span>))
+<span style=color:#000>pets</span> <span style=color:#000>=</span> <span style=color:#000>np</span><span style=color:#000>.</span><span style=color:#000>fromiter</span>(<span style=color:#000>generator</span>, <span style=color:#000>dtype</span><span style=color:#000>=</span><span style=color:#000>PetNumpy</span>)
+<span style=color:#000>size</span> <span style=color:#000>=</span> <span style=color:#a90d91>round</span>(<span style=color:#000>asizeof</span>(<span style=color:#000>pets</span>) <span style=color:#000>/</span> <span style=color:#000>n</span>)
+</code></pre></div><pre tabindex=0><code>Pet size (structured array) = 14 bytes
+x0.09 to baseline
+</code></pre><div class=row>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt=Tuple src=tuple.png></figure>
+</div>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt=Dataclass src=dataclass.png></figure>
+</div>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="Named tuple" src=named-tuple.png></figure>
+</div>
+</div>
+<div class=row>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="Dataclass with slots" src=dataclass-slots.png></figure>
+</div>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="Manual slots" src=manual-slots.png></figure>
+</div>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="numpy array" src=np-array.png></figure>
+</div>
+</div>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter and <a href=http://digest.antonz.org/><strong>subscribe by email</strong></a> to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2022-05-13 20:25:00 +0000 UTC">13 May, 2022</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/python/>python</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/python-stdlib-changes/>Python Standard Library changes in recent years</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/python-stdlib-changes/>Python Standard Library changes in recent years</a></p>
+<p><a href=/page-iterator/>Page iterator in Python</a></p>
+<p><a href=/functools-cache/>Caching slow functions in Python</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=http://digest.antonz.org/ class=footer__social-link><i class="fas fa-envelope"></i><span>Email</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>

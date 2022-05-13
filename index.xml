@@ -1,4 +1,103 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 11 May 2022 12:40:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Python Standard Library changes in recent years</title><link>https://antonz.org/python-stdlib-changes/</link><pubDate>Wed, 11 May 2022 12:40:00 +0000</pubDate><guid>https://antonz.org/python-stdlib-changes/</guid><description>17 modules with new and improved features.</description><content:encoded><![CDATA[<p>With each major Python release, all the attention goes to the new language features: the walrus operator, dictionary merging, pattern matching. There is also a lot of writing about <code>asyncio</code> and <code>typing</code> modules — they are developing rapidly and are obviously important for the core team.</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 13 May 2022 20:25:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Compact objects in Python</title><link>https://antonz.org/compact-objects/</link><pubDate>Fri, 13 May 2022 20:25:00 +0000</pubDate><guid>https://antonz.org/compact-objects/</guid><description>Tuple vs dataclass, until numpy interferes</description><content:encoded><![CDATA[<p>Python is an object language. This is nice and cozy until you are out of memory holding 10 million objects at once. Let&rsquo;s talk about how to reduce appetite.</p>
+<p>Imagine you have a simple <code>Pet</code> object with the <code>name</code> (string) and <code>price</code> (integer) attributes. Intuitively, it seems that the most compact representation is a tuple:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">(<span style="color:#c41a16">&#34;Pigeon Frank&#34;</span>, <span style="color:#1c01ce">50000</span>)
+</code></pre></div><p>Let&rsquo;s measure how much memory this beauty eats:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">import</span> <span style="color:#000">random</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">pympler.asizeof</span> <span style="color:#a90d91">import</span> <span style="color:#000">asizeof</span>
+
+<span style="color:#a90d91">def</span> <span style="color:#000">fields</span>():
+    <span style="color:#000">name_gen</span> <span style="color:#000">=</span> (<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">choice</span>(<span style="color:#000">string</span><span style="color:#000">.</span><span style="color:#000">ascii_uppercase</span>) <span style="color:#a90d91">for</span> <span style="color:#000">_</span> <span style="color:#000">in</span> <span style="color:#a90d91">range</span>(<span style="color:#1c01ce">10</span>))
+    <span style="color:#000">name</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#34;&#34;</span><span style="color:#000">.</span><span style="color:#000">join</span>(<span style="color:#000">name_gen</span>)
+    <span style="color:#000">price</span> <span style="color:#000">=</span> <span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">randint</span>(<span style="color:#1c01ce">10000</span>, <span style="color:#1c01ce">99999</span>)
+    <span style="color:#a90d91">return</span> (<span style="color:#000">name</span>, <span style="color:#000">price</span>)
+
+<span style="color:#a90d91">def</span> <span style="color:#000">measure</span>(<span style="color:#000">name</span>, <span style="color:#000">fn</span>, <span style="color:#000">n</span><span style="color:#000">=</span><span style="color:#1c01ce">10_000</span>):
+    <span style="color:#000">pets</span> <span style="color:#000">=</span> [<span style="color:#000">fn</span>() <span style="color:#a90d91">for</span> <span style="color:#000">_</span> <span style="color:#000">in</span> <span style="color:#a90d91">range</span>(<span style="color:#000">n</span>)]
+    <span style="color:#000">size</span> <span style="color:#000">=</span> <span style="color:#a90d91">round</span>(<span style="color:#000">asizeof</span>(<span style="color:#000">pets</span>) <span style="color:#000">/</span> <span style="color:#000">n</span>)
+    <span style="color:#a90d91">print</span>(<span style="color:#c41a16">f</span><span style="color:#c41a16">&#34;Pet size (</span><span style="color:#c41a16">{</span><span style="color:#000">name</span><span style="color:#c41a16">}</span><span style="color:#c41a16">) = </span><span style="color:#c41a16">{</span><span style="color:#000">size</span><span style="color:#c41a16">}</span><span style="color:#c41a16"> bytes&#34;</span>)
+    <span style="color:#a90d91">return</span> <span style="color:#000">size</span>
+
+<span style="color:#000">baseline</span> <span style="color:#000">=</span> <span style="color:#000">measure</span>(<span style="color:#c41a16">&#34;tuple&#34;</span>, <span style="color:#000">fields</span>)
+</code></pre></div><pre tabindex="0"><code>Pet size (tuple) = 161 bytes
+</code></pre><p>161 bytes. Let&rsquo;s use it as a baseline for further comparison.</p>
+<p>But who works with tuples these days? You would probably choose a dataclass:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">from</span> <span style="color:#000">dataclasses</span> <span style="color:#a90d91">import</span> <span style="color:#000">dataclass</span>
+
+<span style="color:#000">@dataclass</span>
+<span style="color:#a90d91">class</span> <span style="color:#3f6e75">PetData</span>:
+    <span style="color:#000">name</span>: <span style="color:#a90d91">str</span>
+    <span style="color:#000">price</span>: <span style="color:#a90d91">int</span>
+
+<span style="color:#000">fn</span> <span style="color:#000">=</span> <span style="color:#a90d91">lambda</span>: <span style="color:#000">PetData</span>(<span style="color:#000">*</span><span style="color:#000">fields</span>())
+<span style="color:#000">measure</span>(<span style="color:#c41a16">&#34;dataclass&#34;</span>, <span style="color:#000">fn</span>)
+</code></pre></div><pre tabindex="0"><code>Pet size (dataclass) = 257 bytes
+x1.60 to baseline
+</code></pre><p>Thing is, it&rsquo;s 1.6 times larger than a tuple.</p>
+<p>Let&rsquo;s try a named tuple then:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">from</span> <span style="color:#000">typing</span> <span style="color:#a90d91">import</span> <span style="color:#000">NamedTuple</span>
+
+<span style="color:#a90d91">class</span> <span style="color:#3f6e75">PetTuple</span>(<span style="color:#000">NamedTuple</span>):
+    <span style="color:#000">name</span>: <span style="color:#a90d91">str</span>
+    <span style="color:#000">price</span>: <span style="color:#a90d91">int</span>
+
+
+<span style="color:#000">fn</span> <span style="color:#000">=</span> <span style="color:#a90d91">lambda</span>: <span style="color:#000">PetTuple</span>(<span style="color:#000">*</span><span style="color:#000">fields</span>())
+<span style="color:#000">measure</span>(<span style="color:#c41a16">&#34;named tuple&#34;</span>, <span style="color:#000">fn</span>)
+</code></pre></div><pre tabindex="0"><code>Pet size (named tuple) = 161 bytes
+x1.00 to baseline
+</code></pre><p>Looks like a dataclass, works like a tuple. Perfect.</p>
+<p>Or not? Python 3.10 received dataclasses with slots:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">@dataclass</span>(<span style="color:#000">slots</span><span style="color:#000">=</span><span style="color:#a90d91">True</span>)
+<span style="color:#a90d91">class</span> <span style="color:#3f6e75">PetData</span>:
+    <span style="color:#000">name</span>: <span style="color:#a90d91">str</span>
+    <span style="color:#000">price</span>: <span style="color:#a90d91">int</span>
+
+
+<span style="color:#000">fn</span> <span style="color:#000">=</span> <span style="color:#a90d91">lambda</span>: <span style="color:#000">PetData</span>(<span style="color:#000">*</span><span style="color:#000">fields</span>())
+<span style="color:#000">measure</span>(<span style="color:#c41a16">&#34;dataclass w/slots&#34;</span>, <span style="color:#000">fn</span>)
+</code></pre></div><pre tabindex="0"><code>Pet size (dataclass w/slots) = 153 bytes
+x0.95 to baseline
+</code></pre><p>Wow! Slots magic creates special skinny objects without an underlying dictionary, unlike regular Python objects. Such dataclass is even lighter than a tuple.</p>
+<p>What if 3.10 is out of the question yet? Use <code>NamedTuple</code>. Or add a slots dunder manually:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">@dataclass</span>
+<span style="color:#a90d91">class</span> <span style="color:#3f6e75">PetData</span>:
+    <span style="color:#000">__slots__</span> <span style="color:#000">=</span> (<span style="color:#c41a16">&#34;name&#34;</span>, <span style="color:#c41a16">&#34;price&#34;</span>)
+    <span style="color:#000">name</span>: <span style="color:#a90d91">str</span>
+    <span style="color:#000">price</span>: <span style="color:#a90d91">int</span>
+</code></pre></div><p>Slot objects have their own shortcomings. But they are great for simple cases (without inheritance and other complex stuff).</p>
+<p>P.S. The real winner, of course, is the <code>numpy</code> array. But there is no fun in competing with it  ツ</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">import</span> <span style="color:#000">string</span>
+<span style="color:#a90d91">import</span> <span style="color:#000">numpy</span> <span style="color:#a90d91">as</span> <span style="color:#000">np</span>
+
+<span style="color:#000">PetNumpy</span> <span style="color:#000">=</span> <span style="color:#000">np</span><span style="color:#000">.</span><span style="color:#000">dtype</span>([(<span style="color:#c41a16">&#34;name&#34;</span>, <span style="color:#c41a16">&#34;S10&#34;</span>), (<span style="color:#c41a16">&#34;price&#34;</span>, <span style="color:#c41a16">&#34;i4&#34;</span>)])
+<span style="color:#000">generator</span> <span style="color:#000">=</span> (<span style="color:#000">fields</span>() <span style="color:#a90d91">for</span> <span style="color:#000">_</span> <span style="color:#000">in</span> <span style="color:#a90d91">range</span>(<span style="color:#000">n</span>))
+<span style="color:#000">pets</span> <span style="color:#000">=</span> <span style="color:#000">np</span><span style="color:#000">.</span><span style="color:#000">fromiter</span>(<span style="color:#000">generator</span>, <span style="color:#000">dtype</span><span style="color:#000">=</span><span style="color:#000">PetNumpy</span>)
+<span style="color:#000">size</span> <span style="color:#000">=</span> <span style="color:#a90d91">round</span>(<span style="color:#000">asizeof</span>(<span style="color:#000">pets</span>) <span style="color:#000">/</span> <span style="color:#000">n</span>)
+</code></pre></div><pre tabindex="0"><code>Pet size (structured array) = 14 bytes
+x0.09 to baseline
+</code></pre><div class="row">
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="Tuple" src="tuple.png"></figure>
+</div>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="Dataclass" src="dataclass.png"></figure>
+</div>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="Named tuple" src="named-tuple.png"></figure>
+</div>
+</div>
+<div class="row">
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="Dataclass with slots" src="dataclass-slots.png"></figure>
+</div>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="Manual slots" src="manual-slots.png"></figure>
+</div>
+<div class="col-xs-12 col-sm-4">
+<figure><img alt="numpy array" src="np-array.png"></figure>
+</div>
+</div>
+]]></content:encoded></item><item><title>Python Standard Library changes in recent years</title><link>https://antonz.org/python-stdlib-changes/</link><pubDate>Wed, 11 May 2022 12:40:00 +0000</pubDate><guid>https://antonz.org/python-stdlib-changes/</guid><description>17 modules with new and improved features.</description><content:encoded><![CDATA[<p>With each major Python release, all the attention goes to the new language features: the walrus operator, dictionary merging, pattern matching. There is also a lot of writing about <code>asyncio</code> and <code>typing</code> modules — they are developing rapidly and are obviously important for the core team.</p>
 <p>The rest of the standard library modules receive undeservedly little attention. I want to fix this and tell you about the novelties introduced in versions 3.8–3.10.</p>
 <blockquote>
 <p>This is not an exhaustive list, of course. I write only about those changes that interested me personally. But since I am not too much different from the &ldquo;average&rdquo; Python backend developer, it is likely that you will also be interested. Let me know if I missed something.</p>
@@ -1065,152 +1164,4 @@ ACTIVE 1: employees.en.db
 </ul>
 <p>Overall, a great release! Strict tables offer a long-awaited alternative to flexible typing, <code>any</code> type makes flexibility explicit, and <code>table_list</code> pragma is just nice to have.</p>
 <p><a href="https://sqlite.org/releaselog/3_37_0.html">Official release notes</a> | <a href="https://sqlite.org/download.html">Download</a></p>
-]]></content:encoded></item><item><title>How Python list really works</title><link>https://antonz.org/list-internals/</link><pubDate>Fri, 12 Nov 2021 17:55:00 +0000</pubDate><guid>https://antonz.org/list-internals/</guid><description>And why some methods take constant time while others take linear.</description><content:encoded><![CDATA[<p><em>This post is largely about the arrays — the #1 data structure in the world. If you are not a data structure guru yet, I guarantee that you will better understand Python lists, their advantages and limitations. If you already know everything — there is no harm in refreshing the key points.</em></p>
-<p>Everybody knows how to work with lists in Python:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#000">&gt;&gt;&gt;</span> <span style="color:#000">guests</span> <span style="color:#000">=</span> [<span style="color:#c41a16">&#34;Frank&#34;</span>, <span style="color:#c41a16">&#34;Claire&#34;</span>, <span style="color:#c41a16">&#34;Zoe&#34;</span>]
-<span style="color:#000">&gt;&gt;&gt;</span> <span style="color:#000">guests</span>[<span style="color:#1c01ce">1</span>]
-<span style="color:#c41a16">&#39;Claire&#39;</span>
-</code></pre></div><p>Surely you know that selecting an item by index — <code>guests[idx]</code> — works instantly even on a million elements list. More precisely, selection by index takes constant time O(1) — that is, it does not depend on the number of items in the list.</p>
-<p>Do you know why it works so fast? Let&rsquo;s find out.</p>
-<h2 id="list--array">List = array?</h2>
-<p>The list is based on an array. An array is a set of elements ① of the same size, ② located in memory one after another, without gaps.</p>
-<p>Since elements are the same size and placed contiguously, it is easy to get an array item by index. All we need is the memory address of the very first element (the &ldquo;head&rdquo; of the array).</p>
-<p>Let&rsquo;s say the head is located at the address <code>0×00001234</code>, and each item occupies 8 bytes. Then the element with the <code>idx</code> index is located at <code>0×00001234 + idx*8</code>:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6">
-<figure>
-  <img alt="List = array" src="array-1.png" class="img-bordered-thin">
-</figure>
-</div>
-</div>
-<p>Since the &ldquo;get value by address&rdquo; memory operation takes constant time, selecting an array item by index also takes O(1).</p>
-<p>Roughly speaking, this is how Python list works. It stores a pointer to the head of the array and the number of items in the array. The item count is stored separately so that the <code>len()</code> function also performs in O(1) time, and does not have to count the elements each time.</p>
-<p>So far so good. But there are a couple of problems:</p>
-<ul>
-<li>All array elements are the same size, but the list should be able to store items of different sizes (true/false, numbers, strings of different lengths).</li>
-<li>The array has a fixed length, but the list should be able to store an arbitrary number of items.</li>
-</ul>
-<p>We&rsquo;ll tackle them a bit later.</p>
-<h2 id="a-very-primitive-list">A very primitive list</h2>
-<p>The best way to master a data structure is to implement it from scratch. Unfortunately, Python is not well suited for such low-level structures as arrays, because it doesn&rsquo;t support explicit pointers (addresses in memory).</p>
-<p>This is probably as close as we can get:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#a90d91">class</span> <span style="color:#3f6e75">OhMyList</span>:
-    <span style="color:#a90d91">def</span> <span style="color:#000">__init__</span>(<span style="color:#5b269a">self</span>):
-        <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">length</span> <span style="color:#000">=</span> <span style="color:#1c01ce">0</span>
-        <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">capacity</span> <span style="color:#000">=</span> <span style="color:#1c01ce">8</span>
-        <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">array</span> <span style="color:#000">=</span> (<span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">capacity</span> <span style="color:#000">*</span> <span style="color:#000">ctypes</span><span style="color:#000">.</span><span style="color:#000">py_object</span>)()
-
-    <span style="color:#a90d91">def</span> <span style="color:#000">append</span>(<span style="color:#5b269a">self</span>, <span style="color:#000">item</span>):
-        <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">array</span>[<span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">length</span>] <span style="color:#000">=</span> <span style="color:#000">item</span>
-        <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">length</span> <span style="color:#000">+=</span> <span style="color:#1c01ce">1</span>
-
-    <span style="color:#a90d91">def</span> <span style="color:#000">__len__</span>(<span style="color:#5b269a">self</span>):
-        <span style="color:#a90d91">return</span> <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">length</span>
-
-    <span style="color:#a90d91">def</span> <span style="color:#000">__getitem__</span>(<span style="color:#5b269a">self</span>, <span style="color:#000">idx</span>):
-        <span style="color:#a90d91">return</span> <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">array</span>[<span style="color:#000">idx</span>]
-</code></pre></div><p>Our custom list has a fixed capacity (<code>capacity</code> = 8 items) and stores the elements in the <code>array</code> array.</p>
-<p>The <code>ctypes</code> module gives access to the low-level structures on which the standard library is built. In this case, we use it to create a C-style array of <code>capacity</code> elements.</p>
-<h2 id="list--array-of-pointers">List = array of pointers</h2>
-<p>The list instantly retrieves an item by index, because it has an array inside. And the array is so fast because all the elements are the same size.</p>
-<p>But list items can be of different sizes:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#000">guests</span> <span style="color:#000">=</span> [<span style="color:#c41a16">&#34;Frank&#34;</span>, <span style="color:#c41a16">&#34;Claire&#34;</span>, <span style="color:#c41a16">&#34;Zoe&#34;</span>, <span style="color:#a90d91">True</span>, <span style="color:#1c01ce">42</span>]
-</code></pre></div><p>To solve this problem, someone came up with the idea of storing item <em>pointers</em> instead of item <em>values</em>. Each element of the array is a memory address, and if you follow this address — you will get the actual value:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-10">
-<figure>
-  <img alt="List = array of pointers" src="array-2.png" class="img-bordered-thin">
-  <figcaption>The array stores pointers adjacently. But the values they refer to can be stored anywhere in memory.</figcaption>
-</figure>
-</div>
-</div>
-<p>Since pointers are fixed size (8 bytes on modern 64-bit processors), everything works fine. Instead of one operation (get the value from the array cell), we&rsquo;ve now got two:</p>
-<ol>
-<li>Get the address from the array cell.</li>
-<li>Get the value at that address.</li>
-</ol>
-<p>But it&rsquo;s still constant time O(1).</p>
-<h2 id="list--dynamic-array">List = dynamic array</h2>
-<p>If there are empty spaces left in the array underneath the list, then the <code>.append(item)</code> runs in constant time. All it takes is to write a new value to a free cell and increase the element counter by 1:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#a90d91">def</span> <span style="color:#000">append</span>(<span style="color:#5b269a">self</span>, <span style="color:#000">item</span>):
-    <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">array</span>[<span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">length</span>] <span style="color:#000">=</span> <span style="color:#000">item</span>
-    <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">length</span> <span style="color:#000">+=</span> <span style="color:#1c01ce">1</span>
-</code></pre></div><p>But what if the array is already full?</p>
-<p>Python has to allocate memory for a new, bigger array and copy all the old items to the new one:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6">
-<figure>
-  <img alt="List = dynamic array" src="array-3.png" class="img-bordered-thin">
-  <figcaption>When there is no more space in the old array, it's time to create a new one.</figcaption>
-</figure>
-</div>
-</div>
-<p>Here we go:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#a90d91">def</span> <span style="color:#000">append</span>(<span style="color:#5b269a">self</span>, <span style="color:#000">item</span>):
-    <span style="color:#a90d91">if</span> <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">length</span> <span style="color:#000">==</span> <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">capacity</span>:
-        <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">_resize</span>(<span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">capacity</span><span style="color:#000">*</span><span style="color:#1c01ce">2</span>)
-    <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">array</span>[<span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">length</span>] <span style="color:#000">=</span> <span style="color:#000">item</span>
-    <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">length</span> <span style="color:#000">+=</span> <span style="color:#1c01ce">1</span>
-
-<span style="color:#a90d91">def</span> <span style="color:#000">_resize</span>(<span style="color:#5b269a">self</span>, <span style="color:#000">new_cap</span>):
-    <span style="color:#000">new_arr</span> <span style="color:#000">=</span> (<span style="color:#000">new_cap</span> <span style="color:#000">*</span> <span style="color:#000">ctypes</span><span style="color:#000">.</span><span style="color:#000">py_object</span>)()
-    <span style="color:#a90d91">for</span> <span style="color:#000">idx</span> <span style="color:#000">in</span> <span style="color:#a90d91">range</span>(<span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">length</span>):
-        <span style="color:#000">new_arr</span>[<span style="color:#000">idx</span>] <span style="color:#000">=</span> <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">array</span>[<span style="color:#000">idx</span>]
-    <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">array</span> <span style="color:#000">=</span> <span style="color:#000">new_arr</span>
-    <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">capacity</span> <span style="color:#000">=</span> <span style="color:#000">new_cap</span>
-</code></pre></div><p><code>._resize()</code> is a costly operation, so the new array should be significantly larger than the old one. In the example above, the new array is twice as large. Python uses a more modest coefficient — about 1.12.</p>
-<p>If you remove more than half of the items from the list via <code>.pop()</code>, Python will shrink it. It&rsquo;ll allocate a new, smaller array and move the elements into it.</p>
-<p>Thus, the list juggles arrays all the time so that we don&rsquo;t have to do it ツ</p>
-<h2 id="appending-an-item-to-the-list">Appending an item to the list</h2>
-<p>Selecting from the list by index takes O(1) time — we have sorted that out. The <code>.append(item)</code> method is also O(1) until Python has to extend the array under the list. But array extension is an O(n) operation. So how long does <code>.append()</code> take after all?</p>
-<p>It would be wrong to measure a single append — as we found out, sometimes it takes O(1), sometimes O(n). So computer scientists came up with <em>amortized analysis</em>. To get an amortized operation time, one estimates the total time that a sequence of K operations will take, then divide it by K.</p>
-<p>Without going into details, I will say that the amortized time for <code>.append(item)</code> turns out to be constant — O(1). So appending to the list works very fast.</p>
-<div class="boxed">
-<h3>Why amortized append time is O(1)</h3>
-<p>Let's say the list is empty and want to append <code>n</code> items. For simplicity, we'll use the expansion factor of 2. Let's count the number of atomic operations:</p>
-<ul>
-  <li>1st item: 1 (copy) + 1 (insert)</li>
-  <li>another 2: 2 (copy) + 2 (insert)</li>
-  <li>another 4: 4 (copy) + 4 (insert)</li>
-  <li>another 8: 8 (copy) + 8 (insert)</li>
-  <li>...</li>
-</ul>
-<p>For <code>n</code> items there will be <code>n</code> insertions.</p>
-<p>As for copy:</p>
-<pre><code>1 + 2 + 4 + ... log(n) = 
-= 2**log(n) * 2 - 1 =
-= 2n - 1</code></pre>
-<p>operations.</p>
-<p>So for <code>n</code> items there will be <code>3n - 1</code> atomic operations.</p>
-<p><code>O((3n - 1) / n)</code> = <code>O(1)</code></p>
-</div>
-<p>Summing up, the following operations are guaranteed to be fast:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#177500"># O(1)</span>
-<span style="color:#000">lst</span>[<span style="color:#000">idx</span>]
-
-<span style="color:#177500"># O(1)</span>
-<span style="color:#a90d91">len</span>(<span style="color:#000">lst</span>)
-
-<span style="color:#177500"># amortized O(1)</span>
-<span style="color:#000">lst</span><span style="color:#000">.</span><span style="color:#000">append</span>(<span style="color:#000">item</span>)
-<span style="color:#000">lst</span><span style="color:#000">.</span><span style="color:#000">pop</span>()
-</code></pre></div><h2 id="summary">Summary</h2>
-<p>As we found out, these operations are O(1):</p>
-<ul>
-<li>select an item by index <code>lst[idx]</code></li>
-<li>count items <code>len(lst)</code></li>
-<li>add an item to the end of the list <code>.append(item)</code></li>
-<li>remove an item from the end of the list <code>.pop()</code></li>
-</ul>
-<p>Other operations are &ldquo;slow&rdquo;:</p>
-<ul>
-<li>Insert or delete an item by index. <code>.insert(idx, item)</code> and <code>.pop(idx)</code> take linear time O(n) because they shift all the elements after the target one.</li>
-<li>Search or delete an item by value. <code>item in lst</code>, <code>.index(item)</code> and <code>.remove(item)</code> take linear time O(n) because they iterate over all the elements.</li>
-<li>Select a slice of <code>k</code> elements. <code>lst[from:to]</code> takes O(k).</li>
-</ul>
-<p>Does this mean that you should not use &ldquo;slow&rdquo; operations? Of course not. If you have a list of 1000 items, the difference between O(1) and O(n) for a single operation is insignificant.</p>
-<p>On the other hand, if you perform a &ldquo;slow&rdquo; operation on a list of 1000 items a million times — this is quite significant. The same goes if you invoke a single &ldquo;slow&rdquo; operation on a list of a million items.</p>
-<p>Therefore, it is useful to know which list methods take constant time and which take linear time — to make a conscious decision in a specific situation.</p>
-<p>I hope you&rsquo;ll see Python lists in a new way after this article. Thanks for reading!</p>
-<p><a href="https://news.ycombinator.com/item?id=29217038">Comments on Hacker News</a></p>
 ]]></content:encoded></item></channel></rss>
