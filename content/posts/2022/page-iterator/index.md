@@ -5,6 +5,7 @@ description = "Traverse dataset in pages for faster batch processing."
 image = "/page-iterator/cover.png"
 slug = "page-iterator"
 tags = ["python"]
+featured = true
 +++
 
 Suppose you are counting stats for a huge dataset of toys sold across the country over the past year:

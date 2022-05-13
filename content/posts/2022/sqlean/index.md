@@ -5,6 +5,7 @@ description = "Regexes, math, file IO and over 100 other functions."
 image = "/sqlean/cover.png"
 slug = "sqlean"
 tags = ["sqlite", "data"]
+featured = true
 +++
 
 I really like SQLite. It's a miniature embedded database, perfect for both exploratory data analysis and as a storage for small apps (I've [blogged about that](/sqlite-is-not-a-toy-database/) previously).

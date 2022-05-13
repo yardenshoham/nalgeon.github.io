@@ -5,6 +5,7 @@ description = "17 modules with new and improved features."
 image = "/python-stdlib-changes/cover.png"
 slug = "python-stdlib-changes"
 tags = ["python"]
+featured = true
 +++
 
 With each major Python release, all the attention goes to the new language features: the walrus operator, dictionary merging, pattern matching. There is also a lot of writing about `asyncio` and `typing` modules — they are developing rapidly and are obviously important for the core team.
