@@ -12,7 +12,7 @@ Python is an object language. This is nice and cozy until you are out of memory 
 Imagine you have a simple `Pet` object with the `name` (string) and `price` (integer) attributes. Intuitively, it seems that the most compact representation is a tuple:
 
 ```python
-("Pigeon Frank", 50000)
+("Francis II", 50000)
 ```
 
 Let's measure how much memory this beauty eats:
