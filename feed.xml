@@ -69,7 +69,33 @@ x0.95 to baseline
     <span style="color:#000">name</span>: <span style="color:#a90d91">str</span>
     <span style="color:#000">price</span>: <span style="color:#a90d91">int</span>
 </code></pre></div><p>Slot objects have their own shortcomings. But they are great for simple cases (without inheritance and other complex stuff).</p>
-<h2 id="others">Others</h2>
+<h2 id="numpy-arrays">numpy arrays</h2>
+<p>The real winner, of course, is the <code>numpy</code> array:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">import</span> <span style="color:#000">string</span>
+<span style="color:#a90d91">import</span> <span style="color:#000">numpy</span> <span style="color:#a90d91">as</span> <span style="color:#000">np</span>
+
+<span style="color:#000">PetNumpy</span> <span style="color:#000">=</span> <span style="color:#000">np</span><span style="color:#000">.</span><span style="color:#000">dtype</span>([(<span style="color:#c41a16">&#34;name&#34;</span>, <span style="color:#c41a16">&#34;S10&#34;</span>), (<span style="color:#c41a16">&#34;price&#34;</span>, <span style="color:#c41a16">&#34;i4&#34;</span>)])
+<span style="color:#000">generator</span> <span style="color:#000">=</span> (<span style="color:#000">fields</span>() <span style="color:#a90d91">for</span> <span style="color:#000">_</span> <span style="color:#000">in</span> <span style="color:#a90d91">range</span>(<span style="color:#000">n</span>))
+<span style="color:#000">pets</span> <span style="color:#000">=</span> <span style="color:#000">np</span><span style="color:#000">.</span><span style="color:#000">fromiter</span>(<span style="color:#000">generator</span>, <span style="color:#000">dtype</span><span style="color:#000">=</span><span style="color:#000">PetNumpy</span>)
+<span style="color:#000">size</span> <span style="color:#000">=</span> <span style="color:#a90d91">round</span>(<span style="color:#000">asizeof</span>(<span style="color:#000">pets</span>) <span style="color:#000">/</span> <span style="color:#000">n</span>)
+</code></pre></div><pre tabindex="0"><code>Pet size (numpy array) = 14 bytes
+x0.09 to baseline
+</code></pre><p>But there are nuances with <code>numpy</code> as well. If names are unicode (<code>U</code> type instead of <code>S</code>), the advantage is not so impressive:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">PetNumpy</span> <span style="color:#000">=</span> <span style="color:#000">np</span><span style="color:#000">.</span><span style="color:#000">dtype</span>([(<span style="color:#c41a16">&#34;name&#34;</span>, <span style="color:#c41a16">&#34;U10&#34;</span>), (<span style="color:#c41a16">&#34;price&#34;</span>, <span style="color:#c41a16">&#34;i4&#34;</span>)])
+</code></pre></div><pre tabindex="0"><code>Pet size (numpy U10) = 44 bytes
+x0.27 to baseline
+</code></pre><p>If the name length is not strictly 10 characters, but varies, say, up to 50 characters (<code>U50</code> instead of <code>U10</code>) — the advantage disappears completely:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">fields</span>():
+    <span style="color:#000">name_len</span> <span style="color:#000">=</span> <span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">randint</span>(<span style="color:#1c01ce">10</span>, <span style="color:#1c01ce">50</span>)
+    <span style="color:#000">name_gen</span> <span style="color:#000">=</span> (<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">choice</span>(<span style="color:#000">string</span><span style="color:#000">.</span><span style="color:#000">ascii_uppercase</span>) <span style="color:#a90d91">for</span> <span style="color:#000">_</span> <span style="color:#000">in</span> <span style="color:#a90d91">range</span>(<span style="color:#000">name_len</span>))
+    <span style="color:#177500"># ...</span>
+
+<span style="color:#000">PetNumpy</span> <span style="color:#000">=</span> <span style="color:#000">np</span><span style="color:#000">.</span><span style="color:#000">dtype</span>([(<span style="color:#c41a16">&#34;name&#34;</span>, <span style="color:#c41a16">&#34;U50&#34;</span>), (<span style="color:#c41a16">&#34;price&#34;</span>, <span style="color:#c41a16">&#34;i4&#34;</span>)])
+</code></pre></div><pre tabindex="0"><code>Pet size (tuple) = 179 bytes
+
+Pet size (numpy U50) = 204 bytes
+x1.14 to baseline
+</code></pre><h2 id="others">Others</h2>
 <p>Let&rsquo;s consider alternatives for completeness.</p>
 <p>A regular class is no different than a dataclass:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">class</span> <span style="color:#3f6e75">PetClass</span>:
@@ -93,18 +119,8 @@ x1.60 to baseline
     <span style="color:#000">price</span>: <span style="color:#a90d91">int</span>
 </code></pre></div><pre tabindex="0"><code>Pet size (pydantic) = 385 bytes
 x2.39 to baseline
-</code></pre><h2 id="the-real-winner">The real winner</h2>
-<p>The real winner, of course, is the <code>numpy</code> array. But there is no fun in competing with it  ツ</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">import</span> <span style="color:#000">string</span>
-<span style="color:#a90d91">import</span> <span style="color:#000">numpy</span> <span style="color:#a90d91">as</span> <span style="color:#000">np</span>
-
-<span style="color:#000">PetNumpy</span> <span style="color:#000">=</span> <span style="color:#000">np</span><span style="color:#000">.</span><span style="color:#000">dtype</span>([(<span style="color:#c41a16">&#34;name&#34;</span>, <span style="color:#c41a16">&#34;S10&#34;</span>), (<span style="color:#c41a16">&#34;price&#34;</span>, <span style="color:#c41a16">&#34;i4&#34;</span>)])
-<span style="color:#000">generator</span> <span style="color:#000">=</span> (<span style="color:#000">fields</span>() <span style="color:#a90d91">for</span> <span style="color:#000">_</span> <span style="color:#000">in</span> <span style="color:#a90d91">range</span>(<span style="color:#000">n</span>))
-<span style="color:#000">pets</span> <span style="color:#000">=</span> <span style="color:#000">np</span><span style="color:#000">.</span><span style="color:#000">fromiter</span>(<span style="color:#000">generator</span>, <span style="color:#000">dtype</span><span style="color:#000">=</span><span style="color:#000">PetNumpy</span>)
-<span style="color:#000">size</span> <span style="color:#000">=</span> <span style="color:#a90d91">round</span>(<span style="color:#000">asizeof</span>(<span style="color:#000">pets</span>) <span style="color:#000">/</span> <span style="color:#000">n</span>)
-</code></pre></div><pre tabindex="0"><code>Pet size (structured array) = 14 bytes
-x0.09 to baseline
-</code></pre><p>I still prefer named tuples though.</p>
+</code></pre><p class="align-center">⌘&nbsp;⌘&nbsp;⌘</p>
+<p>Compact (and not so compact) objects in Python:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-4">
 <figure><img alt="Tuple" src="tuple.png"></figure>
