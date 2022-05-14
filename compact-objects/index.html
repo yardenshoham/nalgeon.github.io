@@ -60,6 +60,7 @@
 <h1>Compact objects in Python</h1>
 </header>
 <p>Python is an object language. This is nice and cozy until you are out of memory holding 10 million objects at once. Let&rsquo;s talk about how to reduce appetite.</p>
+<h2 id=tuples>Tuples</h2>
 <p>Imagine you have a simple <code>Pet</code> object with the <code>name</code> (string) and <code>price</code> (integer) attributes. Intuitively, it seems that the most compact representation is a tuple:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>(<span style=color:#c41a16>&#34;Frank the Pigeon&#34;</span>, <span style=color:#1c01ce>50000</span>)
 </code></pre></div><p>Let&rsquo;s measure how much memory this beauty eats:</p>
@@ -81,6 +82,7 @@
 <span style=color:#000>baseline</span> <span style=color:#000>=</span> <span style=color:#000>measure</span>(<span style=color:#c41a16>&#34;tuple&#34;</span>, <span style=color:#000>fields</span>)
 </code></pre></div><pre tabindex=0><code>Pet size (tuple) = 161 bytes
 </code></pre><p>161 bytes. Let&rsquo;s use it as a baseline for further comparison.</p>
+<h2 id=dataclasses-vs-named-tuples>Dataclasses vs named tuples</h2>
 <p>But who works with tuples these days? You would probably choose a dataclass:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>from</span> <span style=color:#000>dataclasses</span> <span style=color:#a90d91>import</span> <span style=color:#000>dataclass</span>
 
@@ -106,8 +108,9 @@ x1.60 to baseline
 <span style=color:#000>measure</span>(<span style=color:#c41a16>&#34;named tuple&#34;</span>, <span style=color:#000>fn</span>)
 </code></pre></div><pre tabindex=0><code>Pet size (named tuple) = 161 bytes
 x1.00 to baseline
-</code></pre><p>Looks like a dataclass, works like a tuple. Perfect.</p>
-<p>Or not? Python 3.10 received dataclasses with slots:</p>
+</code></pre><p>Looks like a dataclass, works like a tuple. Perfect. Or not?</p>
+<h2 id=slots>Slots</h2>
+<p>Python 3.10 received dataclasses with slots:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>@dataclass</span>(<span style=color:#000>slots</span><span style=color:#000>=</span><span style=color:#a90d91>True</span>)
 <span style=color:#a90d91>class</span> <span style=color:#3f6e75>PetData</span>:
     <span style=color:#000>name</span>: <span style=color:#a90d91>str</span>
@@ -126,7 +129,32 @@ x0.95 to baseline
     <span style=color:#000>name</span>: <span style=color:#a90d91>str</span>
     <span style=color:#000>price</span>: <span style=color:#a90d91>int</span>
 </code></pre></div><p>Slot objects have their own shortcomings. But they are great for simple cases (without inheritance and other complex stuff).</p>
-<p>P.S. The real winner, of course, is the <code>numpy</code> array. But there is no fun in competing with it  ツ</p>
+<h2 id=others>Others</h2>
+<p>Let&rsquo;s consider alternatives for completeness.</p>
+<p>A regular class is no different than a dataclass:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>class</span> <span style=color:#3f6e75>PetClass</span>:
+    <span style=color:#a90d91>def</span> <span style=color:#000>__init__</span>(<span style=color:#5b269a>self</span>, <span style=color:#000>name</span>: <span style=color:#a90d91>str</span>, <span style=color:#000>price</span>: <span style=color:#a90d91>int</span>):
+        <span style=color:#5b269a>self</span><span style=color:#000>.</span><span style=color:#000>name</span> <span style=color:#000>=</span> <span style=color:#000>name</span>
+        <span style=color:#5b269a>self</span><span style=color:#000>.</span><span style=color:#000>price</span> <span style=color:#000>=</span> <span style=color:#000>price</span>
+</code></pre></div><pre tabindex=0><code>Pet size (class) = 257 bytes
+x1.60 to baseline
+</code></pre><p>And a frozen (immutable) dataclass too:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>@dataclass</span>(<span style=color:#000>frozen</span><span style=color:#000>=</span><span style=color:#a90d91>True</span>)
+<span style=color:#a90d91>class</span> <span style=color:#3f6e75>PetDataFrozen</span>:
+    <span style=color:#000>name</span>: <span style=color:#a90d91>str</span>
+    <span style=color:#000>price</span>: <span style=color:#a90d91>int</span>
+</code></pre></div><pre tabindex=0><code>Pet size (frozen dataclass) = 257 bytes
+x1.60 to baseline
+</code></pre><p>Pydantic model sets an anti-record (no wonder, it uses inheritance):</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>from</span> <span style=color:#000>pydantic</span> <span style=color:#a90d91>import</span> <span style=color:#000>BaseModel</span>
+
+<span style=color:#a90d91>class</span> <span style=color:#3f6e75>PetModel</span>(<span style=color:#000>BaseModel</span>):
+    <span style=color:#000>name</span>: <span style=color:#a90d91>str</span>
+    <span style=color:#000>price</span>: <span style=color:#a90d91>int</span>
+</code></pre></div><pre tabindex=0><code>Pet size (pydantic) = 385 bytes
+x2.39 to baseline
+</code></pre><h2 id=the-real-winner>The real winner</h2>
+<p>The real winner, of course, is the <code>numpy</code> array. But there is no fun in competing with it  ツ</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>import</span> <span style=color:#000>string</span>
 <span style=color:#a90d91>import</span> <span style=color:#000>numpy</span> <span style=color:#a90d91>as</span> <span style=color:#000>np</span>
 
@@ -136,7 +164,8 @@ x0.95 to baseline
 <span style=color:#000>size</span> <span style=color:#000>=</span> <span style=color:#a90d91>round</span>(<span style=color:#000>asizeof</span>(<span style=color:#000>pets</span>) <span style=color:#000>/</span> <span style=color:#000>n</span>)
 </code></pre></div><pre tabindex=0><code>Pet size (structured array) = 14 bytes
 x0.09 to baseline
-</code></pre><div class=row>
+</code></pre><p>I still prefer named tuples though.</p>
+<div class=row>
 <div class="col-xs-12 col-sm-4">
 <figure><img alt=Tuple src=tuple.png></figure>
 </div>
