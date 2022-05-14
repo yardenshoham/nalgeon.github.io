@@ -124,6 +124,54 @@ class PetData:
 
 Slot objects have their own shortcomings. But they are great for simple cases (without inheritance and other complex stuff).
 
+## numpy arrays
+
+The real winner, of course, is the `numpy` array:
+
+```python
+import string
+import numpy as np
+
+PetNumpy = np.dtype([("name", "S10"), ("price", "i4")])
+generator = (fields() for _ in range(n))
+pets = np.fromiter(generator, dtype=PetNumpy)
+size = round(asizeof(pets) / n)
+```
+
+```
+Pet size (numpy array) = 14 bytes
+x0.09 to baseline
+```
+
+But there are nuances with `numpy` as well. If names are unicode (`U` type instead of `S`), the advantage is not so impressive:
+
+```python
+PetNumpy = np.dtype([("name", "U10"), ("price", "i4")])
+```
+
+```
+Pet size (numpy U10) = 44 bytes
+x0.27 to baseline
+```
+
+If the name length is not strictly 10 characters, but varies, say, up to 50 characters (`U50` instead of `U10`) — the advantage disappears completely:
+
+```python
+def fields():
+    name_len = random.randint(10, 50)
+    name_gen = (random.choice(string.ascii_uppercase) for _ in range(name_len))
+    # ...
+
+PetNumpy = np.dtype([("name", "U50"), ("price", "i4")])
+```
+
+```
+Pet size (tuple) = 179 bytes
+
+Pet size (numpy U50) = 204 bytes
+x1.14 to baseline
+```
+
 ## Others
 
 Let's consider alternatives for completeness.
@@ -171,26 +219,9 @@ Pet size (pydantic) = 385 bytes
 x2.39 to baseline
 ```
 
-## The real winner
+<p class="align-center">⌘&nbsp;⌘&nbsp;⌘</p>
 
-The real winner, of course, is the `numpy` array. But there is no fun in competing with it  ツ
-
-```python
-import string
-import numpy as np
-
-PetNumpy = np.dtype([("name", "S10"), ("price", "i4")])
-generator = (fields() for _ in range(n))
-pets = np.fromiter(generator, dtype=PetNumpy)
-size = round(asizeof(pets) / n)
-```
-
-```
-Pet size (structured array) = 14 bytes
-x0.09 to baseline
-```
-
-I still prefer named tuples though.
+Compact (and not so compact) objects in Python:
 
 <div class="row">
 <div class="col-xs-12 col-sm-4">
