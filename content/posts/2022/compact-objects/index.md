@@ -9,6 +9,8 @@ tags = ["python"]
 
 Python is an object language. This is nice and cozy until you are out of memory holding 10 million objects at once. Let's talk about how to reduce appetite.
 
+## Tuples
+
 Imagine you have a simple `Pet` object with the `name` (string) and `price` (integer) attributes. Intuitively, it seems that the most compact representation is a tuple:
 
 ```python
@@ -41,6 +43,8 @@ Pet size (tuple) = 161 bytes
 ```
 
 161 bytes. Let's use it as a baseline for further comparison.
+
+## Dataclasses vs named tuples
 
 But who works with tuples these days? You would probably choose a dataclass:
 
@@ -82,9 +86,11 @@ Pet size (named tuple) = 161 bytes
 x1.00 to baseline
 ```
 
-Looks like a dataclass, works like a tuple. Perfect.
+Looks like a dataclass, works like a tuple. Perfect. Or not?
 
-Or not? Python 3.10 received dataclasses with slots:
+## Slots
+
+Python 3.10 received dataclasses with slots:
 
 ```python
 @dataclass(slots=True)
@@ -116,7 +122,56 @@ class PetData:
 
 Slot objects have their own shortcomings. But they are great for simple cases (without inheritance and other complex stuff).
 
-P.S. The real winner, of course, is the `numpy` array. But there is no fun in competing with it  ツ
+## Others
+
+Let's consider alternatives for completeness.
+
+A regular class is no different than a dataclass:
+
+```python
+class PetClass:
+    def __init__(self, name: str, price: int):
+        self.name = name
+        self.price = price
+```
+
+```
+Pet size (class) = 257 bytes
+x1.60 to baseline
+```
+
+And a frozen (immutable) dataclass too:
+
+```python
+@dataclass(frozen=True)
+class PetDataFrozen:
+    name: str
+    price: int
+```
+
+```
+Pet size (frozen dataclass) = 257 bytes
+x1.60 to baseline
+```
+
+Pydantic model sets an anti-record (no wonder, it uses inheritance):
+
+```python
+from pydantic import BaseModel
+
+class PetModel(BaseModel):
+    name: str
+    price: int
+```
+
+```
+Pet size (pydantic) = 385 bytes
+x2.39 to baseline
+```
+
+## The real winner
+
+The real winner, of course, is the `numpy` array. But there is no fun in competing with it  ツ
 
 ```python
 import string
@@ -132,6 +187,8 @@ size = round(asizeof(pets) / n)
 Pet size (structured array) = 14 bytes
 x0.09 to baseline
 ```
+
+I still prefer named tuples though.
 
 <div class="row">
 <div class="col-xs-12 col-sm-4">
