@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 15 May 2022 11:25:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>JSON and virtual columns in SQLite</title><link>https://antonz.org/json-virtual-columns/</link><pubDate>Sun, 15 May 2022 11:25:00 +0000</pubDate><guid>https://antonz.org/json-virtual-columns/</guid><description>Faster JSON handling in a relational database.</description><content:encoded><![CDATA[<p><a href="/generated-columns/">Generated columns</a> has another great use case.</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 15 May 2022 11:25:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>JSON and virtual columns in SQLite</title><link>https://antonz.org/json-virtual-columns/</link><pubDate>Sun, 15 May 2022 11:25:00 +0000</pubDate><guid>https://antonz.org/json-virtual-columns/</guid><description>Faster JSON handling in a relational database.</description><content:encoded><![CDATA[<p><a href="/generated-columns/">Generated columns</a> have another great use case.</p>
+<p><img src="json-data.png" alt="JSON data"></p>
 <p>Let&rsquo;s say you decide to keep a log of events that occur in the system. There are different types of events, each with its own set of fields. For example, sign-in:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
     <span style="color:#000">&#34;timestamp&#34;</span>: <span style="color:#c41a16">&#34;2022-05-15T09:31:00Z&#34;</span>,
@@ -20,7 +21,8 @@
         <span style="color:#000">&#34;currency&#34;</span>: <span style="color:#c41a16">&#34;USD&#34;</span>
     }
 }
-</code></pre></div><p>You decide to store the raw JSON, as normalization is non-trivial. You create an <code>events</code> table with a single <code>value</code> field:</p>
+</code></pre></div><p><img src="json-functions.png" alt="JSON functions"></p>
+<p>You decide to store the raw JSON, as normalization is non-trivial. You create an <code>events</code> table with a single <code>value</code> field:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">value</span> <span style="color:#a90d91">from</span> <span style="color:#000">events</span>;
 </code></pre></div><pre tabindex="0"><code>{&quot;timestamp&quot;:&quot;2022-05-15T09:31:00Z&quot;,&quot;object&quot;:&quot;user&quot;,&quot;object_id&quot;:11,&quot;action&quot;:&quot;login&quot;,&quot;details&quot;:{&quot;ip&quot;:&quot;192.168.0.1&quot;}}
 {&quot;timestamp&quot;:&quot;2022-05-15T09:32:00Z&quot;,&quot;object&quot;:&quot;account&quot;,&quot;object_id&quot;:12,&quot;action&quot;:&quot;deposit&quot;,&quot;details&quot;:{&quot;amount&quot;:&quot;1000&quot;,&quot;currency&quot;:&quot;USD&quot;}}
@@ -37,6 +39,7 @@
 │ user   │ login  │
 └────────┴────────┘
 </code></pre><p>So far, so good. But <code>json_extract()</code> parses the text on each call, so for hundreds of thousands of records the query is slow. What should you do?</p>
+<p><img src="json-columns.png" alt="JSON columns"></p>
 <p>Define virtual columns:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">alter</span> <span style="color:#a90d91">table</span> <span style="color:#000">events</span>
 <span style="color:#a90d91">add</span> <span style="color:#a90d91">column</span> <span style="color:#000">object_id</span> <span style="color:#a90d91">integer</span>

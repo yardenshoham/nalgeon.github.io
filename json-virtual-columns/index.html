@@ -59,7 +59,8 @@
 <header>
 <h1>JSON and virtual columns in SQLite</h1>
 </header>
-<p><a href=/generated-columns/>Generated columns</a> has another great use case.</p>
+<p><a href=/generated-columns/>Generated columns</a> have another great use case.</p>
+<p><img src=json-data.png alt="JSON data"></p>
 <p>Let&rsquo;s say you decide to keep a log of events that occur in the system. There are different types of events, each with its own set of fields. For example, sign-in:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json>{
     <span style=color:#000>&#34;timestamp&#34;</span>: <span style=color:#c41a16>&#34;2022-05-15T09:31:00Z&#34;</span>,
@@ -81,7 +82,8 @@
         <span style=color:#000>&#34;currency&#34;</span>: <span style=color:#c41a16>&#34;USD&#34;</span>
     }
 }
-</code></pre></div><p>You decide to store the raw JSON, as normalization is non-trivial. You create an <code>events</code> table with a single <code>value</code> field:</p>
+</code></pre></div><p><img src=json-functions.png alt="JSON functions"></p>
+<p>You decide to store the raw JSON, as normalization is non-trivial. You create an <code>events</code> table with a single <code>value</code> field:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>value</span> <span style=color:#a90d91>from</span> <span style=color:#000>events</span>;
 </code></pre></div><pre tabindex=0><code>{&quot;timestamp&quot;:&quot;2022-05-15T09:31:00Z&quot;,&quot;object&quot;:&quot;user&quot;,&quot;object_id&quot;:11,&quot;action&quot;:&quot;login&quot;,&quot;details&quot;:{&quot;ip&quot;:&quot;192.168.0.1&quot;}}
 {&quot;timestamp&quot;:&quot;2022-05-15T09:32:00Z&quot;,&quot;object&quot;:&quot;account&quot;,&quot;object_id&quot;:12,&quot;action&quot;:&quot;deposit&quot;,&quot;details&quot;:{&quot;amount&quot;:&quot;1000&quot;,&quot;currency&quot;:&quot;USD&quot;}}
@@ -98,6 +100,7 @@
 │ user   │ login  │
 └────────┴────────┘
 </code></pre><p>So far, so good. But <code>json_extract()</code> parses the text on each call, so for hundreds of thousands of records the query is slow. What should you do?</p>
+<p><img src=json-columns.png alt="JSON columns"></p>
 <p>Define virtual columns:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>alter</span> <span style=color:#a90d91>table</span> <span style=color:#000>events</span>
 <span style=color:#a90d91>add</span> <span style=color:#a90d91>column</span> <span style=color:#000>object_id</span> <span style=color:#a90d91>integer</span>
