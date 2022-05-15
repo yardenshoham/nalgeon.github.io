@@ -7,7 +7,9 @@ slug = "json-virtual-columns"
 tags = ["sqlite"]
 +++
 
-[Generated columns](/generated-columns/) has another great use case.
+[Generated columns](/generated-columns/) have another great use case.
+
+![JSON data](json-data.png)
 
 Let's say you decide to keep a log of events that occur in the system. There are different types of events, each with its own set of fields. For example, sign-in:
 
@@ -37,6 +39,8 @@ Or account deposit:
     }
 }
 ```
+
+![JSON functions](json-functions.png)
 
 You decide to store the raw JSON, as normalization is non-trivial. You create an `events` table with a single `value` field:
 
@@ -69,6 +73,8 @@ where json_extract(value, '$.object_id') = 11;
 ```
 
 So far, so good. But `json_extract()` parses the text on each call, so for hundreds of thousands of records the query is slow. What should you do?
+
+![JSON columns](json-columns.png)
 
 Define virtual columns:
 
