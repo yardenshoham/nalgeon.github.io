@@ -12,14 +12,14 @@
 </ol>
 <p><img src="cte.png" alt="CTE"></p>
 <p>A <strong>Common Table Expression</strong> is basically a named subquery:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#000">vacancy_cte</span> <span style="color:#a90d91">as</span> (
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#000">combined_cte</span> <span style="color:#a90d91">as</span> (
   <span style="color:#a90d91">select</span> <span style="color:#000">v</span>.<span style="color:#000">*</span>, <span style="color:#000">e</span>.<span style="color:#000">name</span>, <span style="color:#000">a</span>.<span style="color:#000">name</span>
   <span style="color:#a90d91">from</span> <span style="color:#000">vacancy</span> <span style="color:#a90d91">as</span> <span style="color:#000">v</span>
     <span style="color:#a90d91">join</span> <span style="color:#000">employer</span> <span style="color:#a90d91">as</span> <span style="color:#000">e</span> <span style="color:#a90d91">on</span> <span style="color:#000">e</span>.<span style="color:#000">id</span> <span style="color:#000">=</span> <span style="color:#000">v</span>.<span style="color:#000">employer_id</span>
     <span style="color:#a90d91">join</span> <span style="color:#000">area</span> <span style="color:#a90d91">as</span> <span style="color:#000">a</span> <span style="color:#a90d91">on</span> <span style="color:#000">a</span>.<span style="color:#000">id</span> <span style="color:#000">=</span> <span style="color:#000">v</span>.<span style="color:#000">area_id</span>
 )
 <span style="color:#a90d91">select</span> ...
-<span style="color:#a90d91">from</span> <span style="color:#000">vacancy_cte</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">combined_cte</span>
 <span style="color:#a90d91">where</span> ...
 <span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> ...
 <span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> ...
@@ -27,7 +27,7 @@
 <p><img src="view.png" alt="View"></p>
 <p>A <strong>view</strong> works like a CTE, but you can reference it by name and not repeat the subquery every time. Views are computed on the fly, similar to CTEs.</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#177500">-- 1) create once
-</span><span style="color:#177500"></span><span style="color:#a90d91">create</span> <span style="color:#a90d91">view</span> <span style="color:#000">vacancy_view</span> <span style="color:#a90d91">as</span>
+</span><span style="color:#177500"></span><span style="color:#a90d91">create</span> <span style="color:#a90d91">view</span> <span style="color:#000">combined_view</span> <span style="color:#a90d91">as</span>
 <span style="color:#a90d91">select</span> <span style="color:#000">v</span>.<span style="color:#000">*</span>, <span style="color:#000">e</span>.<span style="color:#000">name</span>, <span style="color:#000">a</span>.<span style="color:#000">name</span>
 <span style="color:#a90d91">from</span> <span style="color:#000">vacancy</span> <span style="color:#a90d91">as</span> <span style="color:#000">v</span>
   <span style="color:#a90d91">join</span> <span style="color:#000">employer</span> <span style="color:#a90d91">as</span> <span style="color:#000">e</span> <span style="color:#a90d91">on</span> <span style="color:#000">e</span>.<span style="color:#000">id</span> <span style="color:#000">=</span> <span style="color:#000">v</span>.<span style="color:#000">employer_id</span>
@@ -35,7 +35,7 @@
 
 <span style="color:#177500">-- 2) use everywhere
 </span><span style="color:#177500"></span><span style="color:#a90d91">select</span> ...
-<span style="color:#a90d91">from</span> <span style="color:#000">vacancy_view</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">combined_view</span>
 <span style="color:#a90d91">where</span> ...
 <span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> ...
 <span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> ...
@@ -43,7 +43,7 @@
 <p><img src="temp-table.png" alt="Temporary table"></p>
 <p>A <strong>temporary table</strong> is like a real table: it stores data on disk, and you can build indexes. But it exists only while the database connection is open.</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#177500">-- 1) create once
-</span><span style="color:#177500"></span><span style="color:#a90d91">create</span> <span style="color:#000">temp</span> <span style="color:#a90d91">table</span> <span style="color:#000">vacancy_temp</span> <span style="color:#a90d91">as</span>
+</span><span style="color:#177500"></span><span style="color:#a90d91">create</span> <span style="color:#000">temp</span> <span style="color:#a90d91">table</span> <span style="color:#000">combined_temp</span> <span style="color:#a90d91">as</span>
 <span style="color:#a90d91">select</span> <span style="color:#000">v</span>.<span style="color:#000">*</span>, <span style="color:#000">e</span>.<span style="color:#000">name</span>, <span style="color:#000">a</span>.<span style="color:#000">name</span>
 <span style="color:#a90d91">from</span> <span style="color:#000">vacancy</span> <span style="color:#a90d91">as</span> <span style="color:#000">v</span>
   <span style="color:#a90d91">join</span> <span style="color:#000">employer</span> <span style="color:#a90d91">as</span> <span style="color:#000">e</span> <span style="color:#a90d91">on</span> <span style="color:#000">e</span>.<span style="color:#000">id</span> <span style="color:#000">=</span> <span style="color:#000">v</span>.<span style="color:#000">employer_id</span>
@@ -51,7 +51,7 @@
 
 <span style="color:#177500">-- 2) use everywhere
 </span><span style="color:#177500"></span><span style="color:#a90d91">select</span> ...
-<span style="color:#a90d91">from</span> <span style="color:#000">vacancy_temp</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">combined_temp</span>
 <span style="color:#a90d91">where</span> ...
 <span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> ...
 <span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> ...
