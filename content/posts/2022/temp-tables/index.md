@@ -29,14 +29,14 @@ The question is how to reference the combined dataset in further queries. There 
 A **Common Table Expression** is basically a named subquery:
 
 ```sql
-with vacancy_cte as (
+with combined_cte as (
   select v.*, e.name, a.name
   from vacancy as v
     join employer as e on e.id = v.employer_id
     join area as a on a.id = v.area_id
 )
 select ...
-from vacancy_cte
+from combined_cte
 where ...
 group by ...
 order by ...
@@ -50,7 +50,7 @@ A **view** works like a CTE, but you can reference it by name and not repeat the
 
 ```sql
 -- 1) create once
-create view vacancy_view as
+create view combined_view as
 select v.*, e.name, a.name
 from vacancy as v
   join employer as e on e.id = v.employer_id
@@ -58,7 +58,7 @@ from vacancy as v
 
 -- 2) use everywhere
 select ...
-from vacancy_view
+from combined_view
 where ...
 group by ...
 order by ...
@@ -72,7 +72,7 @@ A **temporary table** is like a real table: it stores data on disk, and you can 
 
 ```sql
 -- 1) create once
-create temp table vacancy_temp as
+create temp table combined_temp as
 select v.*, e.name, a.name
 from vacancy as v
   join employer as e on e.id = v.employer_id
@@ -80,7 +80,7 @@ from vacancy as v
 
 -- 2) use everywhere
 select ...
-from vacancy_temp
+from combined_temp
 where ...
 group by ...
 order by ...
