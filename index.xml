@@ -1,4 +1,78 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 15 May 2022 11:25:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>JSON and virtual columns in SQLite</title><link>https://antonz.org/json-virtual-columns/</link><pubDate>Sun, 15 May 2022 11:25:00 +0000</pubDate><guid>https://antonz.org/json-virtual-columns/</guid><description>Faster JSON handling in a relational database.</description><content:encoded><![CDATA[<p><a href="/generated-columns/">Generated columns</a> have another great use case.</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 18 May 2022 20:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Temporary tables in SQLite</title><link>https://antonz.org/temp-tables/</link><pubDate>Wed, 18 May 2022 20:30:00 +0000</pubDate><guid>https://antonz.org/temp-tables/</guid><description>For faster exploratory data analysis.</description><content:encoded><![CDATA[<p>Sometimes you want to combine data from multiple tables into one and query the results. For example, join vacancies together with employers and regions:</p>
+<p><img src="combine-then-query.png" alt="Combine, then query"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">v</span>.<span style="color:#000">*</span>, <span style="color:#000">e</span>.<span style="color:#000">name</span>, <span style="color:#000">a</span>.<span style="color:#000">name</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">vacancy</span> <span style="color:#a90d91">as</span> <span style="color:#000">v</span>
+  <span style="color:#a90d91">join</span> <span style="color:#000">employer</span> <span style="color:#a90d91">as</span> <span style="color:#000">e</span> <span style="color:#a90d91">on</span> <span style="color:#000">e</span>.<span style="color:#000">id</span> <span style="color:#000">=</span> <span style="color:#000">v</span>.<span style="color:#000">employer_id</span>
+  <span style="color:#a90d91">join</span> <span style="color:#000">area</span> <span style="color:#a90d91">as</span> <span style="color:#000">a</span> <span style="color:#a90d91">on</span> <span style="color:#000">a</span>.<span style="color:#000">id</span> <span style="color:#000">=</span> <span style="color:#000">v</span>.<span style="color:#000">area_id</span>
+</code></pre></div><p>The question is how to reference the combined dataset in further queries. There are three ways of doing that:</p>
+<ol>
+<li>Common Table Expressions (CTEs)</li>
+<li>Views</li>
+<li>Temporary tables</li>
+</ol>
+<p><img src="cte.png" alt="CTE"></p>
+<p>A <strong>Common Table Expression</strong> is basically a named subquery:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#000">vacancy_cte</span> <span style="color:#a90d91">as</span> (
+  <span style="color:#a90d91">select</span> <span style="color:#000">v</span>.<span style="color:#000">*</span>, <span style="color:#000">e</span>.<span style="color:#000">name</span>, <span style="color:#000">a</span>.<span style="color:#000">name</span>
+  <span style="color:#a90d91">from</span> <span style="color:#000">vacancy</span> <span style="color:#a90d91">as</span> <span style="color:#000">v</span>
+    <span style="color:#a90d91">join</span> <span style="color:#000">employer</span> <span style="color:#a90d91">as</span> <span style="color:#000">e</span> <span style="color:#a90d91">on</span> <span style="color:#000">e</span>.<span style="color:#000">id</span> <span style="color:#000">=</span> <span style="color:#000">v</span>.<span style="color:#000">employer_id</span>
+    <span style="color:#a90d91">join</span> <span style="color:#000">area</span> <span style="color:#a90d91">as</span> <span style="color:#000">a</span> <span style="color:#a90d91">on</span> <span style="color:#000">a</span>.<span style="color:#000">id</span> <span style="color:#000">=</span> <span style="color:#000">v</span>.<span style="color:#000">area_id</span>
+)
+<span style="color:#a90d91">select</span> ...
+<span style="color:#a90d91">from</span> <span style="color:#000">vacancy_cte</span>
+<span style="color:#a90d91">where</span> ...
+<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> ...
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> ...
+</code></pre></div><p>The CTE is repeated in each query and computed on the fly. So if the subquery for the combined dataset is slow, the entire query will be even slower.</p>
+<p><img src="view.png" alt="View"></p>
+<p>A <strong>view</strong> works like a CTE, but you can reference it by name and not repeat the subquery every time. Views are computed on the fly, similar to CTEs.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#177500">-- 1) create once
+</span><span style="color:#177500"></span><span style="color:#a90d91">create</span> <span style="color:#a90d91">view</span> <span style="color:#000">vacancy_view</span> <span style="color:#a90d91">as</span>
+<span style="color:#a90d91">select</span> <span style="color:#000">v</span>.<span style="color:#000">*</span>, <span style="color:#000">e</span>.<span style="color:#000">name</span>, <span style="color:#000">a</span>.<span style="color:#000">name</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">vacancy</span> <span style="color:#a90d91">as</span> <span style="color:#000">v</span>
+  <span style="color:#a90d91">join</span> <span style="color:#000">employer</span> <span style="color:#a90d91">as</span> <span style="color:#000">e</span> <span style="color:#a90d91">on</span> <span style="color:#000">e</span>.<span style="color:#000">id</span> <span style="color:#000">=</span> <span style="color:#000">v</span>.<span style="color:#000">employer_id</span>
+  <span style="color:#a90d91">join</span> <span style="color:#000">area</span> <span style="color:#a90d91">as</span> <span style="color:#000">a</span> <span style="color:#a90d91">on</span> <span style="color:#000">a</span>.<span style="color:#000">id</span> <span style="color:#000">=</span> <span style="color:#000">v</span>.<span style="color:#000">area_id</span>;
+
+<span style="color:#177500">-- 2) use everywhere
+</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> ...
+<span style="color:#a90d91">from</span> <span style="color:#000">vacancy_view</span>
+<span style="color:#a90d91">where</span> ...
+<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> ...
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> ...
+</code></pre></div><p>PostgreSQL and others have materialized views, which store data on disk. But not SQLite.</p>
+<p><img src="temp-table.png" alt="Temporary table"></p>
+<p>A <strong>temporary table</strong> is like a real table: it stores data on disk, and you can build indexes. But it exists only while the database connection is open.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#177500">-- 1) create once
+</span><span style="color:#177500"></span><span style="color:#a90d91">create</span> <span style="color:#000">temp</span> <span style="color:#a90d91">table</span> <span style="color:#000">vacancy_temp</span> <span style="color:#a90d91">as</span>
+<span style="color:#a90d91">select</span> <span style="color:#000">v</span>.<span style="color:#000">*</span>, <span style="color:#000">e</span>.<span style="color:#000">name</span>, <span style="color:#000">a</span>.<span style="color:#000">name</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">vacancy</span> <span style="color:#a90d91">as</span> <span style="color:#000">v</span>
+  <span style="color:#a90d91">join</span> <span style="color:#000">employer</span> <span style="color:#a90d91">as</span> <span style="color:#000">e</span> <span style="color:#a90d91">on</span> <span style="color:#000">e</span>.<span style="color:#000">id</span> <span style="color:#000">=</span> <span style="color:#000">v</span>.<span style="color:#000">employer_id</span>
+  <span style="color:#a90d91">join</span> <span style="color:#000">area</span> <span style="color:#a90d91">as</span> <span style="color:#000">a</span> <span style="color:#a90d91">on</span> <span style="color:#000">a</span>.<span style="color:#000">id</span> <span style="color:#000">=</span> <span style="color:#000">v</span>.<span style="color:#000">area_id</span>;
+
+<span style="color:#177500">-- 2) use everywhere
+</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> ...
+<span style="color:#a90d91">from</span> <span style="color:#000">vacancy_temp</span>
+<span style="color:#a90d91">where</span> ...
+<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> ...
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> ...
+</code></pre></div><p>Technically, SQLite stores temporary tables in a separate <code>temp</code> database. It keeps that database in a separate file on disk, visible only to the current database connection. The temporary database is deleted automatically as soon as the connection is closed.</p>
+<div class="boxed">
+<p><strong>Temporary database location</strong></p>
+<p>On unix-like systems, the directory for storing the temp database can be one of the following:</p>
+<ol>
+<li>The directory set by <code>PRAGMA temp_store_directory</code> (deprecated)</li>
+<li>The <code>SQLITE_TMPDIR</code> environment variable</li>
+<li>The <code>TMPDIR</code> environment variable</li>
+<li><code>/var/tmp</code></li>
+<li><code>/usr/tmp</code></li>
+<li><code>/tmp</code></li>
+<li>The current working directory (<code>.</code>)</li>
+</ol>
+<p>SQLite picks the first one with both write and execute permissions.</p>
+<p><a href="https://sqlite.org/tempfiles.html">documentation</a></p>
+</div>
+<p>Temporary tables are great for experimenting when you&rsquo;re just getting to know the data. Do whatever you want — everything will be forgotten after disconnecting from the database ツ</p>
+]]></content:encoded></item><item><title>JSON and virtual columns in SQLite</title><link>https://antonz.org/json-virtual-columns/</link><pubDate>Sun, 15 May 2022 11:25:00 +0000</pubDate><guid>https://antonz.org/json-virtual-columns/</guid><description>Faster JSON handling in a relational database.</description><content:encoded><![CDATA[<p><a href="/generated-columns/">Generated columns</a> have another great use case.</p>
 <p><img src="json-data.png" alt="JSON data"></p>
 <p>Let&rsquo;s say you decide to keep a log of events that occur in the system. There are different types of events, each with its own set of fields. For example, sign-in:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
@@ -1097,79 +1171,4 @@ Use islice:               93 ms
 </div>
 <p>SQLite writes the history to a file when the console exits normally, so in case of the computer or CLI crash the commands executed since the last <code>sqlite3</code> launch will be lost.</p>
 <p>History recording is not the only feature of the console. SQLite CLI makes it easy to import and export data or work with several databases at the same time. Debugging <a href="/sqlite-multiline/">multi-line queries</a> is quite a challenge, though.</p>
-]]></content:encoded></item><item><title>The ultimate SQLite extension set</title><link>https://antonz.org/sqlean/</link><pubDate>Tue, 04 Jan 2022 13:00:00 +0000</pubDate><guid>https://antonz.org/sqlean/</guid><description>Regexes, math, file IO and over 100 other functions.</description><content:encoded><![CDATA[<p>I really like SQLite. It&rsquo;s a miniature embedded database, perfect for both exploratory data analysis and as a storage for small apps (I&rsquo;ve <a href="/sqlite-is-not-a-toy-database/">blogged about that</a> previously).</p>
-<p>It has a minor drawback though. There are few built-in functions compared to PostgreSQL or Oracle. Fortunately, the authors provided an extension mechanism, which allows doing almost anything. As a result, there are a lot of SQLite extensions out there, but they are incomplete, inconsistent and scattered across the internet.</p>
-<p>I wanted more consistency. So I started the <strong>sqlean</strong> project, which brings the extensions together, neatly packaged into domain modules, documented, tested, and built for Linux, Windows and macOS. Something like a standard library in Python or Go, only for SQLite.</p>
-<p>I plan to write in detail about each module in a separate article, but for now — here&rsquo;s a brief overview.</p>
-<h2 id="the-main-set">The main set</h2>
-<p>These are the most popular functions missing in SQLite:</p>
-<ul>
-<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/crypto.md">crypto</a>: cryptographic hashes like MD5 or SHA-256.</li>
-<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/fileio.md">fileio</a>: read and write files and catalogs.</li>
-<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/fuzzy.md">fuzzy</a>: fuzzy string matching and phonetics.</li>
-<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/ipaddr.md">ipaddr</a>: IP address manipulation.</li>
-<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/json1.md">json1</a>: JSON functions.</li>
-<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/math.md">math</a>: math functions.</li>
-<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/re.md">re</a>: regular expressions.</li>
-<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/stats.md">stats</a>: math statistics — median, percentiles, etc.</li>
-<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/text.md">text</a>: string functions.</li>
-<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/unicode.md">unicode</a>: Unicode support.</li>
-<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/uuid.md">uuid</a>: Universally Unique IDentifiers.</li>
-<li><a href="https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md">vsv</a>: CSV files as virtual tables.</li>
-</ul>
-<p>There are <a href="https://github.com/nalgeon/sqlean/releases/latest">precompiled binaries</a> for Windows, Linix and macOS.</p>
-<h2 id="the-incubator">The incubator</h2>
-<p>These extensions haven&rsquo;t yet made their way to the main set. They may be too broad, too narrow, or without a well-thought API. I&rsquo;m gradually refactoring and merging them into the main set:</p>
-<ul>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004109889">array</a>: one-dimensional arrays.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-999732640">besttype</a>: convert string value to numeric.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1002267134">bloom</a>: a fast way to tell if a value is already in a table.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004896027">btreeinfo</a>, <a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007421989">memstat</a>, <a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-999732907">recsize</a> and <a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007654407">stmt</a>: various database introspection features.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-996605444">cbrt</a> and <a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-999128539">math2</a>: additional math functions and bit arithmetics.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1001239676">classifier</a>: binary classifier via logistic regression.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004931771">closure</a>: navigate hierarchic tables with parent/child relationships.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1000937999">compress</a> and <a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1000938046">sqlar</a>: compress / uncompress data.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997427979">cron</a>: match dates against cron patterns.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1006791300">dbdump</a>: export database as SQL.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007348326">decimal</a>, <a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997482625">fcmp</a> and <a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007375162">ieee754</a>: decimal and floating-point arithmetic.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004347222">define</a>: create scalar and table-valued functions from SQL.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997423609">envfuncs</a>: read environment variables.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-996432840">eval</a>: run arbitrary SQL statements.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-998138191">isodate</a>: additional date and time functions.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997417836">pearson</a>: Pearson correlation coefficient between two data sets.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997052157">pivotvtab</a>: pivot tables.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007464840">prefixes</a>: generate string prefixes.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007500659">rotate</a>: string obfuscation.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1002297477">spellfix</a>: search a large vocabulary for close matches.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1000902666">stats2</a> and <a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1002703581">stats3</a>: additional math statistics functions.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1003105288">text2</a>: additional string functions.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1001232670">uint</a>: natural string sorting and comparison.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997432989">unhex</a>: reverse for <code>hex()</code>.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007687162">unionvtab</a>: union similar tables into one.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997018486">xmltojson</a>: convert XML to JSON string.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1001190336">zipfile</a>: read and write zip files.</li>
-<li><a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007733209">zorder</a>: map multidimensional data to a single dimension.</li>
-</ul>
-<p><a href="https://github.com/nalgeon/sqlean/issues/27">Vote for your favorites</a>! Popular ones will make their way into the main set faster.</p>
-<p>Incubator extensions are also available <a href="https://github.com/nalgeon/sqlean/releases/tag/incubator">for download</a>.</p>
-<h2 id="how-to-load-an-extension">How to load an extension</h2>
-<p>There are three ways to do it. If you are using SQLite CLI (<code>sqlite.exe</code>):</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#000">sqlite</span><span style="color:#000">&gt;</span> .<span style="color:#a90d91">load</span> .<span style="color:#000">/</span><span style="color:#000">stats</span>
-<span style="color:#000">sqlite</span><span style="color:#000">&gt;</span> <span style="color:#a90d91">select</span> <span style="color:#000">median</span>(<span style="color:#000">value</span>) <span style="color:#a90d91">from</span> <span style="color:#000">generate_series</span>(<span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">99</span>);
-</code></pre></div><p>If you are using a tool like DB Browser for SQLite, SQLite Expert or DBeaver:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">load_extension</span>(<span style="color:#c41a16">&#39;c:\Users\anton\sqlite\stats.dll&#39;</span>);
-<span style="color:#a90d91">select</span> <span style="color:#000">median</span>(<span style="color:#000">value</span>) <span style="color:#a90d91">from</span> <span style="color:#000">generate_series</span>(<span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">99</span>);
-</code></pre></div><p>If you are using Python (other languages provide similar means):</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">import</span> <span style="color:#000">sqlite3</span>
-
-<span style="color:#000">connection</span> <span style="color:#000">=</span> <span style="color:#000">sqlite3</span><span style="color:#000">.</span><span style="color:#000">connect</span>(<span style="color:#c41a16">&#34;:memory:&#34;</span>)
-<span style="color:#000">connection</span><span style="color:#000">.</span><span style="color:#000">enable_load_extension</span>(<span style="color:#a90d91">True</span>)
-<span style="color:#000">connection</span><span style="color:#000">.</span><span style="color:#000">load_extension</span>(<span style="color:#c41a16">&#34;./stats.so&#34;</span>)
-<span style="color:#000">connection</span><span style="color:#000">.</span><span style="color:#000">execute</span>(<span style="color:#c41a16">&#34;select median(value) from generate_series(1, 99)&#34;</span>)
-<span style="color:#000">connection</span><span style="color:#000">.</span><span style="color:#000">close</span>()
-</code></pre></div><h2 id="next-steps">Next steps</h2>
-<p>If you feel that you are missing some function in SQLite, check the <a href="https://github.com/nalgeon/sqlean"><strong>sqlean</strong></a> repository — you&rsquo;ll probably find one.</p>
-<p>If you want to participate, submit <a href="https://github.com/nalgeon/sqlean/blob/incubator/docs/submit.md">your own</a> or <a href="https://github.com/nalgeon/sqlean/blob/incubator/docs/external.md">third-party</a> extensions.</p>
-<p>I keep adding new extensions to the incubator. I also refactor the extensions from the incubator and merge them into the main set. I plan to write a separate article for each main module, so stay tuned.</p>
-<p>SQLite FTW!</p>
 ]]></content:encoded></item></channel></rss>

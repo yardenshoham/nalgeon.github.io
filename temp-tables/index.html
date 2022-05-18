@@ -1,0 +1,182 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Temporary tables in SQLite</title>
+<meta name=description content="For faster exploratory data analysis.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.65f0a52d2e69e5dbfd825b3072b88215fc0b75fca7c9690febf6b43535d86a5e.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/temp-tables/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Temporary tables in SQLite">
+<meta property="og:description" content="For faster exploratory data analysis.">
+<meta property="og:url" content="https://antonz.org/temp-tables/">
+<meta property="og:image" content="https://antonz.org/temp-tables/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Temporary tables in SQLite">
+<meta name=twitter:description content="For faster exploratory data analysis.">
+<meta name=twitter:url content="https://antonz.org/temp-tables/">
+<meta name=twitter:site content="@nalgeon">
+<meta name=twitter:image content="https://antonz.org/temp-tables/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/stopwar.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Temporary tables in SQLite</h1>
+</header>
+<p>Sometimes you want to combine data from multiple tables into one and query the results. For example, join vacancies together with employers and regions:</p>
+<p><img src=combine-then-query.png alt="Combine, then query"></p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>v</span>.<span style=color:#000>*</span>, <span style=color:#000>e</span>.<span style=color:#000>name</span>, <span style=color:#000>a</span>.<span style=color:#000>name</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>vacancy</span> <span style=color:#a90d91>as</span> <span style=color:#000>v</span>
+  <span style=color:#a90d91>join</span> <span style=color:#000>employer</span> <span style=color:#a90d91>as</span> <span style=color:#000>e</span> <span style=color:#a90d91>on</span> <span style=color:#000>e</span>.<span style=color:#000>id</span> <span style=color:#000>=</span> <span style=color:#000>v</span>.<span style=color:#000>employer_id</span>
+  <span style=color:#a90d91>join</span> <span style=color:#000>area</span> <span style=color:#a90d91>as</span> <span style=color:#000>a</span> <span style=color:#a90d91>on</span> <span style=color:#000>a</span>.<span style=color:#000>id</span> <span style=color:#000>=</span> <span style=color:#000>v</span>.<span style=color:#000>area_id</span>
+</code></pre></div><p>The question is how to reference the combined dataset in further queries. There are three ways of doing that:</p>
+<ol>
+<li>Common Table Expressions (CTEs)</li>
+<li>Views</li>
+<li>Temporary tables</li>
+</ol>
+<p><img src=cte.png alt=CTE></p>
+<p>A <strong>Common Table Expression</strong> is basically a named subquery:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>with</span> <span style=color:#000>vacancy_cte</span> <span style=color:#a90d91>as</span> (
+  <span style=color:#a90d91>select</span> <span style=color:#000>v</span>.<span style=color:#000>*</span>, <span style=color:#000>e</span>.<span style=color:#000>name</span>, <span style=color:#000>a</span>.<span style=color:#000>name</span>
+  <span style=color:#a90d91>from</span> <span style=color:#000>vacancy</span> <span style=color:#a90d91>as</span> <span style=color:#000>v</span>
+    <span style=color:#a90d91>join</span> <span style=color:#000>employer</span> <span style=color:#a90d91>as</span> <span style=color:#000>e</span> <span style=color:#a90d91>on</span> <span style=color:#000>e</span>.<span style=color:#000>id</span> <span style=color:#000>=</span> <span style=color:#000>v</span>.<span style=color:#000>employer_id</span>
+    <span style=color:#a90d91>join</span> <span style=color:#000>area</span> <span style=color:#a90d91>as</span> <span style=color:#000>a</span> <span style=color:#a90d91>on</span> <span style=color:#000>a</span>.<span style=color:#000>id</span> <span style=color:#000>=</span> <span style=color:#000>v</span>.<span style=color:#000>area_id</span>
+)
+<span style=color:#a90d91>select</span> ...
+<span style=color:#a90d91>from</span> <span style=color:#000>vacancy_cte</span>
+<span style=color:#a90d91>where</span> ...
+<span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> ...
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> ...
+</code></pre></div><p>The CTE is repeated in each query and computed on the fly. So if the subquery for the combined dataset is slow, the entire query will be even slower.</p>
+<p><img src=view.png alt=View></p>
+<p>A <strong>view</strong> works like a CTE, but you can reference it by name and not repeat the subquery every time. Views are computed on the fly, similar to CTEs.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#177500>-- 1) create once
+</span><span style=color:#177500></span><span style=color:#a90d91>create</span> <span style=color:#a90d91>view</span> <span style=color:#000>vacancy_view</span> <span style=color:#a90d91>as</span>
+<span style=color:#a90d91>select</span> <span style=color:#000>v</span>.<span style=color:#000>*</span>, <span style=color:#000>e</span>.<span style=color:#000>name</span>, <span style=color:#000>a</span>.<span style=color:#000>name</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>vacancy</span> <span style=color:#a90d91>as</span> <span style=color:#000>v</span>
+  <span style=color:#a90d91>join</span> <span style=color:#000>employer</span> <span style=color:#a90d91>as</span> <span style=color:#000>e</span> <span style=color:#a90d91>on</span> <span style=color:#000>e</span>.<span style=color:#000>id</span> <span style=color:#000>=</span> <span style=color:#000>v</span>.<span style=color:#000>employer_id</span>
+  <span style=color:#a90d91>join</span> <span style=color:#000>area</span> <span style=color:#a90d91>as</span> <span style=color:#000>a</span> <span style=color:#a90d91>on</span> <span style=color:#000>a</span>.<span style=color:#000>id</span> <span style=color:#000>=</span> <span style=color:#000>v</span>.<span style=color:#000>area_id</span>;
+
+<span style=color:#177500>-- 2) use everywhere
+</span><span style=color:#177500></span><span style=color:#a90d91>select</span> ...
+<span style=color:#a90d91>from</span> <span style=color:#000>vacancy_view</span>
+<span style=color:#a90d91>where</span> ...
+<span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> ...
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> ...
+</code></pre></div><p>PostgreSQL and others have materialized views, which store data on disk. But not SQLite.</p>
+<p><img src=temp-table.png alt="Temporary table"></p>
+<p>A <strong>temporary table</strong> is like a real table: it stores data on disk, and you can build indexes. But it exists only while the database connection is open.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#177500>-- 1) create once
+</span><span style=color:#177500></span><span style=color:#a90d91>create</span> <span style=color:#000>temp</span> <span style=color:#a90d91>table</span> <span style=color:#000>vacancy_temp</span> <span style=color:#a90d91>as</span>
+<span style=color:#a90d91>select</span> <span style=color:#000>v</span>.<span style=color:#000>*</span>, <span style=color:#000>e</span>.<span style=color:#000>name</span>, <span style=color:#000>a</span>.<span style=color:#000>name</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>vacancy</span> <span style=color:#a90d91>as</span> <span style=color:#000>v</span>
+  <span style=color:#a90d91>join</span> <span style=color:#000>employer</span> <span style=color:#a90d91>as</span> <span style=color:#000>e</span> <span style=color:#a90d91>on</span> <span style=color:#000>e</span>.<span style=color:#000>id</span> <span style=color:#000>=</span> <span style=color:#000>v</span>.<span style=color:#000>employer_id</span>
+  <span style=color:#a90d91>join</span> <span style=color:#000>area</span> <span style=color:#a90d91>as</span> <span style=color:#000>a</span> <span style=color:#a90d91>on</span> <span style=color:#000>a</span>.<span style=color:#000>id</span> <span style=color:#000>=</span> <span style=color:#000>v</span>.<span style=color:#000>area_id</span>;
+
+<span style=color:#177500>-- 2) use everywhere
+</span><span style=color:#177500></span><span style=color:#a90d91>select</span> ...
+<span style=color:#a90d91>from</span> <span style=color:#000>vacancy_temp</span>
+<span style=color:#a90d91>where</span> ...
+<span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> ...
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> ...
+</code></pre></div><p>Technically, SQLite stores temporary tables in a separate <code>temp</code> database. It keeps that database in a separate file on disk, visible only to the current database connection. The temporary database is deleted automatically as soon as the connection is closed.</p>
+<div class=boxed>
+<p><strong>Temporary database location</strong></p>
+<p>On unix-like systems, the directory for storing the temp database can be one of the following:</p>
+<ol>
+<li>The directory set by <code>PRAGMA temp_store_directory</code> (deprecated)</li>
+<li>The <code>SQLITE_TMPDIR</code> environment variable</li>
+<li>The <code>TMPDIR</code> environment variable</li>
+<li><code>/var/tmp</code></li>
+<li><code>/usr/tmp</code></li>
+<li><code>/tmp</code></li>
+<li>The current working directory (<code>.</code>)</li>
+</ol>
+<p>SQLite picks the first one with both write and execute permissions.</p>
+<p><a href=https://sqlite.org/tempfiles.html>documentation</a></p>
+</div>
+<p>Temporary tables are great for experimenting when you&rsquo;re just getting to know the data. Do whatever you want — everything will be forgotten after disconnecting from the database ツ</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter and <a href=http://digest.antonz.org/><strong>subscribe by email</strong></a> to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2022-05-18 20:30:00 +0000 UTC">18 May, 2022</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/sqlite/>sqlite</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/json-virtual-columns/>JSON and virtual columns in SQLite</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/json-virtual-columns/>JSON and virtual columns in SQLite</a></p>
+<p><a href=/generated-columns/>Generated columns in SQLite</a></p>
+<p><a href=/sqlite-multiline/>Multi-line queries in SQLite shell</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=http://digest.antonz.org/ class=footer__social-link><i class="fas fa-envelope"></i><span>Email</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
