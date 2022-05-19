@@ -103,6 +103,8 @@ On unix-like systems, the directory for storing the temp database can be one of 
 
 SQLite picks the first one with both write and execute permissions.
 
+To store the temp database in memory, set `PRAGMA temp_store = MEMORY`.
+
 [documentation](https://sqlite.org/tempfiles.html)
 
 </div>
