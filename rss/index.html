@@ -1,4 +1,124 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 18 May 2022 20:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Temporary tables in SQLite</title><link>https://antonz.org/temp-tables/</link><pubDate>Wed, 18 May 2022 20:30:00 +0000</pubDate><guid>https://antonz.org/temp-tables/</guid><description>For faster exploratory data analysis.</description><content:encoded><![CDATA[<p>Sometimes you want to combine data from multiple tables into one and query the results. For example, join vacancies together with employers and regions:</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 20 May 2022 16:50:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Common Table Expressions in SQL</title><link>https://antonz.org/cte/</link><pubDate>Fri, 20 May 2022 16:50:00 +0000</pubDate><guid>https://antonz.org/cte/</guid><description>Use them instead of subqueries.</description><content:encoded><![CDATA[<p>Rule #1 for writing well-readable SQL queries is to use <em>common table expressions</em> (CTE). People are afraid of them, but they really shouldn&rsquo;t. Let&rsquo;s learn CTEs in three minutes, so you don&rsquo;t have to read a weighty SQL book or take an online course.</p>
+<h2 id="problem">Problem</h2>
+<p>Let&rsquo;s say we have a table with monthly sales for two years:</p>
+<pre tabindex="0"><code>┌──────┬───────┬───────┬──────────┬─────────┐
+│ year │ month │ price │ quantity │ revenue │
+├──────┼───────┼───────┼──────────┼─────────┤
+│ 2019 │ 1     │ 60    │ 200      │ 12000   │
+│ 2019 │ 2     │ 60    │ 660      │ 39600   │
+│ 2019 │ 3     │ 60    │ 400      │ 24000   │
+│ 2019 │ 4     │ 60    │ 300      │ 18000   │
+│ 2019 │ 5     │ 60    │ 440      │ 26400   │
+│ 2019 │ 6     │ 60    │ 540      │ 32400   │
+│ 2019 │ 7     │ 60    │ 440      │ 26400   │
+│ 2019 │ 8     │ 60    │ 440      │ 26400   │
+│ 2019 │ 9     │ 60    │ 250      │ 15000   │
+│ 2019 │ 10    │ 60    │ 420      │ 25200   │
+│ ...  │ ...   │ ...   │ ...      │ ...     │
+└──────┴───────┴───────┴──────────┴─────────┘
+</code></pre><p><a href="https://sqlime.org/#gist:858c409b81ae3a676580cba6745d68ea">playground</a></p>
+<p>We want to select only those months for which revenue exceeded the monthly average for the year.</p>
+<p>To begin with, let&rsquo;s calculate the average monthly revenue by year:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#a90d91">year</span>,
+  <span style="color:#a90d91">avg</span>(<span style="color:#000">revenue</span>) <span style="color:#a90d91">as</span> <span style="color:#000">avg_rev</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">sales</span>
+<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>;
+</code></pre></div><pre tabindex="0"><code>┌──────┬─────────┐
+│ year │ avg_rev │
+├──────┼─────────┤
+│ 2019 │ 25125.0 │
+│ 2020 │ 48625.0 │
+└──────┴─────────┘
+</code></pre><p>Now we can select only those records in which <code>revenue</code> is not less than <code>avg_rev</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#000">sales</span>.<span style="color:#a90d91">year</span>,
+  <span style="color:#000">sales</span>.<span style="color:#a90d91">month</span>,
+  <span style="color:#000">sales</span>.<span style="color:#000">revenue</span>,
+  <span style="color:#000">round</span>(<span style="color:#000">totals</span>.<span style="color:#000">avg_rev</span>) <span style="color:#a90d91">as</span> <span style="color:#000">avg_rev</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">sales</span>
+  <span style="color:#a90d91">join</span> (
+    <span style="color:#a90d91">select</span>
+      <span style="color:#a90d91">year</span>,
+      <span style="color:#a90d91">avg</span>(<span style="color:#000">revenue</span>) <span style="color:#a90d91">as</span> <span style="color:#000">avg_rev</span>
+    <span style="color:#a90d91">from</span> <span style="color:#000">sales</span>
+    <span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>
+  ) <span style="color:#a90d91">as</span> <span style="color:#000">totals</span>
+  <span style="color:#a90d91">on</span> <span style="color:#000">sales</span>.<span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#000">totals</span>.<span style="color:#a90d91">year</span>
+<span style="color:#a90d91">where</span> <span style="color:#000">sales</span>.<span style="color:#000">revenue</span> <span style="color:#000">&gt;=</span> <span style="color:#000">totals</span>.<span style="color:#000">avg_rev</span>;
+</code></pre></div><pre tabindex="0"><code>┌──────┬───────┬─────────┬─────────┐
+│ year │ month │ revenue │ avg_rev │
+├──────┼───────┼─────────┼─────────┤
+│ 2019 │ 2     │ 39600   │ 25125.0 │
+│ 2019 │ 5     │ 26400   │ 25125.0 │
+│ 2019 │ 6     │ 32400   │ 25125.0 │
+│ 2019 │ 7     │ 26400   │ 25125.0 │
+│ ...  │ ...   │ ...     │ ...     │
+└──────┴───────┴─────────┴─────────┘
+</code></pre><p>We solved the task using a subquery:</p>
+<ul>
+<li>the inner query calculates the average monthly revenue;</li>
+<li>the outer query joins with it and filters the results.</li>
+</ul>
+<p>The query as a whole turned out to be a bit complicated. If you revisit it in a month, you&rsquo;ll probably spend some time &ldquo;unraveling&rdquo; things. The problem is that such nested queries have to be read from the inside out:</p>
+<ul>
+<li>find the innermost query and comprehend it;</li>
+<li>join it with the next outer query;</li>
+<li>join them with the next outer query;</li>
+<li>and so on.</li>
+</ul>
+<p>It is OK when there are only two levels, as in our example. In practice, I often encounter three- and four-level subqueries. A pain to read and understand.</p>
+<h2 id="solution">Solution</h2>
+<p>Instead of a subquery, we can use a <em>common table expression</em> (CTE). Every subquery <code>X</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">a</span>, <span style="color:#000">b</span>, <span style="color:#a90d91">c</span>
+<span style="color:#a90d91">from</span> (<span style="color:#000">X</span>)
+<span style="color:#a90d91">where</span> <span style="color:#000">e</span> <span style="color:#000">=</span> <span style="color:#000">f</span>
+</code></pre></div><p>Can be converted to CTE:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#000">cte</span> <span style="color:#a90d91">as</span> (<span style="color:#000">X</span>)
+<span style="color:#a90d91">select</span> <span style="color:#000">a</span>, <span style="color:#000">b</span>, <span style="color:#a90d91">c</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">cte</span>
+<span style="color:#a90d91">where</span> <span style="color:#000">e</span> <span style="color:#000">=</span> <span style="color:#000">f</span>
+</code></pre></div><p>In our example:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#000">totals</span> <span style="color:#a90d91">as</span> (
+  <span style="color:#a90d91">select</span>
+    <span style="color:#a90d91">year</span>,
+    <span style="color:#a90d91">avg</span>(<span style="color:#000">revenue</span>) <span style="color:#a90d91">as</span> <span style="color:#000">avg_rev</span>
+  <span style="color:#a90d91">from</span> <span style="color:#000">sales</span>
+  <span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>
+)
+
+<span style="color:#a90d91">select</span>
+  <span style="color:#000">sales</span>.<span style="color:#a90d91">year</span>,
+  <span style="color:#000">sales</span>.<span style="color:#a90d91">month</span>,
+  <span style="color:#000">sales</span>.<span style="color:#000">revenue</span>,
+  <span style="color:#000">round</span>(<span style="color:#000">totals</span>.<span style="color:#000">avg_rev</span>) <span style="color:#a90d91">as</span> <span style="color:#000">avg_rev</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">sales</span>
+  <span style="color:#a90d91">join</span> <span style="color:#000">totals</span> <span style="color:#a90d91">on</span> <span style="color:#000">totals</span>.<span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#000">sales</span>.<span style="color:#a90d91">year</span>
+<span style="color:#a90d91">where</span> <span style="color:#000">sales</span>.<span style="color:#000">revenue</span> <span style="color:#000">&gt;=</span> <span style="color:#000">totals</span>.<span style="color:#000">avg_rev</span>;
+</code></pre></div><p>With a table expression, the query becomes flat — it&rsquo;s much easier to perceive it this way. Besides, we can reuse the table expression as if it were a regular table:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#000">totals</span> <span style="color:#a90d91">as</span> (...)
+<span style="color:#a90d91">select</span> ... <span style="color:#a90d91">from</span> <span style="color:#000">sales_ru</span> <span style="color:#a90d91">join</span> <span style="color:#000">totals</span> ...
+<span style="color:#a90d91">union</span> <span style="color:#a90d91">all</span>
+<span style="color:#a90d91">select</span> ... <span style="color:#a90d91">from</span> <span style="color:#000">sales_us</span> <span style="color:#a90d91">join</span> <span style="color:#000">totals</span> ...
+</code></pre></div><p>SQL table expressions are somewhat similar to functions in a regular programming language — they reduce the overall complexity:</p>
+<ul>
+<li>You can write an unreadable sheet of code, or you can break the code into understandable individual functions and compose a program out of them.</li>
+<li>You can build a tower of nested subqueries, or you can extract them into CTEs and reference from the main query.</li>
+</ul>
+<h2 id="cte-vs-subquery">CTE vs subquery</h2>
+<p>There is a myth that &ldquo;CTEs are slow&rdquo;. It came from old versions of PostgreSQL (11 and earlier), which always <em>materialized</em> CTE — calculated the full result of a table expression and stored it until the end of the query.</p>
+<p>This is usually a good thing: the engine calculates the result once, and then uses it several times during the main query. But sometimes materialization prevented the engine from optimizing the query:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#000">cte</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">select</span> <span style="color:#000">*</span> <span style="color:#a90d91">from</span> <span style="color:#000">foo</span>)
+<span style="color:#a90d91">select</span> <span style="color:#000">*</span> <span style="color:#a90d91">from</span> <span style="color:#000">cte</span> <span style="color:#a90d91">where</span> <span style="color:#000">id</span> <span style="color:#000">=</span> <span style="color:#1c01ce">500000</span>;
+</code></pre></div><p>The query selects exactly one record by ID, but materialization creates a copy of the <em>entire table</em> in memory. Because of this, the query is terribly slow.</p>
+<p>PostgreSQL 12+ and other modern DBMS have become smarter and no longer do so. Materialization is used when it does more good than harm. Plus, many DBMSs allow you to explicitly control this behavior through the <code>MATERIALIZED</code> / <code>NOT MATERIALIZED</code> instructions.</p>
+<p>So CTEs work no slower than subqueries. And if in doubt, you can try both — a subquery and a table expression — and compare the query plan and execution time.</p>
+<p>How does one know when to use a subquery and when to use CTE? I came up with a simple rule that has never failed me yet:</p>
+<blockquote class="big">
+<p>Always use CTE</p>
+</blockquote>
+<p>That&rsquo;s what I wish you.</p>
+]]></content:encoded></item><item><title>Temporary tables in SQLite</title><link>https://antonz.org/temp-tables/</link><pubDate>Wed, 18 May 2022 20:30:00 +0000</pubDate><guid>https://antonz.org/temp-tables/</guid><description>For faster exploratory data analysis.</description><content:encoded><![CDATA[<p>Sometimes you want to combine data from multiple tables into one and query the results. For example, join vacancies together with employers and regions:</p>
 <p><img src="combine-then-query.png" alt="Combine, then query"></p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">v</span>.<span style="color:#000">*</span>, <span style="color:#000">e</span>.<span style="color:#000">name</span>, <span style="color:#000">a</span>.<span style="color:#000">name</span>
 <span style="color:#a90d91">from</span> <span style="color:#000">vacancy</span> <span style="color:#a90d91">as</span> <span style="color:#000">v</span>
@@ -1152,24 +1272,4 @@ Use islice:               93 ms
 </code></pre></div><p>The cache works in-process and will die with it. So if you need something more scalable, look at Redis or other external cache.</p>
 <p><a href="https://devdocs.io/python/library/functools#functools.lru_cache">Documentation</a> •
 <a href="https://replit.com/@antonz/functools-cache#main.py">Playground</a></p>
-]]></content:encoded></item><item><title>SQLite CLI command history</title><link>https://antonz.org/sqlite-history/</link><pubDate>Sun, 17 Apr 2022 14:50:00 +0000</pubDate><guid>https://antonz.org/sqlite-history/</guid><description>Search for the query instead of typing it by hand.</description><content:encoded><![CDATA[<p>SQLite command line tool (<code>sqlite3</code> or <code>sqlite3.exe</code>) remembers the last 2000 executed commands. To repeat the last command, just press the <code>↑</code> key, to search for older ones — use <code>Ctrl+R</code> shortcut.</p>
-<div class="row">
-<div class="col-xs-12 col-sm-8">
-<figure>
-  <img alt="History search" src="search.jpg">
-  <figcaption>It's faster to find a query than to type it again</figcaption>
-</figure>
-</div>
-</div>
-<p>By default, SQLite stores the history file in the user&rsquo;s home directory and names it <code>.sqlite_history</code>. It&rsquo;s in plain text, so you can view it in your favorite editor. If you prefer to save it elsewhere, specify the full path in the <code>SQLITE_HISTORY</code> environment variable.</p>
-<div class="row">
-<div class="col-xs-12 col-sm-8">
-<figure>
-  <img alt="History file" src="history.jpg">
-  <figcaption>Sync the history file (via Dropbox etc.) to search for queries on all devices</figcaption>
-</figure>
-</div>
-</div>
-<p>SQLite writes the history to a file when the console exits normally, so in case of the computer or CLI crash the commands executed since the last <code>sqlite3</code> launch will be lost.</p>
-<p>History recording is not the only feature of the console. SQLite CLI makes it easy to import and export data or work with several databases at the same time. Debugging <a href="/sqlite-multiline/">multi-line queries</a> is quite a challenge, though.</p>
 ]]></content:encoded></item></channel></rss>

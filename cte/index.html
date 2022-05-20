@@ -1,0 +1,228 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Common Table Expressions in SQL</title>
+<meta name=description content="Use them instead of subqueries.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.65f0a52d2e69e5dbfd825b3072b88215fc0b75fca7c9690febf6b43535d86a5e.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/cte/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Common Table Expressions in SQL">
+<meta property="og:description" content="Use them instead of subqueries.">
+<meta property="og:url" content="https://antonz.org/cte/">
+<meta property="og:image" content="https://antonz.org/cte/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Common Table Expressions in SQL">
+<meta name=twitter:description content="Use them instead of subqueries.">
+<meta name=twitter:url content="https://antonz.org/cte/">
+<meta name=twitter:site content="@nalgeon">
+<meta name=twitter:image content="https://antonz.org/cte/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/stopwar.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Common Table Expressions in SQL</h1>
+</header>
+<p>Rule #1 for writing well-readable SQL queries is to use <em>common table expressions</em> (CTE). People are afraid of them, but they really shouldn&rsquo;t. Let&rsquo;s learn CTEs in three minutes, so you don&rsquo;t have to read a weighty SQL book or take an online course.</p>
+<h2 id=problem>Problem</h2>
+<p>Let&rsquo;s say we have a table with monthly sales for two years:</p>
+<pre tabindex=0><code>┌──────┬───────┬───────┬──────────┬─────────┐
+│ year │ month │ price │ quantity │ revenue │
+├──────┼───────┼───────┼──────────┼─────────┤
+│ 2019 │ 1     │ 60    │ 200      │ 12000   │
+│ 2019 │ 2     │ 60    │ 660      │ 39600   │
+│ 2019 │ 3     │ 60    │ 400      │ 24000   │
+│ 2019 │ 4     │ 60    │ 300      │ 18000   │
+│ 2019 │ 5     │ 60    │ 440      │ 26400   │
+│ 2019 │ 6     │ 60    │ 540      │ 32400   │
+│ 2019 │ 7     │ 60    │ 440      │ 26400   │
+│ 2019 │ 8     │ 60    │ 440      │ 26400   │
+│ 2019 │ 9     │ 60    │ 250      │ 15000   │
+│ 2019 │ 10    │ 60    │ 420      │ 25200   │
+│ ...  │ ...   │ ...   │ ...      │ ...     │
+└──────┴───────┴───────┴──────────┴─────────┘
+</code></pre><p><a href=https://sqlime.org/#gist:858c409b81ae3a676580cba6745d68ea>playground</a></p>
+<p>We want to select only those months for which revenue exceeded the monthly average for the year.</p>
+<p>To begin with, let&rsquo;s calculate the average monthly revenue by year:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
+  <span style=color:#a90d91>year</span>,
+  <span style=color:#a90d91>avg</span>(<span style=color:#000>revenue</span>) <span style=color:#a90d91>as</span> <span style=color:#000>avg_rev</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>sales</span>
+<span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> <span style=color:#a90d91>year</span>;
+</code></pre></div><pre tabindex=0><code>┌──────┬─────────┐
+│ year │ avg_rev │
+├──────┼─────────┤
+│ 2019 │ 25125.0 │
+│ 2020 │ 48625.0 │
+└──────┴─────────┘
+</code></pre><p>Now we can select only those records in which <code>revenue</code> is not less than <code>avg_rev</code>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
+  <span style=color:#000>sales</span>.<span style=color:#a90d91>year</span>,
+  <span style=color:#000>sales</span>.<span style=color:#a90d91>month</span>,
+  <span style=color:#000>sales</span>.<span style=color:#000>revenue</span>,
+  <span style=color:#000>round</span>(<span style=color:#000>totals</span>.<span style=color:#000>avg_rev</span>) <span style=color:#a90d91>as</span> <span style=color:#000>avg_rev</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>sales</span>
+  <span style=color:#a90d91>join</span> (
+    <span style=color:#a90d91>select</span>
+      <span style=color:#a90d91>year</span>,
+      <span style=color:#a90d91>avg</span>(<span style=color:#000>revenue</span>) <span style=color:#a90d91>as</span> <span style=color:#000>avg_rev</span>
+    <span style=color:#a90d91>from</span> <span style=color:#000>sales</span>
+    <span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> <span style=color:#a90d91>year</span>
+  ) <span style=color:#a90d91>as</span> <span style=color:#000>totals</span>
+  <span style=color:#a90d91>on</span> <span style=color:#000>sales</span>.<span style=color:#a90d91>year</span> <span style=color:#000>=</span> <span style=color:#000>totals</span>.<span style=color:#a90d91>year</span>
+<span style=color:#a90d91>where</span> <span style=color:#000>sales</span>.<span style=color:#000>revenue</span> <span style=color:#000>&gt;=</span> <span style=color:#000>totals</span>.<span style=color:#000>avg_rev</span>;
+</code></pre></div><pre tabindex=0><code>┌──────┬───────┬─────────┬─────────┐
+│ year │ month │ revenue │ avg_rev │
+├──────┼───────┼─────────┼─────────┤
+│ 2019 │ 2     │ 39600   │ 25125.0 │
+│ 2019 │ 5     │ 26400   │ 25125.0 │
+│ 2019 │ 6     │ 32400   │ 25125.0 │
+│ 2019 │ 7     │ 26400   │ 25125.0 │
+│ ...  │ ...   │ ...     │ ...     │
+└──────┴───────┴─────────┴─────────┘
+</code></pre><p>We solved the task using a subquery:</p>
+<ul>
+<li>the inner query calculates the average monthly revenue;</li>
+<li>the outer query joins with it and filters the results.</li>
+</ul>
+<p>The query as a whole turned out to be a bit complicated. If you revisit it in a month, you&rsquo;ll probably spend some time &ldquo;unraveling&rdquo; things. The problem is that such nested queries have to be read from the inside out:</p>
+<ul>
+<li>find the innermost query and comprehend it;</li>
+<li>join it with the next outer query;</li>
+<li>join them with the next outer query;</li>
+<li>and so on.</li>
+</ul>
+<p>It is OK when there are only two levels, as in our example. In practice, I often encounter three- and four-level subqueries. A pain to read and understand.</p>
+<h2 id=solution>Solution</h2>
+<p>Instead of a subquery, we can use a <em>common table expression</em> (CTE). Every subquery <code>X</code>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>a</span>, <span style=color:#000>b</span>, <span style=color:#a90d91>c</span>
+<span style=color:#a90d91>from</span> (<span style=color:#000>X</span>)
+<span style=color:#a90d91>where</span> <span style=color:#000>e</span> <span style=color:#000>=</span> <span style=color:#000>f</span>
+</code></pre></div><p>Can be converted to CTE:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>with</span> <span style=color:#000>cte</span> <span style=color:#a90d91>as</span> (<span style=color:#000>X</span>)
+<span style=color:#a90d91>select</span> <span style=color:#000>a</span>, <span style=color:#000>b</span>, <span style=color:#a90d91>c</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>cte</span>
+<span style=color:#a90d91>where</span> <span style=color:#000>e</span> <span style=color:#000>=</span> <span style=color:#000>f</span>
+</code></pre></div><p>In our example:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>with</span> <span style=color:#000>totals</span> <span style=color:#a90d91>as</span> (
+  <span style=color:#a90d91>select</span>
+    <span style=color:#a90d91>year</span>,
+    <span style=color:#a90d91>avg</span>(<span style=color:#000>revenue</span>) <span style=color:#a90d91>as</span> <span style=color:#000>avg_rev</span>
+  <span style=color:#a90d91>from</span> <span style=color:#000>sales</span>
+  <span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> <span style=color:#a90d91>year</span>
+)
+
+<span style=color:#a90d91>select</span>
+  <span style=color:#000>sales</span>.<span style=color:#a90d91>year</span>,
+  <span style=color:#000>sales</span>.<span style=color:#a90d91>month</span>,
+  <span style=color:#000>sales</span>.<span style=color:#000>revenue</span>,
+  <span style=color:#000>round</span>(<span style=color:#000>totals</span>.<span style=color:#000>avg_rev</span>) <span style=color:#a90d91>as</span> <span style=color:#000>avg_rev</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>sales</span>
+  <span style=color:#a90d91>join</span> <span style=color:#000>totals</span> <span style=color:#a90d91>on</span> <span style=color:#000>totals</span>.<span style=color:#a90d91>year</span> <span style=color:#000>=</span> <span style=color:#000>sales</span>.<span style=color:#a90d91>year</span>
+<span style=color:#a90d91>where</span> <span style=color:#000>sales</span>.<span style=color:#000>revenue</span> <span style=color:#000>&gt;=</span> <span style=color:#000>totals</span>.<span style=color:#000>avg_rev</span>;
+</code></pre></div><p>With a table expression, the query becomes flat — it&rsquo;s much easier to perceive it this way. Besides, we can reuse the table expression as if it were a regular table:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>with</span> <span style=color:#000>totals</span> <span style=color:#a90d91>as</span> (...)
+<span style=color:#a90d91>select</span> ... <span style=color:#a90d91>from</span> <span style=color:#000>sales_ru</span> <span style=color:#a90d91>join</span> <span style=color:#000>totals</span> ...
+<span style=color:#a90d91>union</span> <span style=color:#a90d91>all</span>
+<span style=color:#a90d91>select</span> ... <span style=color:#a90d91>from</span> <span style=color:#000>sales_us</span> <span style=color:#a90d91>join</span> <span style=color:#000>totals</span> ...
+</code></pre></div><p>SQL table expressions are somewhat similar to functions in a regular programming language — they reduce the overall complexity:</p>
+<ul>
+<li>You can write an unreadable sheet of code, or you can break the code into understandable individual functions and compose a program out of them.</li>
+<li>You can build a tower of nested subqueries, or you can extract them into CTEs and reference from the main query.</li>
+</ul>
+<h2 id=cte-vs-subquery>CTE vs subquery</h2>
+<p>There is a myth that &ldquo;CTEs are slow&rdquo;. It came from old versions of PostgreSQL (11 and earlier), which always <em>materialized</em> CTE — calculated the full result of a table expression and stored it until the end of the query.</p>
+<p>This is usually a good thing: the engine calculates the result once, and then uses it several times during the main query. But sometimes materialization prevented the engine from optimizing the query:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>with</span> <span style=color:#000>cte</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>foo</span>)
+<span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>cte</span> <span style=color:#a90d91>where</span> <span style=color:#000>id</span> <span style=color:#000>=</span> <span style=color:#1c01ce>500000</span>;
+</code></pre></div><p>The query selects exactly one record by ID, but materialization creates a copy of the <em>entire table</em> in memory. Because of this, the query is terribly slow.</p>
+<p>PostgreSQL 12+ and other modern DBMS have become smarter and no longer do so. Materialization is used when it does more good than harm. Plus, many DBMSs allow you to explicitly control this behavior through the <code>MATERIALIZED</code> / <code>NOT MATERIALIZED</code> instructions.</p>
+<p>So CTEs work no slower than subqueries. And if in doubt, you can try both — a subquery and a table expression — and compare the query plan and execution time.</p>
+<p>How does one know when to use a subquery and when to use CTE? I came up with a simple rule that has never failed me yet:</p>
+<blockquote class=big>
+<p>Always use CTE</p>
+</blockquote>
+<p>That&rsquo;s what I wish you.</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter and <a href=http://digest.antonz.org/><strong>subscribe by email</strong></a> to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2022-05-20 16:50:00 +0000 UTC">20 May, 2022</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/sqlite/>sqlite</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/temp-tables/>Temporary tables in SQLite</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/temp-tables/>Temporary tables in SQLite</a></p>
+<p><a href=/json-virtual-columns/>JSON and virtual columns in SQLite</a></p>
+<p><a href=/generated-columns/>Generated columns in SQLite</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=http://digest.antonz.org/ class=footer__social-link><i class="fas fa-envelope"></i><span>Email</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
