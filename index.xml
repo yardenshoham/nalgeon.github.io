@@ -118,6 +118,7 @@
 <p>Always use CTE</p>
 </blockquote>
 <p>That&rsquo;s what I wish you.</p>
+<p>P.S. There are also <em>recursive</em> CTEs, famous for their complexity and terrible naming (they have almost nothing in common with regular CTEs). Let&rsquo;s talk about them some other day.</p>
 ]]></content:encoded></item><item><title>Temporary tables in SQLite</title><link>https://antonz.org/temp-tables/</link><pubDate>Wed, 18 May 2022 20:30:00 +0000</pubDate><guid>https://antonz.org/temp-tables/</guid><description>For faster exploratory data analysis.</description><content:encoded><![CDATA[<p>Sometimes you want to combine data from multiple tables into one and query the results. For example, join vacancies together with employers and regions:</p>
 <p><img src="combine-then-query.png" alt="Combine, then query"></p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">v</span>.<span style="color:#000">*</span>, <span style="color:#000">e</span>.<span style="color:#000">name</span>, <span style="color:#000">a</span>.<span style="color:#000">name</span>
