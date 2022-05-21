@@ -186,7 +186,7 @@ Contributed by: [Dennis Sweeney](https://github.com/sweeneyde) • [Niklas Fieka
 
 [`dataclasses`](https://docs.python.org/3/library/dataclasses) module generates classes according to the specification.
 
-Dataclasses can now use [`slots`](https://docs.python.org/3/reference/datamodel.html#slots) for compact objects with a fixed set of properties (3.10+).
+Dataclasses can now use [`slots`](https://docs.python.org/3/reference/datamodel.html#slots), which are great for creating [compact data objects](/compact-objects/) with a fixed set of properties (3.10+).
 
 Regular dataclass:
 
