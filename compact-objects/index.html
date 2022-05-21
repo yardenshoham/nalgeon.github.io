@@ -60,7 +60,7 @@
 <h1>Compact objects in Python</h1>
 </header>
 <p>Python is an object language. This is nice and cozy until you are out of memory holding 10 million objects at once. Let&rsquo;s talk about how to reduce appetite.</p>
-<p><em>Visit the <a href="https://colab.research.google.com/drive/1oKl4rda2apWORLxYYtN9J49r3Mj3L6J9?usp=sharing">Playground</a> to try out the code samples</em></p>
+<p><em>Visit the <a href="https://colab.research.google.com/drive/16GK-Xbv_kOvDC9Hfa_0O8E0Nyo4L9JwO?usp=sharing">Playground</a> to try out the code samples</em></p>
 <h2 id=tuples>Tuples</h2>
 <p>Imagine you have a simple <code>Pet</code> object with the <code>name</code> (string) and <code>price</code> (integer) attributes. Intuitively, it seems that the most compact representation is a tuple:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python>(<span style=color:#c41a16>&#34;Frank the Pigeon&#34;</span>, <span style=color:#1c01ce>50000</span>)
@@ -141,7 +141,7 @@ x0.95 to baseline
 <span style=color:#000>size</span> <span style=color:#000>=</span> <span style=color:#a90d91>round</span>(<span style=color:#000>asizeof</span>(<span style=color:#000>pets</span>) <span style=color:#000>/</span> <span style=color:#000>n</span>)
 </code></pre></div><pre tabindex=0><code>Pet size (numpy array) = 14 bytes
 x0.09 to baseline
-</code></pre><p>This is not a flawless victory, as you might think. If names are unicode (<code>U</code> type instead of <code>S</code>), the advantage is not so impressive:</p>
+</code></pre><p>This is not a flawless victory, though. If names are unicode (<code>U</code> type instead of <code>S</code>), the advantage is not so impressive:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>PetNumpy</span> <span style=color:#000>=</span> <span style=color:#000>np</span><span style=color:#000>.</span><span style=color:#000>dtype</span>([(<span style=color:#c41a16>&#34;name&#34;</span>, <span style=color:#c41a16>&#34;U10&#34;</span>), (<span style=color:#c41a16>&#34;price&#34;</span>, <span style=color:#c41a16>&#34;i4&#34;</span>)])
 </code></pre></div><pre tabindex=0><code>Pet size (numpy U10) = 44 bytes
 x0.27 to baseline
@@ -158,21 +158,27 @@ Pet size (numpy U50) = 204 bytes
 x1.14 to baseline
 </code></pre><h2 id=others>Others</h2>
 <p>Let&rsquo;s consider alternatives for completeness.</p>
-<p>A regular class is no different than a dataclass:</p>
+<p>A <strong>regular class</strong> is no different than a dataclass:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>class</span> <span style=color:#3f6e75>PetClass</span>:
     <span style=color:#a90d91>def</span> <span style=color:#000>__init__</span>(<span style=color:#5b269a>self</span>, <span style=color:#000>name</span>: <span style=color:#a90d91>str</span>, <span style=color:#000>price</span>: <span style=color:#a90d91>int</span>):
         <span style=color:#5b269a>self</span><span style=color:#000>.</span><span style=color:#000>name</span> <span style=color:#000>=</span> <span style=color:#000>name</span>
         <span style=color:#5b269a>self</span><span style=color:#000>.</span><span style=color:#000>price</span> <span style=color:#000>=</span> <span style=color:#000>price</span>
 </code></pre></div><pre tabindex=0><code>Pet size (class) = 257 bytes
 x1.60 to baseline
-</code></pre><p>And a frozen (immutable) dataclass too:</p>
+</code></pre><p>And a <strong>frozen</strong> (immutable) dataclass too:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>@dataclass</span>(<span style=color:#000>frozen</span><span style=color:#000>=</span><span style=color:#a90d91>True</span>)
 <span style=color:#a90d91>class</span> <span style=color:#3f6e75>PetDataFrozen</span>:
     <span style=color:#000>name</span>: <span style=color:#a90d91>str</span>
     <span style=color:#000>price</span>: <span style=color:#a90d91>int</span>
 </code></pre></div><pre tabindex=0><code>Pet size (frozen dataclass) = 257 bytes
 x1.60 to baseline
-</code></pre><p>Pydantic model sets an anti-record (no wonder, it uses inheritance):</p>
+</code></pre><p>A <strong>dict</strong> is even worse:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>names</span> <span style=color:#000>=</span> (<span style=color:#c41a16>&#34;name&#34;</span>, <span style=color:#c41a16>&#34;price&#34;</span>)
+<span style=color:#000>fn</span> <span style=color:#000>=</span> <span style=color:#a90d91>lambda</span>: <span style=color:#a90d91>dict</span>(<span style=color:#a90d91>zip</span>(<span style=color:#000>names</span>, <span style=color:#000>fields</span>()))
+<span style=color:#000>measure</span>(<span style=color:#c41a16>&#34;dict&#34;</span>, <span style=color:#000>fn</span>)
+</code></pre></div><pre tabindex=0><code>Pet size (dict) = 355 bytes
+x1.98 to baseline
+</code></pre><p><strong>Pydantic model</strong> sets an anti-record (no wonder, it uses inheritance):</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>from</span> <span style=color:#000>pydantic</span> <span style=color:#a90d91>import</span> <span style=color:#000>BaseModel</span>
 
 <span style=color:#a90d91>class</span> <span style=color:#3f6e75>PetModel</span>(<span style=color:#000>BaseModel</span>):
