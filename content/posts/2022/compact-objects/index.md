@@ -143,7 +143,7 @@ Pet size (numpy array) = 14 bytes
 x0.09 to baseline
 ```
 
-But there are nuances with `numpy` as well. If names are unicode (`U` type instead of `S`), the advantage is not so impressive:
+This is not a flawless victory, as you might think. If names are unicode (`U` type instead of `S`), the advantage is not so impressive:
 
 ```python
 PetNumpy = np.dtype([("name", "U10"), ("price", "i4")])
