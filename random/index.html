@@ -1,0 +1,147 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Random numbers and sequences in Python</title>
+<meta name=description content="There is much more than just randint()">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.65f0a52d2e69e5dbfd825b3072b88215fc0b75fca7c9690febf6b43535d86a5e.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/random/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Random numbers and sequences in Python">
+<meta property="og:description" content="There is much more than just randint()">
+<meta property="og:url" content="https://antonz.org/random/">
+<meta property="og:image" content="https://antonz.org/random/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Random numbers and sequences in Python">
+<meta name=twitter:description content="There is much more than just randint()">
+<meta name=twitter:url content="https://antonz.org/random/">
+<meta name=twitter:site content="@nalgeon">
+<meta name=twitter:image content="https://antonz.org/random/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/stopwar.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Random numbers and sequences in Python</h1>
+</header>
+<p>Everybody knows about <code>random.randint(a, b)</code> in Python, which returns a ≤ n ≤ b:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>random</span><span style=color:#000>.</span><span style=color:#000>randint</span>(<span style=color:#1c01ce>10</span>, <span style=color:#1c01ce>99</span>)
+<span style=color:#177500># 59</span>
+</code></pre></div><p>But the <code>random</code> module has so much more to offer.</p>
+<p>Like selecting a number from a range <strong>with a step</strong>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>random</span><span style=color:#000>.</span><span style=color:#000>randrange</span>(<span style=color:#1c01ce>10</span>, <span style=color:#1c01ce>99</span>, <span style=color:#1c01ce>3</span>)
+<span style=color:#177500># 91</span>
+</code></pre></div><p>Or a random <strong>sequence element</strong>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>numbers</span> <span style=color:#000>=</span> [<span style=color:#1c01ce>7</span>, <span style=color:#1c01ce>9</span>, <span style=color:#1c01ce>13</span>, <span style=color:#1c01ce>42</span>, <span style=color:#1c01ce>64</span>, <span style=color:#1c01ce>99</span>]
+<span style=color:#000>random</span><span style=color:#000>.</span><span style=color:#000>choice</span>(<span style=color:#000>numbers</span>)
+<span style=color:#177500># 42</span>
+</code></pre></div><p>Or <strong>multiple</strong> elements:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>numbers</span> <span style=color:#000>=</span> <span style=color:#a90d91>range</span>(<span style=color:#1c01ce>99</span>, <span style=color:#1c01ce>10</span>, <span style=color:#000>-</span><span style=color:#1c01ce>1</span>)
+<span style=color:#000>random</span><span style=color:#000>.</span><span style=color:#000>choices</span>(<span style=color:#000>numbers</span>, <span style=color:#000>k</span><span style=color:#000>=</span><span style=color:#1c01ce>3</span>)
+<span style=color:#177500># [32, 62, 76]</span>
+</code></pre></div><p>How about choosing some elements <strong>more often</strong> than others? Sure:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>numbers</span> <span style=color:#000>=</span> [<span style=color:#1c01ce>7</span>, <span style=color:#1c01ce>9</span>, <span style=color:#1c01ce>13</span>, <span style=color:#1c01ce>42</span>, <span style=color:#1c01ce>64</span>, <span style=color:#1c01ce>99</span>]
+<span style=color:#000>weights</span> <span style=color:#000>=</span> [<span style=color:#1c01ce>10</span>, <span style=color:#1c01ce>1</span>, <span style=color:#1c01ce>1</span>, <span style=color:#1c01ce>1</span>, <span style=color:#1c01ce>1</span>, <span style=color:#1c01ce>1</span>]
+
+<span style=color:#000>random</span><span style=color:#000>.</span><span style=color:#000>choices</span>(<span style=color:#000>numbers</span>, <span style=color:#000>weights</span>, <span style=color:#000>k</span><span style=color:#000>=</span><span style=color:#1c01ce>3</span>)
+<span style=color:#177500># [42, 13, 7]</span>
+
+<span style=color:#000>random</span><span style=color:#000>.</span><span style=color:#000>choices</span>(<span style=color:#000>numbers</span>, <span style=color:#000>weights</span>, <span style=color:#000>k</span><span style=color:#000>=</span><span style=color:#1c01ce>3</span>)
+<span style=color:#177500># [7, 7, 7]</span>
+
+<span style=color:#000>random</span><span style=color:#000>.</span><span style=color:#000>choices</span>(<span style=color:#000>numbers</span>, <span style=color:#000>weights</span>, <span style=color:#000>k</span><span style=color:#000>=</span><span style=color:#1c01ce>3</span>)
+<span style=color:#177500># [13, 7, 7]</span>
+</code></pre></div><p>Wanna see a sample <strong>without repetitions</strong>? No problem:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>numbers</span> <span style=color:#000>=</span> [<span style=color:#1c01ce>7</span>, <span style=color:#1c01ce>9</span>, <span style=color:#1c01ce>13</span>, <span style=color:#1c01ce>42</span>, <span style=color:#1c01ce>64</span>, <span style=color:#1c01ce>99</span>]
+<span style=color:#000>random</span><span style=color:#000>.</span><span style=color:#000>sample</span>(<span style=color:#000>numbers</span>, <span style=color:#000>k</span><span style=color:#000>=</span><span style=color:#1c01ce>3</span>)
+<span style=color:#177500># [42, 99, 7]</span>
+</code></pre></div><p>Or even <strong>shuffle</strong> the whole sequence:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>numbers</span> <span style=color:#000>=</span> [<span style=color:#1c01ce>1</span>, <span style=color:#1c01ce>2</span>, <span style=color:#1c01ce>3</span>, <span style=color:#1c01ce>4</span>, <span style=color:#1c01ce>5</span>]
+<span style=color:#000>random</span><span style=color:#000>.</span><span style=color:#000>shuffle</span>(<span style=color:#000>numbers</span>)
+<span style=color:#177500># [3, 2, 1, 5, 4]</span>
+</code></pre></div><p>There are also countless <strong>real-valued</strong> distributions like <code>uniform()</code>, <code>gauss()</code>, <code>expovariate()</code>, <code>paretovariate()</code> and many more. Not gonna get into the specifics now — <a href=https://docs.python.org/3/library/random.html#real-valued-distributions>see for yourself</a> if your are a statistics fan.</p>
+<p>Last but not least. When testing, <strong>seed</strong> the generator with a constant so that it gives reproducible results:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>random</span><span style=color:#000>.</span><span style=color:#000>seed</span>(<span style=color:#1c01ce>42</span>)
+</code></pre></div><p>On the contrary, use <code>seed()</code> without arguments in production. Python will then use the sources of randomness provided by the operating system.</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter and <a href=http://digest.antonz.org/><strong>subscribe by email</strong></a> to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2022-05-23 15:30:00 +0000 UTC">23 May, 2022</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/python/>python</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/cte/>Common Table Expressions in SQL</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/compact-objects/>Compact objects in Python</a></p>
+<p><a href=/python-stdlib-changes/>Python Standard Library changes in recent years</a></p>
+<p><a href=/page-iterator/>Page iterator in Python</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=http://digest.antonz.org/ class=footer__social-link><i class="fas fa-envelope"></i><span>Email</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>

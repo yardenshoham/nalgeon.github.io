@@ -1,4 +1,43 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 20 May 2022 16:50:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Common Table Expressions in SQL</title><link>https://antonz.org/cte/</link><pubDate>Fri, 20 May 2022 16:50:00 +0000</pubDate><guid>https://antonz.org/cte/</guid><description>Use them instead of subqueries.</description><content:encoded><![CDATA[<p>Rule #1 for writing well-readable SQL queries is to use <em>common table expressions</em> (CTE). People are afraid of them, but they really shouldn&rsquo;t. Let&rsquo;s learn CTEs in three minutes, so you don&rsquo;t have to read a weighty SQL book or take an online course.</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Mon, 23 May 2022 15:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Random numbers and sequences in Python</title><link>https://antonz.org/random/</link><pubDate>Mon, 23 May 2022 15:30:00 +0000</pubDate><guid>https://antonz.org/random/</guid><description>There is much more than just randint()</description><content:encoded><![CDATA[<p>Everybody knows about <code>random.randint(a, b)</code> in Python, which returns a ≤ n ≤ b:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">randint</span>(<span style="color:#1c01ce">10</span>, <span style="color:#1c01ce">99</span>)
+<span style="color:#177500"># 59</span>
+</code></pre></div><p>But the <code>random</code> module has so much more to offer.</p>
+<p>Like selecting a number from a range <strong>with a step</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">randrange</span>(<span style="color:#1c01ce">10</span>, <span style="color:#1c01ce">99</span>, <span style="color:#1c01ce">3</span>)
+<span style="color:#177500"># 91</span>
+</code></pre></div><p>Or a random <strong>sequence element</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">numbers</span> <span style="color:#000">=</span> [<span style="color:#1c01ce">7</span>, <span style="color:#1c01ce">9</span>, <span style="color:#1c01ce">13</span>, <span style="color:#1c01ce">42</span>, <span style="color:#1c01ce">64</span>, <span style="color:#1c01ce">99</span>]
+<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">choice</span>(<span style="color:#000">numbers</span>)
+<span style="color:#177500"># 42</span>
+</code></pre></div><p>Or <strong>multiple</strong> elements:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">numbers</span> <span style="color:#000">=</span> <span style="color:#a90d91">range</span>(<span style="color:#1c01ce">99</span>, <span style="color:#1c01ce">10</span>, <span style="color:#000">-</span><span style="color:#1c01ce">1</span>)
+<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">choices</span>(<span style="color:#000">numbers</span>, <span style="color:#000">k</span><span style="color:#000">=</span><span style="color:#1c01ce">3</span>)
+<span style="color:#177500"># [32, 62, 76]</span>
+</code></pre></div><p>How about choosing some elements <strong>more often</strong> than others? Sure:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">numbers</span> <span style="color:#000">=</span> [<span style="color:#1c01ce">7</span>, <span style="color:#1c01ce">9</span>, <span style="color:#1c01ce">13</span>, <span style="color:#1c01ce">42</span>, <span style="color:#1c01ce">64</span>, <span style="color:#1c01ce">99</span>]
+<span style="color:#000">weights</span> <span style="color:#000">=</span> [<span style="color:#1c01ce">10</span>, <span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">1</span>]
+
+<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">choices</span>(<span style="color:#000">numbers</span>, <span style="color:#000">weights</span>, <span style="color:#000">k</span><span style="color:#000">=</span><span style="color:#1c01ce">3</span>)
+<span style="color:#177500"># [42, 13, 7]</span>
+
+<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">choices</span>(<span style="color:#000">numbers</span>, <span style="color:#000">weights</span>, <span style="color:#000">k</span><span style="color:#000">=</span><span style="color:#1c01ce">3</span>)
+<span style="color:#177500"># [7, 7, 7]</span>
+
+<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">choices</span>(<span style="color:#000">numbers</span>, <span style="color:#000">weights</span>, <span style="color:#000">k</span><span style="color:#000">=</span><span style="color:#1c01ce">3</span>)
+<span style="color:#177500"># [13, 7, 7]</span>
+</code></pre></div><p>Wanna see a sample <strong>without repetitions</strong>? No problem:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">numbers</span> <span style="color:#000">=</span> [<span style="color:#1c01ce">7</span>, <span style="color:#1c01ce">9</span>, <span style="color:#1c01ce">13</span>, <span style="color:#1c01ce">42</span>, <span style="color:#1c01ce">64</span>, <span style="color:#1c01ce">99</span>]
+<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">sample</span>(<span style="color:#000">numbers</span>, <span style="color:#000">k</span><span style="color:#000">=</span><span style="color:#1c01ce">3</span>)
+<span style="color:#177500"># [42, 99, 7]</span>
+</code></pre></div><p>Or even <strong>shuffle</strong> the whole sequence:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">numbers</span> <span style="color:#000">=</span> [<span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">2</span>, <span style="color:#1c01ce">3</span>, <span style="color:#1c01ce">4</span>, <span style="color:#1c01ce">5</span>]
+<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">shuffle</span>(<span style="color:#000">numbers</span>)
+<span style="color:#177500"># [3, 2, 1, 5, 4]</span>
+</code></pre></div><p>There are also countless <strong>real-valued</strong> distributions like <code>uniform()</code>, <code>gauss()</code>, <code>expovariate()</code>, <code>paretovariate()</code> and many more. Not gonna get into the specifics now — <a href="https://docs.python.org/3/library/random.html#real-valued-distributions">see for yourself</a> if your are a statistics fan.</p>
+<p>Last but not least. When testing, <strong>seed</strong> the generator with a constant so that it gives reproducible results:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">seed</span>(<span style="color:#1c01ce">42</span>)
+</code></pre></div><p>On the contrary, use <code>seed()</code> without arguments in production. Python will then use the sources of randomness provided by the operating system.</p>
+]]></content:encoded></item><item><title>Common Table Expressions in SQL</title><link>https://antonz.org/cte/</link><pubDate>Fri, 20 May 2022 16:50:00 +0000</pubDate><guid>https://antonz.org/cte/</guid><description>Use them instead of subqueries.</description><content:encoded><![CDATA[<p>Rule #1 for writing well-readable SQL queries is to use <em>common table expressions</em> (CTE). People are afraid of them, but they really shouldn&rsquo;t. Let&rsquo;s learn CTEs in three minutes, so you don&rsquo;t have to read a weighty SQL book or take an online course.</p>
 <h2 id="problem">Problem</h2>
 <p>Let&rsquo;s say we have a table with monthly sales for two years:</p>
 <pre tabindex="0"><code>┌──────┬───────┬───────┬──────────┬─────────┐
@@ -1226,57 +1265,4 @@ Use islice:               93 ms
 <li>Run query from file (<code>.read &lt;file&gt;</code>)</li>
 <li>Consider DBeaver, DataGrip or other UI tool</li>
 </ul>
-]]></content:encoded></item><item><title>Caching slow functions in Python</title><link>https://antonz.org/functools-cache/</link><pubDate>Sat, 23 Apr 2022 19:10:00 +0000</pubDate><guid>https://antonz.org/functools-cache/</guid><description>With @lru_cache and @cache from the functools module</description><content:encoded><![CDATA[<p>Suppose you wrote a function that returns the user&rsquo;s email:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">get_user_email</span>(<span style="color:#000">user_id</span>):
-    <span style="color:#000">user</span> <span style="color:#000">=</span> <span style="color:#000">find_by_id</span>(<span style="color:#000">user_id</span>)
-    <span style="color:#a90d91">return</span> <span style="color:#000">user</span>[<span style="color:#c41a16">&#34;email&#34;</span>]
-</code></pre></div><p>But there is a problem. <code>find_by_id()</code> calls a terribly slow legacy system:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">find_by_id</span>(<span style="color:#000">user_id</span>):
-    <span style="color:#177500"># simulate a slow network request,</span>
-    <span style="color:#177500"># returning a user by their id</span>
-    <span style="color:#000">time</span><span style="color:#000">.</span><span style="color:#000">sleep</span>(<span style="color:#1c01ce">1</span>)
-    <span style="color:#a90d91">return</span> { <span style="color:#c41a16">&#34;email&#34;</span>: <span style="color:#c41a16">&#34;...&#34;</span> }
-</code></pre></div><p>100 calls for <code>get_user_email(42)</code> result in 100 slow requests. A single one should be quite enough, so let&rsquo;s attach a simple cache:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">cache</span> <span style="color:#000">=</span> {}
-
-<span style="color:#a90d91">def</span> <span style="color:#000">get_user_email</span>(<span style="color:#000">user_id</span>):
-    <span style="color:#a90d91">if</span> <span style="color:#000">user_id</span> <span style="color:#000">not</span> <span style="color:#000">in</span> <span style="color:#000">cache</span>:
-        <span style="color:#000">user</span> <span style="color:#000">=</span> <span style="color:#000">find_by_id</span>(<span style="color:#000">user_id</span>)
-        <span style="color:#000">cache</span>[<span style="color:#000">user_id</span>] <span style="color:#000">=</span> <span style="color:#000">user</span>[<span style="color:#c41a16">&#34;email&#34;</span>]
-    <span style="color:#a90d91">return</span> <span style="color:#000">cache</span>[<span style="color:#000">user_id</span>]
-</code></pre></div><p>Nothing too complicated (apart from the issue of cache expiration, let&rsquo;s not touch it). But imagine that there are a lot of slow functions, and you have to implement caching for every one of them. Not too inspiring.</p>
-<p>Fortunately, there is an <code>@lru_cache</code> decorator in the <code>functools</code> module. That&rsquo;s what we need. Add one line to the original function, and be done with it:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">@functools</span><span style="color:#000">.</span><span style="color:#000">lru_cache</span>(<span style="color:#000">maxsize</span><span style="color:#000">=</span><span style="color:#1c01ce">256</span>)
-<span style="color:#a90d91">def</span> <span style="color:#000">get_user_email</span>(<span style="color:#000">user_id</span>):
-    <span style="color:#000">user</span> <span style="color:#000">=</span> <span style="color:#000">find_by_id</span>(<span style="color:#000">user_id</span>)
-    <span style="color:#a90d91">return</span> <span style="color:#000">user</span>[<span style="color:#c41a16">&#34;email&#34;</span>]
-</code></pre></div><p>Now repeated calls to <code>get_user_email()</code> with the same <code>user_id</code> return the cached result without requesting <code>find_by_id()</code>.</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6 col-md-5">
-<figure>
-  <img alt="Don't write your own cache" src="cache-1.png" class="img-bordered-thin">
-  <figcaption>Don't write your own cache...</figcaption>
-</figure>
-</div>
-<div class="col-xs-12 col-sm-6 col-md-5">
-<figure>
-  <img alt="Use functools @lru_cache" src="cache-2.png" class="img-bordered-thin">
-  <figcaption>Use functools @lru_cache instead!</figcaption>
-</figure>
-</div>
-</div>
-<p><code>@lru_cache</code> automatically evicts old entries from the cache when there are more than <code>maxsize</code> entries. So the cache won&rsquo;t eat up all the memory.</p>
-<p>Python 3.9 received another decorator — <code>@functools.cache</code>. It&rsquo;s similar to <code>@lru_cache</code>, only without the cache entry limit (which makes it work a little faster).</p>
-<p>One can manage the cache — view hits/misses stats or clean it:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#177500"># cache management</span>
-
-<span style="color:#000">stats</span> <span style="color:#000">=</span> <span style="color:#000">get_user_email</span><span style="color:#000">.</span><span style="color:#000">cache_info</span>()
-<span style="color:#a90d91">print</span>(<span style="color:#000">stats</span>)
-<span style="color:#177500"># CacheInfo(hits=2, misses=3, maxsize=256, currsize=3)</span>
-
-<span style="color:#000">get_user_email</span><span style="color:#000">.</span><span style="color:#000">cache_clear</span>()
-<span style="color:#177500"># CacheInfo(hits=0, misses=0, maxsize=256, currsize=0)</span>
-</code></pre></div><p>The cache works in-process and will die with it. So if you need something more scalable, look at Redis or other external cache.</p>
-<p><a href="https://devdocs.io/python/library/functools#functools.lru_cache">Documentation</a> •
-<a href="https://replit.com/@antonz/functools-cache#main.py">Playground</a></p>
 ]]></content:encoded></item></channel></rss>
