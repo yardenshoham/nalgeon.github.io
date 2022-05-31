@@ -9,7 +9,7 @@ tags = ["python"]
 
 Python is an object language. This is nice and cozy until you are out of memory holding 10 million objects at once. Let's talk about how to reduce appetite.
 
-_Visit the [Playground](https://colab.research.google.com/drive/1oKl4rda2apWORLxYYtN9J49r3Mj3L6J9?usp=sharing) to try out the code samples_
+_Visit the [Playground](https://colab.research.google.com/drive/16GK-Xbv_kOvDC9Hfa_0O8E0Nyo4L9JwO?usp=sharing) to try out the code samples_
 
 ## Tuples
 
@@ -143,7 +143,7 @@ Pet size (numpy array) = 14 bytes
 x0.09 to baseline
 ```
 
-But there are nuances with `numpy` as well. If names are unicode (`U` type instead of `S`), the advantage is not so impressive:
+This is not a flawless victory, though. If names are unicode (`U` type instead of `S`), the advantage is not so impressive:
 
 ```python
 PetNumpy = np.dtype([("name", "U10"), ("price", "i4")])
@@ -176,7 +176,7 @@ x1.14 to baseline
 
 Let's consider alternatives for completeness.
 
-A regular class is no different than a dataclass:
+A **regular class** is no different than a dataclass:
 
 ```python
 class PetClass:
@@ -190,7 +190,7 @@ Pet size (class) = 257 bytes
 x1.60 to baseline
 ```
 
-And a frozen (immutable) dataclass too:
+And a **frozen** (immutable) dataclass too:
 
 ```python
 @dataclass(frozen=True)
@@ -204,7 +204,20 @@ Pet size (frozen dataclass) = 257 bytes
 x1.60 to baseline
 ```
 
-Pydantic model sets an anti-record (no wonder, it uses inheritance):
+A **dict** is even worse:
+
+```python
+names = ("name", "price")
+fn = lambda: dict(zip(names, fields()))
+measure("dict", fn)
+```
+
+```
+Pet size (dict) = 355 bytes
+x1.98 to baseline
+```
+
+**Pydantic model** sets an anti-record (no wonder, it uses inheritance):
 
 ```python
 from pydantic import BaseModel
