@@ -1,4 +1,98 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Mon, 23 May 2022 15:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Random numbers and sequences in Python</title><link>https://antonz.org/random/</link><pubDate>Mon, 23 May 2022 15:30:00 +0000</pubDate><guid>https://antonz.org/random/</guid><description>There is much more than just randint()</description><content:encoded><![CDATA[<p>Everybody knows about <code>random.randint(a, b)</code> in Python, which returns a ≤ n ≤ b:</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Tue, 31 May 2022 17:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Flying Pig, or Protocols in Python</title><link>https://antonz.org/protocol/</link><pubDate>Tue, 31 May 2022 17:00:00 +0000</pubDate><guid>https://antonz.org/protocol/</guid><description>Structural subtyping using protocols.</description><content:encoded><![CDATA[<p>Let&rsquo;s say you&rsquo;ve developed a utility that sends everything flying:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">launch</span>(<span style="color:#000">thing</span>):
+    <span style="color:#000">thing</span><span style="color:#000">.</span><span style="color:#000">fly</span>()
+</code></pre></div><p>Well, not exactly <em>everything</em>. Things with the <code>fly()</code> method, to be precise. With a single handy function we launch Frank (he&rsquo;s a pigeon), an airplane, and even Superman:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">class</span> <span style="color:#3f6e75">Frank</span>:
+    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>(<span style="color:#5b269a">self</span>):
+        <span style="color:#a90d91">print</span>(<span style="color:#c41a16">&#34;💩&#34;</span>)
+
+<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Plane</span>:
+    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>(<span style="color:#5b269a">self</span>):
+        <span style="color:#a90d91">print</span>(<span style="color:#c41a16">&#34;Flight delayed&#34;</span>)
+
+<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Superman</span>:
+    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>(<span style="color:#5b269a">self</span>):
+        <span style="color:#a90d91">print</span>(<span style="color:#c41a16">&#34;ε===(っ≧ω≦)っ&#34;</span>)
+</code></pre></div><p>Whoosh:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">f</span> <span style="color:#000">=</span> <span style="color:#000">Frank</span>()
+<span style="color:#000">launch</span>(<span style="color:#000">f</span>)
+<span style="color:#177500"># 💩</span>
+
+<span style="color:#000">p</span> <span style="color:#000">=</span> <span style="color:#000">Plane</span>()
+<span style="color:#000">launch</span>(<span style="color:#000">p</span>)
+<span style="color:#177500"># Flight delayed</span>
+
+<span style="color:#000">s</span> <span style="color:#000">=</span> <span style="color:#000">Superman</span>()
+<span style="color:#000">launch</span>(<span style="color:#000">s</span>)
+<span style="color:#177500"># ε===(っ≧ω≦)っ</span>
+</code></pre></div><p>It&rsquo;s not that our heroes are particularly successful at coping with the task, but the launch works for them.</p>
+<p>So far, so good. But sometimes (especially when the program grows) the developer wants to add a little rigor. Make it clear that the <code>thing</code> parameter in <code>launch()</code> is not any object, but necessarily a flying thing with the <code>fly()</code> method. What is the best way to do this?</p>
+<h2 id="using-a-description">Using a description</h2>
+<p>If you prefer to avoid types, then you will go with a variable name or a docstring:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">launch</span>(<span style="color:#000">flyer</span>):
+    <span style="color:#c41a16">&#34;&#34;&#34;Launces a flyer (an object with a `fly()` method)&#34;&#34;&#34;</span>
+    <span style="color:#000">flyer</span><span style="color:#000">.</span><span style="color:#000">fly</span>()
+</code></pre></div><p>The problem is that the more complex the code, the more often the &ldquo;descriptive&rdquo; approach fails.</p>
+<h2 id="using-a-base-class">Using a base class</h2>
+<p>Thanks to some 1990s java programming skills, you end up with a small hierarchy:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">class</span> <span style="color:#3f6e75">Flyer</span>:
+    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>():
+        <span style="color:#000">...</span>
+
+<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Frank</span>(<span style="color:#000">Flyer</span>):
+    <span style="color:#177500"># ...</span>
+
+<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Plane</span>(<span style="color:#000">Flyer</span>):
+    <span style="color:#177500"># ...</span>
+
+<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Superman</span>(<span style="color:#000">Flyer</span>):
+    <span style="color:#177500"># ...</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">launch</span>(<span style="color:#000">thing</span>: <span style="color:#000">Flyer</span>):
+    <span style="color:#000">thing</span><span style="color:#000">.</span><span style="color:#000">fly</span>()
+</code></pre></div><p>This method works:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ mypy flyer.py
+Success: no issues found in <span style="color:#1c01ce">1</span> <span style="color:#a90d91">source</span> file
+</code></pre></div><p>But, as the Python devs say, it is terribly &ldquo;unpythonic&rdquo;:</p>
+<blockquote>
+<p>The problem is that a class has to be explicitly marked, which is unpythonic and unlike what one would normally do in idiomatic dynamically typed Python code.</p>
+</blockquote>
+<p>Indeed. Not only have we modified three classes instead of one function. Not only have we introduced an inheritance hierarchy to our code. But also Frank, the plane and Superman are now burdened by the shared knowledge that they are Flyers. They never asked for this, you know.</p>
+<h2 id="using-a-protocol">Using a protocol</h2>
+<p>The quote above is from <a href="https://peps.python.org/pep-0544/">PEP 544</a> (Python Enhancement Proposal), which was implemented in Python 3.8. Starting with this version, Python recieved <em>protocols</em>.</p>
+<p>Protocols describe behavior. Here is our Flyer:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">from</span> <span style="color:#000">typing</span> <span style="color:#a90d91">import</span> <span style="color:#000">Protocol</span>
+
+<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Flyer</span>(<span style="color:#000">Protocol</span>):
+    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>(<span style="color:#5b269a">self</span>):
+        <span style="color:#000">...</span>
+</code></pre></div><p>We use a protocol to specify that an object should have a specific behavior. The <code>launch()</code> function can only launch Flyers:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">launch</span>(<span style="color:#000">thing</span>: <span style="color:#000">Flyer</span>):
+    <span style="color:#000">thing</span><span style="color:#000">.</span><span style="color:#000">fly</span>()
+</code></pre></div><p>The objects themselves do not need to know about the protocol. It is enough that they implement the right behavior:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">class</span> <span style="color:#3f6e75">Frank</span>:
+    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>(<span style="color:#5b269a">self</span>):
+        <span style="color:#177500"># ...</span>
+
+<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Plane</span>:
+    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>(<span style="color:#5b269a">self</span>):
+        <span style="color:#177500"># ...</span>
+
+<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Superman</span>:
+    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>(<span style="color:#5b269a">self</span>):
+        <span style="color:#177500"># ...</span>
+</code></pre></div><p>Protocols are static duck typing:</p>
+<ul>
+<li>the interface is explicitly described in the protocol: a flyer has the <code>fly()</code> method;</li>
+<li>but it is implemented implicitly, according to the &ldquo;duck&rdquo; principle: Superman has the <code>fly()</code> method — so he&rsquo;s a flyer.</li>
+</ul>
+<p>Let&rsquo;s check:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ mypy flyer.py
+Success: no issues found in <span style="color:#1c01ce">1</span> <span style="color:#a90d91">source</span> file
+</code></pre></div><p>Perfect!</p>
+<h2 id="summary">Summary</h2>
+<p>If your code should work consistently with different types, find their common behavior and specify it in the protocol. Use the protocol type for static code validation using mypy.</p>
+<p>Avoid pigeons, planes, and superheroes whenever possible. They are nothing but problems.</p>
+]]></content:encoded></item><item><title>Random numbers and sequences in Python</title><link>https://antonz.org/random/</link><pubDate>Mon, 23 May 2022 15:30:00 +0000</pubDate><guid>https://antonz.org/random/</guid><description>There is much more than just randint()</description><content:encoded><![CDATA[<p>Everybody knows about <code>random.randint(a, b)</code> in Python, which returns a ≤ n ≤ b:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">randint</span>(<span style="color:#1c01ce">10</span>, <span style="color:#1c01ce">99</span>)
 <span style="color:#177500"># 59</span>
 </code></pre></div><p>But the <code>random</code> module has so much more to offer.</p>
@@ -1250,19 +1344,4 @@ Use islice:               93 ms
 <p>Filling the page with <code>.append()</code> is slow due to array resizing. It is better to use a fixed-size list, or even better, iteration based on <code>itertools.islice()</code></p>
 <p>Totally recommend it.</p>
 <p><a href="https://replit.com/@antonz/page-iterator#main.py">Playground</a></p>
-]]></content:encoded></item><item><title>Multi-line queries in SQLite shell</title><link>https://antonz.org/sqlite-multiline/</link><pubDate>Sun, 24 Apr 2022 21:30:00 +0000</pubDate><guid>https://antonz.org/sqlite-multiline/</guid><description>How to edit a big query without leaving the CLI</description><content:encoded><![CDATA[<p>Just after writing that debugging multi-line queries <a href="/sqlite-history/">in SQLite shell</a> is not easy, I discovered a cool trick on the sqlite forum:</p>
-<p>Use <code>Ctrl+V</code>, <code>Ctrl+J</code> instead of <code>Enter</code> for new lines. After that, edit the query with the <code>↑</code> button.</p>
-<div class="row">
-<div class="col-xs-12 col-sm-7">
-<figure>
-  <img alt="SQLite shell" src="multiline.png" class="img-bordered-thin">
-</figure>
-</div>
-</div>
-<p>And here are some more ways to edit multi-line queries:</p>
-<ul>
-<li>Use external editor (<code>.shell &lt;editor&gt; &lt;file&gt;</code>)</li>
-<li>Run query from file (<code>.read &lt;file&gt;</code>)</li>
-<li>Consider DBeaver, DataGrip or other UI tool</li>
-</ul>
 ]]></content:encoded></item></channel></rss>

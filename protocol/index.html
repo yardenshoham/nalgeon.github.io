@@ -1,0 +1,202 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Flying Pig, or Protocols in Python</title>
+<meta name=description content="Structural subtyping using protocols.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.65f0a52d2e69e5dbfd825b3072b88215fc0b75fca7c9690febf6b43535d86a5e.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/protocol/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flying Pig, or Protocols in Python">
+<meta property="og:description" content="Structural subtyping using protocols.">
+<meta property="og:url" content="https://antonz.org/protocol/">
+<meta property="og:image" content="https://antonz.org/protocol/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Flying Pig, or Protocols in Python">
+<meta name=twitter:description content="Structural subtyping using protocols.">
+<meta name=twitter:url content="https://antonz.org/protocol/">
+<meta name=twitter:site content="@nalgeon">
+<meta name=twitter:image content="https://antonz.org/protocol/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/stopwar.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Flying Pig, or Protocols in Python</h1>
+</header>
+<p>Let&rsquo;s say you&rsquo;ve developed a utility that sends everything flying:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>def</span> <span style=color:#000>launch</span>(<span style=color:#000>thing</span>):
+    <span style=color:#000>thing</span><span style=color:#000>.</span><span style=color:#000>fly</span>()
+</code></pre></div><p>Well, not exactly <em>everything</em>. Things with the <code>fly()</code> method, to be precise. With a single handy function we launch Frank (he&rsquo;s a pigeon), an airplane, and even Superman:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>class</span> <span style=color:#3f6e75>Frank</span>:
+    <span style=color:#a90d91>def</span> <span style=color:#000>fly</span>(<span style=color:#5b269a>self</span>):
+        <span style=color:#a90d91>print</span>(<span style=color:#c41a16>&#34;💩&#34;</span>)
+
+<span style=color:#a90d91>class</span> <span style=color:#3f6e75>Plane</span>:
+    <span style=color:#a90d91>def</span> <span style=color:#000>fly</span>(<span style=color:#5b269a>self</span>):
+        <span style=color:#a90d91>print</span>(<span style=color:#c41a16>&#34;Flight delayed&#34;</span>)
+
+<span style=color:#a90d91>class</span> <span style=color:#3f6e75>Superman</span>:
+    <span style=color:#a90d91>def</span> <span style=color:#000>fly</span>(<span style=color:#5b269a>self</span>):
+        <span style=color:#a90d91>print</span>(<span style=color:#c41a16>&#34;ε===(っ≧ω≦)っ&#34;</span>)
+</code></pre></div><p>Whoosh:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>f</span> <span style=color:#000>=</span> <span style=color:#000>Frank</span>()
+<span style=color:#000>launch</span>(<span style=color:#000>f</span>)
+<span style=color:#177500># 💩</span>
+
+<span style=color:#000>p</span> <span style=color:#000>=</span> <span style=color:#000>Plane</span>()
+<span style=color:#000>launch</span>(<span style=color:#000>p</span>)
+<span style=color:#177500># Flight delayed</span>
+
+<span style=color:#000>s</span> <span style=color:#000>=</span> <span style=color:#000>Superman</span>()
+<span style=color:#000>launch</span>(<span style=color:#000>s</span>)
+<span style=color:#177500># ε===(っ≧ω≦)っ</span>
+</code></pre></div><p>It&rsquo;s not that our heroes are particularly successful at coping with the task, but the launch works for them.</p>
+<p>So far, so good. But sometimes (especially when the program grows) the developer wants to add a little rigor. Make it clear that the <code>thing</code> parameter in <code>launch()</code> is not any object, but necessarily a flying thing with the <code>fly()</code> method. What is the best way to do this?</p>
+<h2 id=using-a-description>Using a description</h2>
+<p>If you prefer to avoid types, then you will go with a variable name or a docstring:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>def</span> <span style=color:#000>launch</span>(<span style=color:#000>flyer</span>):
+    <span style=color:#c41a16>&#34;&#34;&#34;Launces a flyer (an object with a `fly()` method)&#34;&#34;&#34;</span>
+    <span style=color:#000>flyer</span><span style=color:#000>.</span><span style=color:#000>fly</span>()
+</code></pre></div><p>The problem is that the more complex the code, the more often the &ldquo;descriptive&rdquo; approach fails.</p>
+<h2 id=using-a-base-class>Using a base class</h2>
+<p>Thanks to some 1990s java programming skills, you end up with a small hierarchy:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>class</span> <span style=color:#3f6e75>Flyer</span>:
+    <span style=color:#a90d91>def</span> <span style=color:#000>fly</span>():
+        <span style=color:#000>...</span>
+
+<span style=color:#a90d91>class</span> <span style=color:#3f6e75>Frank</span>(<span style=color:#000>Flyer</span>):
+    <span style=color:#177500># ...</span>
+
+<span style=color:#a90d91>class</span> <span style=color:#3f6e75>Plane</span>(<span style=color:#000>Flyer</span>):
+    <span style=color:#177500># ...</span>
+
+<span style=color:#a90d91>class</span> <span style=color:#3f6e75>Superman</span>(<span style=color:#000>Flyer</span>):
+    <span style=color:#177500># ...</span>
+</code></pre></div><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>def</span> <span style=color:#000>launch</span>(<span style=color:#000>thing</span>: <span style=color:#000>Flyer</span>):
+    <span style=color:#000>thing</span><span style=color:#000>.</span><span style=color:#000>fly</span>()
+</code></pre></div><p>This method works:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ mypy flyer.py
+Success: no issues found in <span style=color:#1c01ce>1</span> <span style=color:#a90d91>source</span> file
+</code></pre></div><p>But, as the Python devs say, it is terribly &ldquo;unpythonic&rdquo;:</p>
+<blockquote>
+<p>The problem is that a class has to be explicitly marked, which is unpythonic and unlike what one would normally do in idiomatic dynamically typed Python code.</p>
+</blockquote>
+<p>Indeed. Not only have we modified three classes instead of one function. Not only have we introduced an inheritance hierarchy to our code. But also Frank, the plane and Superman are now burdened by the shared knowledge that they are Flyers. They never asked for this, you know.</p>
+<h2 id=using-a-protocol>Using a protocol</h2>
+<p>The quote above is from <a href=https://peps.python.org/pep-0544/>PEP 544</a> (Python Enhancement Proposal), which was implemented in Python 3.8. Starting with this version, Python recieved <em>protocols</em>.</p>
+<p>Protocols describe behavior. Here is our Flyer:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>from</span> <span style=color:#000>typing</span> <span style=color:#a90d91>import</span> <span style=color:#000>Protocol</span>
+
+<span style=color:#a90d91>class</span> <span style=color:#3f6e75>Flyer</span>(<span style=color:#000>Protocol</span>):
+    <span style=color:#a90d91>def</span> <span style=color:#000>fly</span>(<span style=color:#5b269a>self</span>):
+        <span style=color:#000>...</span>
+</code></pre></div><p>We use a protocol to specify that an object should have a specific behavior. The <code>launch()</code> function can only launch Flyers:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>def</span> <span style=color:#000>launch</span>(<span style=color:#000>thing</span>: <span style=color:#000>Flyer</span>):
+    <span style=color:#000>thing</span><span style=color:#000>.</span><span style=color:#000>fly</span>()
+</code></pre></div><p>The objects themselves do not need to know about the protocol. It is enough that they implement the right behavior:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>class</span> <span style=color:#3f6e75>Frank</span>:
+    <span style=color:#a90d91>def</span> <span style=color:#000>fly</span>(<span style=color:#5b269a>self</span>):
+        <span style=color:#177500># ...</span>
+
+<span style=color:#a90d91>class</span> <span style=color:#3f6e75>Plane</span>:
+    <span style=color:#a90d91>def</span> <span style=color:#000>fly</span>(<span style=color:#5b269a>self</span>):
+        <span style=color:#177500># ...</span>
+
+<span style=color:#a90d91>class</span> <span style=color:#3f6e75>Superman</span>:
+    <span style=color:#a90d91>def</span> <span style=color:#000>fly</span>(<span style=color:#5b269a>self</span>):
+        <span style=color:#177500># ...</span>
+</code></pre></div><p>Protocols are static duck typing:</p>
+<ul>
+<li>the interface is explicitly described in the protocol: a flyer has the <code>fly()</code> method;</li>
+<li>but it is implemented implicitly, according to the &ldquo;duck&rdquo; principle: Superman has the <code>fly()</code> method — so he&rsquo;s a flyer.</li>
+</ul>
+<p>Let&rsquo;s check:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>$ mypy flyer.py
+Success: no issues found in <span style=color:#1c01ce>1</span> <span style=color:#a90d91>source</span> file
+</code></pre></div><p>Perfect!</p>
+<h2 id=summary>Summary</h2>
+<p>If your code should work consistently with different types, find their common behavior and specify it in the protocol. Use the protocol type for static code validation using mypy.</p>
+<p>Avoid pigeons, planes, and superheroes whenever possible. They are nothing but problems.</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter and <a href=http://digest.antonz.org/><strong>subscribe by email</strong></a> to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2022-05-31 17:00:00 +0000 UTC">31 May, 2022</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/python/>python</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/random/>Random numbers and sequences in Python</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/random/>Random numbers and sequences in Python</a></p>
+<p><a href=/compact-objects/>Compact objects in Python</a></p>
+<p><a href=/python-stdlib-changes/>Python Standard Library changes in recent years</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=http://digest.antonz.org/ class=footer__social-link><i class="fas fa-envelope"></i><span>Email</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
