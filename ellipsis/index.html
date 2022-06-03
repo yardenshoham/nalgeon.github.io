@@ -1,0 +1,136 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Expressive Ellipsis in Python</title>
+<meta name=description content="What is Ellipsis and how it is used.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.65f0a52d2e69e5dbfd825b3072b88215fc0b75fca7c9690febf6b43535d86a5e.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/ellipsis/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Expressive Ellipsis in Python">
+<meta property="og:description" content="What is Ellipsis and how it is used.">
+<meta property="og:url" content="https://antonz.org/ellipsis/">
+<meta property="og:image" content="https://antonz.org/ellipsis/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Expressive Ellipsis in Python">
+<meta name=twitter:description content="What is Ellipsis and how it is used.">
+<meta name=twitter:url content="https://antonz.org/ellipsis/">
+<meta name=twitter:site content="@nalgeon">
+<meta name=twitter:image content="https://antonz.org/ellipsis/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/stopwar.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Expressive Ellipsis in Python</h1>
+</header>
+<p>One of the lesser-known things in Python is the ellipsis:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>class</span> <span style=color:#3f6e75>Flyer</span>:
+    <span style=color:#a90d91>def</span> <span style=color:#000>fly</span>(<span style=color:#5b269a>self</span>):
+        <span style=color:#000>...</span>
+</code></pre></div><p>This code works. The <code>...</code> (aka <code>Ellipsis</code>) is a real object that can be used in code.</p>
+<p><code>Ellipsis</code> is the only instance of the <code>EllipsisType</code> type (similar to how <code>None</code> is the only instance of the <code>NoneType</code> type):</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>&gt;&gt;&gt;</span> <span style=color:#000>...</span> <span style=color:#000>is</span> <span style=color:#5b269a>Ellipsis</span>
+<span style=color:#000>&gt;&gt;&gt;</span> <span style=color:#a90d91>True</span>
+<span style=color:#000>&gt;&gt;&gt;</span> <span style=color:#5b269a>Ellipsis</span> <span style=color:#000>is</span> <span style=color:#000>...</span>
+<span style=color:#000>&gt;&gt;&gt;</span> <span style=color:#a90d91>True</span>
+</code></pre></div><p>Python core devs mostly use <code>...</code> to show that a type, method, or function has no implementation — as in the <code>fly()</code> example.</p>
+<p>And in <a href=https://docs.python.org/3/library/typing.html>type hints</a>:</p>
+<blockquote>
+<p>It is possible to declare the return type of a callable without specifying the call signature by substituting a literal ellipsis for the list of arguments in the type hint: <code>Callable[..., ReturnType]</code></p>
+</blockquote>
+<blockquote>
+<p>To specify a variable-length tuple of homogeneous type, use literal ellipsis, e.g. <code>Tuple[int, ...]</code>. A plain <code>Tuple</code> is equivalent to <code>Tuple[Any, ...]</code>, and in turn to tuple.</p>
+</blockquote>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#177500># numbers  is a tuple of integer numbers</span>
+<span style=color:#177500># summator is a function that accepts arbitrary parameters</span>
+<span style=color:#177500>#          and returns an integer</span>
+<span style=color:#a90d91>def</span> <span style=color:#000>print_sum</span>(<span style=color:#000>numbers</span>: <span style=color:#a90d91>tuple</span>[<span style=color:#a90d91>int</span>, <span style=color:#000>...</span>], <span style=color:#000>summator</span>: <span style=color:#000>Callable</span>[<span style=color:#000>...</span>, <span style=color:#a90d91>int</span>]):
+    <span style=color:#000>total</span> <span style=color:#000>=</span> <span style=color:#000>summator</span>(<span style=color:#000>numbers</span>)
+    <span style=color:#a90d91>print</span>(<span style=color:#000>total</span>)
+
+<span style=color:#000>print_sum</span>((<span style=color:#1c01ce>1</span>, <span style=color:#1c01ce>2</span>, <span style=color:#1c01ce>3</span>), <span style=color:#a90d91>sum</span>)
+<span style=color:#177500># 6</span>
+</code></pre></div><p>Other developers use Ellipsis for all sorts of bizarre things ツ</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter and <a href=http://digest.antonz.org/><strong>subscribe by email</strong></a> to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2022-06-03 10:50:00 +0000 UTC">03 Jun, 2022</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/python/>python</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/protocol/>Flying Pig, or Protocols in Python</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/protocol/>Flying Pig, or Protocols in Python</a></p>
+<p><a href=/random/>Random numbers and sequences in Python</a></p>
+<p><a href=/compact-objects/>Compact objects in Python</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=http://digest.antonz.org/ class=footer__social-link><i class="fas fa-envelope"></i><span>Email</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>

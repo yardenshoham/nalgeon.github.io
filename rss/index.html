@@ -1,4 +1,32 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Tue, 31 May 2022 17:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Flying Pig, or Protocols in Python</title><link>https://antonz.org/protocol/</link><pubDate>Tue, 31 May 2022 17:00:00 +0000</pubDate><guid>https://antonz.org/protocol/</guid><description>Structural subtyping using protocols.</description><content:encoded><![CDATA[<p>Let&rsquo;s say you&rsquo;ve developed a utility that sends everything flying:</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 03 Jun 2022 10:50:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Expressive Ellipsis in Python</title><link>https://antonz.org/ellipsis/</link><pubDate>Fri, 03 Jun 2022 10:50:00 +0000</pubDate><guid>https://antonz.org/ellipsis/</guid><description>What is Ellipsis and how it is used.</description><content:encoded><![CDATA[<p>One of the lesser-known things in Python is the ellipsis:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">class</span> <span style="color:#3f6e75">Flyer</span>:
+    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>(<span style="color:#5b269a">self</span>):
+        <span style="color:#000">...</span>
+</code></pre></div><p>This code works. The <code>...</code> (aka <code>Ellipsis</code>) is a real object that can be used in code.</p>
+<p><code>Ellipsis</code> is the only instance of the <code>EllipsisType</code> type (similar to how <code>None</code> is the only instance of the <code>NoneType</code> type):</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">&gt;&gt;&gt;</span> <span style="color:#000">...</span> <span style="color:#000">is</span> <span style="color:#5b269a">Ellipsis</span>
+<span style="color:#000">&gt;&gt;&gt;</span> <span style="color:#a90d91">True</span>
+<span style="color:#000">&gt;&gt;&gt;</span> <span style="color:#5b269a">Ellipsis</span> <span style="color:#000">is</span> <span style="color:#000">...</span>
+<span style="color:#000">&gt;&gt;&gt;</span> <span style="color:#a90d91">True</span>
+</code></pre></div><p>Python core devs mostly use <code>...</code> to show that a type, method, or function has no implementation — as in the <code>fly()</code> example.</p>
+<p>And in <a href="https://docs.python.org/3/library/typing.html">type hints</a>:</p>
+<blockquote>
+<p>It is possible to declare the return type of a callable without specifying the call signature by substituting a literal ellipsis for the list of arguments in the type hint: <code>Callable[..., ReturnType]</code></p>
+</blockquote>
+<blockquote>
+<p>To specify a variable-length tuple of homogeneous type, use literal ellipsis, e.g. <code>Tuple[int, ...]</code>. A plain <code>Tuple</code> is equivalent to <code>Tuple[Any, ...]</code>, and in turn to tuple.</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#177500"># numbers  is a tuple of integer numbers</span>
+<span style="color:#177500"># summator is a function that accepts arbitrary parameters</span>
+<span style="color:#177500">#          and returns an integer</span>
+<span style="color:#a90d91">def</span> <span style="color:#000">print_sum</span>(<span style="color:#000">numbers</span>: <span style="color:#a90d91">tuple</span>[<span style="color:#a90d91">int</span>, <span style="color:#000">...</span>], <span style="color:#000">summator</span>: <span style="color:#000">Callable</span>[<span style="color:#000">...</span>, <span style="color:#a90d91">int</span>]):
+    <span style="color:#000">total</span> <span style="color:#000">=</span> <span style="color:#000">summator</span>(<span style="color:#000">numbers</span>)
+    <span style="color:#a90d91">print</span>(<span style="color:#000">total</span>)
+
+<span style="color:#000">print_sum</span>((<span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">2</span>, <span style="color:#1c01ce">3</span>), <span style="color:#a90d91">sum</span>)
+<span style="color:#177500"># 6</span>
+</code></pre></div><p>Other developers use Ellipsis for all sorts of bizarre things ツ</p>
+]]></content:encoded></item><item><title>Flying Pig, or Protocols in Python</title><link>https://antonz.org/protocol/</link><pubDate>Tue, 31 May 2022 17:00:00 +0000</pubDate><guid>https://antonz.org/protocol/</guid><description>Structural subtyping using protocols.</description><content:encoded><![CDATA[<p>Let&rsquo;s say you&rsquo;ve developed a utility that sends everything flying:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">launch</span>(<span style="color:#000">thing</span>):
     <span style="color:#000">thing</span><span style="color:#000">.</span><span style="color:#000">fly</span>()
 </code></pre></div><p>Well, not exactly <em>everything</em>. Things with the <code>fly()</code> method, to be precise. With a single handy function we launch Frank (he&rsquo;s a pigeon), an airplane, and even Superman:</p>
@@ -1246,102 +1274,4 @@ x2.39 to baseline
 add column COLUMN TYPE as (EXPRESSION);
 </code></pre><p>Generated column expression can include any table columns, but not other tables or subquery results. It&rsquo;s for the best: for more complex combinations, there are <em>views</em> and <em>temp tables</em>. Let&rsquo;s talk about them some other time.</p>
 <p><a href="https://sqlite.org/gencol.html">Documentation</a> • <a href="https://sqlime.org/#gist:5208177f89a0e38ccfae8ead90a35631">Playground</a></p>
-]]></content:encoded></item><item><title>Page iterator in Python</title><link>https://antonz.org/page-iterator/</link><pubDate>Mon, 02 May 2022 13:00:00 +0000</pubDate><guid>https://antonz.org/page-iterator/</guid><description>Traverse dataset in pages for faster batch processing.</description><content:encoded><![CDATA[<p>Suppose you are counting stats for a huge dataset of toys sold across the country over the past year:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">reader</span> <span style="color:#000">=</span> <span style="color:#000">fetch_toys</span>()
-<span style="color:#a90d91">for</span> <span style="color:#000">item</span> <span style="color:#000">in</span> <span style="color:#000">reader</span>:
-    <span style="color:#000">process_single</span>(<span style="color:#000">item</span>)
-</code></pre></div><p><code>process_single()</code> takes 10 ms, so 400 million toys will be processed in 46 days 😱</p>
-<p>After a number of intense conversations, you manage to convince the developers that it&rsquo;s not very fast. <code>process_batch()</code> function enters the scene. It processes 10,000 toys in 1 second. It means 11 hours for all the toys — much nicer.</p>
-<p>Now we need to iterate over the dataset in batches of 10 thousand records. This is where the page iterator comes in handy!</p>
-<h2 id="naive-paginator">Naive paginator</h2>
-<p>Let&rsquo;s go through the initial sequence, gradually filling the page. As soon as it is filled, return it through <code>yield</code> and start filling in the next one. Continue until the original sequence is exhausted:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">paginate</span>(<span style="color:#000">iterable</span>, <span style="color:#000">page_size</span>):
-    <span style="color:#000">page</span> <span style="color:#000">=</span> []
-    <span style="color:#a90d91">for</span> <span style="color:#000">item</span> <span style="color:#000">in</span> <span style="color:#000">iterable</span>:
-        <span style="color:#000">page</span><span style="color:#000">.</span><span style="color:#000">append</span>(<span style="color:#000">item</span>)
-        <span style="color:#a90d91">if</span> <span style="color:#a90d91">len</span>(<span style="color:#000">page</span>) <span style="color:#000">==</span> <span style="color:#000">page_size</span>:
-            <span style="color:#a90d91">yield</span> <span style="color:#000">page</span>
-            <span style="color:#000">page</span> <span style="color:#000">=</span> []
-    <span style="color:#a90d91">yield</span> <span style="color:#000">page</span>
-</code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">reader</span> <span style="color:#000">=</span> <span style="color:#000">fetch_toys</span>()
-<span style="color:#000">page_size</span> <span style="color:#000">=</span> <span style="color:#1c01ce">10_000</span>
-<span style="color:#a90d91">for</span> <span style="color:#000">page</span> <span style="color:#000">in</span> <span style="color:#000">paginate</span>(<span style="color:#000">reader</span>, <span style="color:#000">page_size</span>):
-    <span style="color:#000">process_batch</span>(<span style="color:#000">page</span>)
-</code></pre></div><p>The implementation is working, but there is a problem. Such page-by-page traversal is noticeably slower than the one-by-one iteration.</p>
-<h2 id="iteration-speed">Iteration speed</h2>
-<p>Let&rsquo;s compare two traversals — one-by-one and paginated:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">one_by_one</span>(<span style="color:#000">a</span>, <span style="color:#000">b</span>):
-    <span style="color:#c41a16">&#34;&#34;&#34;Processes records one-by-one, without pagination&#34;&#34;&#34;</span>
-    <span style="color:#000">rdr</span> <span style="color:#000">=</span> <span style="color:#000">reader</span>(<span style="color:#000">a</span>, <span style="color:#000">b</span>)
-    <span style="color:#a90d91">for</span> <span style="color:#000">record</span> <span style="color:#000">in</span> <span style="color:#000">rdr</span>:
-        <span style="color:#000">process_single</span>(<span style="color:#000">record</span>)
-
-<span style="color:#a90d91">def</span> <span style="color:#000">batch</span>(<span style="color:#000">page_size</span>, <span style="color:#000">a</span>, <span style="color:#000">b</span>):
-    <span style="color:#c41a16">&#34;&#34;&#34;Processes records in batches, with pagination&#34;&#34;&#34;</span>
-    <span style="color:#000">rdr</span> <span style="color:#000">=</span> <span style="color:#000">reader</span>(<span style="color:#000">a</span>, <span style="color:#000">b</span>)
-    <span style="color:#a90d91">for</span> <span style="color:#000">page</span> <span style="color:#000">in</span> <span style="color:#000">paginate</span>(<span style="color:#000">rdr</span>, <span style="color:#000">page_size</span>):
-        <span style="color:#000">process_batch</span>(<span style="color:#000">page</span>)
-
-<span style="color:#000">times</span> <span style="color:#000">=</span> <span style="color:#1c01ce">10</span>
-
-<span style="color:#000">page_size</span> <span style="color:#000">=</span> <span style="color:#1c01ce">10_000</span>
-<span style="color:#000">a</span> <span style="color:#000">=</span> <span style="color:#1c01ce">1_000_000</span>
-<span style="color:#000">b</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2_000_000</span>
-
-<span style="color:#000">fn</span> <span style="color:#000">=</span> <span style="color:#a90d91">lambda</span>: <span style="color:#000">one_by_one</span>(<span style="color:#000">a</span>, <span style="color:#000">b</span>)
-<span style="color:#000">total</span> <span style="color:#000">=</span> <span style="color:#000">timeit</span><span style="color:#000">.</span><span style="color:#000">timeit</span>(<span style="color:#000">fn</span>, <span style="color:#000">number</span><span style="color:#000">=</span><span style="color:#000">times</span>)
-<span style="color:#000">it_time</span> <span style="color:#000">=</span> <span style="color:#a90d91">round</span>(<span style="color:#000">total</span> <span style="color:#000">*</span> <span style="color:#1c01ce">1000</span> <span style="color:#000">/</span> <span style="color:#000">times</span>)
-<span style="color:#a90d91">print</span>(<span style="color:#c41a16">f</span><span style="color:#c41a16">&#34;One-by-one (baseline): </span><span style="color:#c41a16">{</span><span style="color:#000">it_time</span><span style="color:#c41a16">}</span><span style="color:#c41a16"> ms&#34;</span>)
-
-<span style="color:#000">fn</span> <span style="color:#000">=</span> <span style="color:#a90d91">lambda</span>: <span style="color:#000">batch</span>(<span style="color:#000">page_size</span>, <span style="color:#000">a</span>, <span style="color:#000">b</span>)
-<span style="color:#000">total</span> <span style="color:#000">=</span> <span style="color:#000">timeit</span><span style="color:#000">.</span><span style="color:#000">timeit</span>(<span style="color:#000">fn</span>, <span style="color:#000">number</span><span style="color:#000">=</span><span style="color:#000">times</span>)
-<span style="color:#000">it_time</span> <span style="color:#000">=</span> <span style="color:#a90d91">round</span>(<span style="color:#000">total</span> <span style="color:#000">*</span> <span style="color:#1c01ce">1000</span> <span style="color:#000">/</span> <span style="color:#000">times</span>)
-<span style="color:#a90d91">print</span>(<span style="color:#c41a16">f</span><span style="color:#c41a16">&#34;Fill page with append(): </span><span style="color:#c41a16">{</span><span style="color:#000">it_time</span><span style="color:#c41a16">}</span><span style="color:#c41a16"> ms&#34;</span>)
-</code></pre></div><p>Here is the result for 1 million records and a page size of 10 thousand:</p>
-<pre tabindex="0"><code>One-by-one (baseline):   161 ms
-Fill page with append(): 227 ms
-</code></pre><p>Page-by-page iteration is almost 1.5 times slower!</p>
-<p>At each iteration of the loop, we create a new empty list and then gradually fill it in. Python has to constantly increase the size of the underlying array, and this is an expensive operation — O(n) of the number of elements in the list.</p>
-<h2 id="fixed-page-size">Fixed page size</h2>
-<p>Let&rsquo;s create a list of the required size in advance and use it for all pages:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">paginate</span>(<span style="color:#000">iterable</span>, <span style="color:#000">page_size</span>):
-    <span style="color:#000">page</span> <span style="color:#000">=</span> [<span style="color:#a90d91">None</span>] <span style="color:#000">*</span> <span style="color:#000">page_size</span>
-    <span style="color:#000">idx</span> <span style="color:#000">=</span> <span style="color:#1c01ce">0</span>
-    <span style="color:#a90d91">for</span> <span style="color:#000">item</span> <span style="color:#000">in</span> <span style="color:#000">iterable</span>:
-        <span style="color:#000">page</span>[<span style="color:#000">idx</span>] <span style="color:#000">=</span> <span style="color:#000">item</span>
-        <span style="color:#000">idx</span> <span style="color:#000">+=</span> <span style="color:#1c01ce">1</span>
-        <span style="color:#a90d91">if</span> <span style="color:#000">idx</span> <span style="color:#000">==</span> <span style="color:#000">page_size</span>:
-            <span style="color:#a90d91">yield</span> <span style="color:#000">page</span>
-            <span style="color:#000">idx</span> <span style="color:#000">=</span> <span style="color:#1c01ce">0</span>
-    <span style="color:#a90d91">yield</span> <span style="color:#000">page</span>[:<span style="color:#000">idx</span>]
-</code></pre></div><p>Compare once again:</p>
-<pre tabindex="0"><code>One-by-one (baseline):   161 ms
-Fill page with append(): 227 ms
-Use fixed-size page:     162 ms
-</code></pre><p>Much faster! Fixed page algorithm is as fast as the ordinary one-by-one traversal.</p>
-<h2 id="slicing-iterator">Slicing iterator</h2>
-<p>Can we do even better? Algorithmically, no. But practically, yes — if we move most of the operations from Python code to C library code. The <code>itertools()</code> module and its <code>islice()</code> function may help:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">paginate</span>(<span style="color:#000">iterable</span>, <span style="color:#000">page_size</span>):
-    <span style="color:#000">it</span> <span style="color:#000">=</span> <span style="color:#a90d91">iter</span>(<span style="color:#000">iterable</span>)
-    <span style="color:#000">slicer</span> <span style="color:#000">=</span> <span style="color:#a90d91">lambda</span>: <span style="color:#a90d91">list</span>(<span style="color:#000">itertools</span><span style="color:#000">.</span><span style="color:#000">islice</span>(<span style="color:#000">it</span>, <span style="color:#000">page_size</span>))
-    <span style="color:#a90d91">return</span> <span style="color:#a90d91">iter</span>(<span style="color:#000">slicer</span>, [])
-</code></pre></div><p>Here is what&rsquo;s going on:</p>
-<ul>
-<li><code>islice()</code> creates an iterator (let&rsquo;s call it a slicer) that traverses the passed sequence until it yields <code>page_size</code> elements;</li>
-<li><code>list()</code> fetches elements from the slicer, thus creating a page;</li>
-<li>since <code>islice()</code> runs on top of the main iterator, the next time it is called, it will continue from the same place where it left off before;</li>
-<li>the <code>iter(slicer, [])</code> expression creates an iterator that calls the slicer at each step;</li>
-<li>thus, the <code>paginate()</code> function returns an iterator, which at each step yields the next page through the slicer, traversing the main sequence until it ends.</li>
-</ul>
-<p>Look how good this implementation is:</p>
-<pre tabindex="0"><code>One-by-one (baseline):   161 ms
-Fill page with append(): 227 ms
-Use fixed-size page:     162 ms
-Use islice:               93 ms
-</code></pre><p>40% faster than the one-by-one iterator!</p>
-<h2 id="summary">Summary</h2>
-<p>Page-by-page traversal works fine whenever a batch operation is much faster than a sequence of single operations. In order not to implement such traversal every time from scratch, it is convenient to use a <em>page iterator</em>.</p>
-<p>Filling the page with <code>.append()</code> is slow due to array resizing. It is better to use a fixed-size list, or even better, iteration based on <code>itertools.islice()</code></p>
-<p>Totally recommend it.</p>
-<p><a href="https://replit.com/@antonz/page-iterator#main.py">Playground</a></p>
 ]]></content:encoded></item></channel></rss>
