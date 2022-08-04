@@ -4,8 +4,7 @@ title = "JSON Lines"
 description = "CSV on steroids."
 image = "/json-lines/cover.jpg"
 slug = "json-lines"
-tags = ["development"]
-subscribe = "ohmypy"
+tags = ["python"]
 +++
 
 Worked with the [JSON Lines](https://jsonlines.org/) format the other day. It's a CSV on steroids:
