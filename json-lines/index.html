@@ -1,0 +1,115 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>JSON Lines</title>
+<meta name=description content="CSV on steroids.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.65f0a52d2e69e5dbfd825b3072b88215fc0b75fca7c9690febf6b43535d86a5e.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/json-lines/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JSON Lines">
+<meta property="og:description" content="CSV on steroids.">
+<meta property="og:url" content="https://antonz.org/json-lines/">
+<meta property="og:image" content="https://antonz.org/json-lines/cover.jpg">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="JSON Lines">
+<meta name=twitter:description content="CSV on steroids.">
+<meta name=twitter:url content="https://antonz.org/json-lines/">
+<meta name=twitter:site content="@nalgeon">
+<meta name=twitter:image content="https://antonz.org/json-lines/cover.jpg"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/stopwar.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>JSON Lines</h1>
+</header>
+<p>Worked with the <a href=https://jsonlines.org/>JSON Lines</a> format the other day. It&rsquo;s a CSV on steroids:</p>
+<ul>
+<li>each entry is a separate line, as in CSV;</li>
+<li>at the same time it is a full-fledged JSON.</li>
+</ul>
+<p>For example:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json>{ <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>11</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;Alice&#34;</span>, <span style=color:#000>&#34;department&#34;</span>: { <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>1001</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;it&#34;</span>} }
+{ <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>12</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;bob&#34;</span>, <span style=color:#000>&#34;department&#34;</span>: { <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>1001</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;it&#34;</span>} }
+{ <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>21</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;Cindy&#34;</span>, <span style=color:#000>&#34;department&#34;</span>: { <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>2001</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;hr&#34;</span>} }
+</code></pre></div><p>Great stuff:</p>
+<ul>
+<li>Suitable for objects of complex structure (unlike csv);</li>
+<li>Easy to stream read without loading the entire file into memory (unlike json);</li>
+<li>Easy to append new entries to an existing file (unlike json).</li>
+</ul>
+<p>JSON can also be streamed. But look <a href=https://replit.com/@antonz/json-lines#main.py>how much easier it is with JSON Lines</a>.</p>
+<p>Great fit for logs and data processing pipelines.</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter and <a href=http://digest.antonz.org/><strong>subscribe by email</strong></a> to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2022-08-04 18:30:00 +0000 UTC">04 Aug, 2022</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/development/>development</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/ellipsis/>Expressive Ellipsis in Python</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=http://digest.antonz.org/ class=footer__social-link><i class="fas fa-envelope"></i><span>Email</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>

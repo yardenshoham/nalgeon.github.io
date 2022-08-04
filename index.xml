@@ -1,4 +1,21 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 03 Jun 2022 10:50:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Expressive Ellipsis in Python</title><link>https://antonz.org/ellipsis/</link><pubDate>Fri, 03 Jun 2022 10:50:00 +0000</pubDate><guid>https://antonz.org/ellipsis/</guid><description>What is Ellipsis and how it is used.</description><content:encoded><![CDATA[<p>One of the lesser-known things in Python is the ellipsis:</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 04 Aug 2022 18:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>JSON Lines</title><link>https://antonz.org/json-lines/</link><pubDate>Thu, 04 Aug 2022 18:30:00 +0000</pubDate><guid>https://antonz.org/json-lines/</guid><description>CSV on steroids.</description><content:encoded><![CDATA[<p>Worked with the <a href="https://jsonlines.org/">JSON Lines</a> format the other day. It&rsquo;s a CSV on steroids:</p>
+<ul>
+<li>each entry is a separate line, as in CSV;</li>
+<li>at the same time it is a full-fledged JSON.</li>
+</ul>
+<p>For example:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{ <span style="color:#000">&#34;id&#34;</span>: <span style="color:#1c01ce">11</span>, <span style="color:#000">&#34;name&#34;</span>: <span style="color:#c41a16">&#34;Alice&#34;</span>, <span style="color:#000">&#34;department&#34;</span>: { <span style="color:#000">&#34;id&#34;</span>: <span style="color:#1c01ce">1001</span>, <span style="color:#000">&#34;name&#34;</span>: <span style="color:#c41a16">&#34;it&#34;</span>} }
+{ <span style="color:#000">&#34;id&#34;</span>: <span style="color:#1c01ce">12</span>, <span style="color:#000">&#34;name&#34;</span>: <span style="color:#c41a16">&#34;bob&#34;</span>, <span style="color:#000">&#34;department&#34;</span>: { <span style="color:#000">&#34;id&#34;</span>: <span style="color:#1c01ce">1001</span>, <span style="color:#000">&#34;name&#34;</span>: <span style="color:#c41a16">&#34;it&#34;</span>} }
+{ <span style="color:#000">&#34;id&#34;</span>: <span style="color:#1c01ce">21</span>, <span style="color:#000">&#34;name&#34;</span>: <span style="color:#c41a16">&#34;Cindy&#34;</span>, <span style="color:#000">&#34;department&#34;</span>: { <span style="color:#000">&#34;id&#34;</span>: <span style="color:#1c01ce">2001</span>, <span style="color:#000">&#34;name&#34;</span>: <span style="color:#c41a16">&#34;hr&#34;</span>} }
+</code></pre></div><p>Great stuff:</p>
+<ul>
+<li>Suitable for objects of complex structure (unlike csv);</li>
+<li>Easy to stream read without loading the entire file into memory (unlike json);</li>
+<li>Easy to append new entries to an existing file (unlike json).</li>
+</ul>
+<p>JSON can also be streamed. But look <a href="https://replit.com/@antonz/json-lines#main.py">how much easier it is with JSON Lines</a>.</p>
+<p>Great fit for logs and data processing pipelines.</p>
+]]></content:encoded></item><item><title>Expressive Ellipsis in Python</title><link>https://antonz.org/ellipsis/</link><pubDate>Fri, 03 Jun 2022 10:50:00 +0000</pubDate><guid>https://antonz.org/ellipsis/</guid><description>What is Ellipsis and how it is used.</description><content:encoded><![CDATA[<p>One of the lesser-known things in Python is the ellipsis:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">class</span> <span style="color:#3f6e75">Flyer</span>:
     <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>(<span style="color:#5b269a">self</span>):
         <span style="color:#000">...</span>
@@ -1244,34 +1261,4 @@ x2.39 to baseline
 </div>
 </div>
 <p>Most importantly, whichever approach you choose — make sure to save and restore the context transparently for the user.</p>
-]]></content:encoded></item><item><title>Generated columns in SQLite</title><link>https://antonz.org/generated-columns/</link><pubDate>Sat, 07 May 2022 17:10:00 +0000</pubDate><guid>https://antonz.org/generated-columns/</guid><description>Simplify queries without storing additional data.</description><content:encoded><![CDATA[<p>Sometimes an SQL query field is calculated based on other table columns. Imagine a table with <code>income</code> and <code>tax_rate</code> columns:</p>
-<pre tabindex="0"><code>┌────────┬──────────┐
-│ income │ tax_rate │
-├────────┼──────────┤
-│ 70     │ 0.22     │
-│ 84     │ 0.22     │
-│ 90     │ 0.24     │
-└────────┴──────────┘
-</code></pre><p>You can calculate the annual tax:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">id</span>,
-  <span style="color:#000">income</span> <span style="color:#000">*</span> <span style="color:#000">tax_rate</span> <span style="color:#a90d91">as</span> <span style="color:#000">tax</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">people</span>;
-</code></pre></div><p>In order not to repeat these calculations everywhere, it is convenient to create a virtual <em>generated column</em>:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">alter</span> <span style="color:#a90d91">table</span> <span style="color:#000">people</span>
-<span style="color:#a90d91">add</span> <span style="color:#a90d91">column</span> <span style="color:#000">tax</span> <span style="color:#a90d91">real</span> <span style="color:#a90d91">as</span> (
-  <span style="color:#000">income</span> <span style="color:#000">*</span> <span style="color:#000">tax_rate</span>
-);
-</code></pre></div><p>After that, the column can be used in queries in the same way as regular columns:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">id</span>, <span style="color:#000">tax</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">people</span>;
-</code></pre></div><p>Virtual columns are not stored in the database and are calculated on the fly. But you can build an index on them to speed up data retrieval.</p>
-<blockquote>
-<p>Strictly speaking, SQLite has <em>virtual</em> generated columns and <em>stored</em> ones. The latter are stored on disk, but it is impossible to create them via <code>alter table</code>, so people mostly use virtual ones.</p>
-</blockquote>
-<p>In general, the syntax is as follows:</p>
-<pre tabindex="0"><code>alter table TABLE
-add column COLUMN TYPE as (EXPRESSION);
-</code></pre><p>Generated column expression can include any table columns, but not other tables or subquery results. It&rsquo;s for the best: for more complex combinations, there are <em>views</em> and <em>temp tables</em>. Let&rsquo;s talk about them some other time.</p>
-<p><a href="https://sqlite.org/gencol.html">Documentation</a> • <a href="https://sqlime.org/#gist:5208177f89a0e38ccfae8ead90a35631">Playground</a></p>
 ]]></content:encoded></item></channel></rss>
