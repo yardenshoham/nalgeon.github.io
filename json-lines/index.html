@@ -65,16 +65,42 @@
 <li>at the same time it is a full-fledged JSON.</li>
 </ul>
 <p>For example:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json>{ <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>11</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;Alice&#34;</span>, <span style=color:#000>&#34;department&#34;</span>: { <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>1001</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;it&#34;</span>} }
-{ <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>12</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;bob&#34;</span>, <span style=color:#000>&#34;department&#34;</span>: { <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>1001</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;it&#34;</span>} }
-{ <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>21</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;Cindy&#34;</span>, <span style=color:#000>&#34;department&#34;</span>: { <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>2001</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;hr&#34;</span>} }
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json>{ <span style=color:#000>&#34;id&#34;</span>:<span style=color:#1c01ce>11</span>, <span style=color:#000>&#34;name&#34;</span>:<span style=color:#c41a16>&#34;Diane&#34;</span>, <span style=color:#000>&#34;city&#34;</span>:<span style=color:#c41a16>&#34;London&#34;</span>, <span style=color:#000>&#34;department&#34;</span>:<span style=color:#c41a16>&#34;hr&#34;</span>, <span style=color:#000>&#34;salary&#34;</span>:<span style=color:#1c01ce>70</span> }
+{ <span style=color:#000>&#34;id&#34;</span>:<span style=color:#1c01ce>12</span>, <span style=color:#000>&#34;name&#34;</span>:<span style=color:#c41a16>&#34;Bob&#34;</span>, <span style=color:#000>&#34;city&#34;</span>:<span style=color:#c41a16>&#34;London&#34;</span>, <span style=color:#000>&#34;department&#34;</span>:<span style=color:#c41a16>&#34;hr&#34;</span>, <span style=color:#000>&#34;salary&#34;</span>:<span style=color:#1c01ce>78</span> }
+{ <span style=color:#000>&#34;id&#34;</span>:<span style=color:#1c01ce>21</span>, <span style=color:#000>&#34;name&#34;</span>:<span style=color:#c41a16>&#34;Emma&#34;</span>, <span style=color:#000>&#34;city&#34;</span>:<span style=color:#c41a16>&#34;London&#34;</span>, <span style=color:#000>&#34;department&#34;</span>:<span style=color:#c41a16>&#34;it&#34;</span>, <span style=color:#000>&#34;salary&#34;</span>:<span style=color:#1c01ce>84</span> }
+{ <span style=color:#000>&#34;id&#34;</span>:<span style=color:#1c01ce>22</span>, <span style=color:#000>&#34;name&#34;</span>:<span style=color:#c41a16>&#34;Grace&#34;</span>, <span style=color:#000>&#34;city&#34;</span>:<span style=color:#c41a16>&#34;Berlin&#34;</span>, <span style=color:#000>&#34;department&#34;</span>:<span style=color:#c41a16>&#34;it&#34;</span>, <span style=color:#000>&#34;salary&#34;</span>:<span style=color:#1c01ce>90</span>}
+{ <span style=color:#000>&#34;id&#34;</span>:<span style=color:#1c01ce>23</span>, <span style=color:#000>&#34;name&#34;</span>:<span style=color:#c41a16>&#34;Henry&#34;</span>, <span style=color:#000>&#34;city&#34;</span>:<span style=color:#c41a16>&#34;London&#34;</span>, <span style=color:#000>&#34;department&#34;</span>:<span style=color:#c41a16>&#34;it&#34;</span>, <span style=color:#000>&#34;salary&#34;</span>:<span style=color:#1c01ce>104</span>}
 </code></pre></div><p>Great stuff:</p>
 <ul>
 <li>Suitable for objects of complex structure (unlike csv);</li>
 <li>Easy to stream read without loading the entire file into memory (unlike json);</li>
 <li>Easy to append new entries to an existing file (unlike json).</li>
 </ul>
-<p>JSON can also be streamed. But look <a href=https://replit.com/@antonz/json-lines#main.py>how much easier it is with JSON Lines</a>.</p>
+<p>JSON can also be streamed. But look how much easier it is with JSON Lines:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>import</span> <span style=color:#000>json</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>typing</span> <span style=color:#a90d91>import</span> <span style=color:#000>Iterator</span>
+
+
+<span style=color:#a90d91>def</span> <span style=color:#000>jl_reader</span>(<span style=color:#000>fname</span>: <span style=color:#a90d91>str</span>) <span style=color:#000>-&gt;</span> <span style=color:#000>Iterator</span>[<span style=color:#a90d91>dict</span>]:
+    <span style=color:#a90d91>with</span> <span style=color:#a90d91>open</span>(<span style=color:#000>fname</span>) <span style=color:#a90d91>as</span> <span style=color:#000>file</span>:
+        <span style=color:#a90d91>for</span> <span style=color:#000>line</span> <span style=color:#000>in</span> <span style=color:#000>file</span>:
+            <span style=color:#000>obj</span> <span style=color:#000>=</span> <span style=color:#000>json</span><span style=color:#000>.</span><span style=color:#000>loads</span>(<span style=color:#000>line</span><span style=color:#000>.</span><span style=color:#000>strip</span>())
+            <span style=color:#a90d91>yield</span> <span style=color:#000>obj</span>
+
+
+<span style=color:#a90d91>if</span> <span style=color:#000>__name__</span> <span style=color:#000>==</span> <span style=color:#c41a16>&#34;__main__&#34;</span>:
+    <span style=color:#000>reader</span> <span style=color:#000>=</span> <span style=color:#000>jl_reader</span>(<span style=color:#c41a16>&#34;employees.jl&#34;</span>)
+    <span style=color:#a90d91>for</span> <span style=color:#000>employee</span> <span style=color:#000>in</span> <span style=color:#000>reader</span>:
+        <span style=color:#a90d91>id</span> <span style=color:#000>=</span> <span style=color:#000>employee</span>[<span style=color:#c41a16>&#34;id&#34;</span>]
+        <span style=color:#000>name</span> <span style=color:#000>=</span> <span style=color:#000>employee</span>[<span style=color:#c41a16>&#34;name&#34;</span>]
+        <span style=color:#000>dept</span> <span style=color:#000>=</span> <span style=color:#000>employee</span>[<span style=color:#c41a16>&#34;department&#34;</span>]
+        <span style=color:#a90d91>print</span>(<span style=color:#c41a16>f</span><span style=color:#c41a16>&#34;#</span><span style=color:#c41a16>{</span><span style=color:#a90d91>id</span><span style=color:#c41a16>}</span><span style=color:#c41a16> - </span><span style=color:#c41a16>{</span><span style=color:#000>name</span><span style=color:#c41a16>}</span><span style=color:#c41a16> (</span><span style=color:#c41a16>{</span><span style=color:#000>dept</span><span style=color:#c41a16>}</span><span style=color:#c41a16>)&#34;</span>)
+</code></pre></div><pre tabindex=0><code>#11 - Diane (hr)
+#12 - Bob (hr)
+#21 - Emma (it)
+#22 - Grace (it)
+#23 - Henry (it)
+</code></pre><p><a href=https://replit.com/@antonz/json-lines#main.py>playground</a></p>
 <p>Great fit for logs and data processing pipelines.</p>
 <p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter and <a href=http://digest.antonz.org/><strong>subscribe by email</strong></a> to keep up with new posts</em> 🚀</p>
 </div>
