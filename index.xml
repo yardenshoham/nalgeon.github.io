@@ -1,4 +1,22 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 04 Aug 2022 18:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>JSON Lines</title><link>https://antonz.org/json-lines/</link><pubDate>Thu, 04 Aug 2022 18:30:00 +0000</pubDate><guid>https://antonz.org/json-lines/</guid><description>CSV on steroids.</description><content:encoded><![CDATA[<p>Worked with the <a href="https://jsonlines.org/">JSON Lines</a> format the other day. It&rsquo;s a CSV on steroids:</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 08 Sep 2022 15:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>User-defined functions in SQLite</title><link>https://antonz.org/sqlean-define/</link><pubDate>Thu, 08 Sep 2022 15:30:00 +0000</pubDate><guid>https://antonz.org/sqlean-define/</guid><description>Write functions in plain SQL.</description><content:encoded><![CDATA[<p>SQLite does not support user-defined functions. Sure, one can write a function in C or Python and register it within SQLite. But not in SQL itself.</p>
+<p>Luckily for us, SQLite provides an extension mechanism. One of such extensions — <code>define</code> — allows writing functions in regular SQL.</p>
+<p>With <code>define</code> writing a custom function becomes as easy as:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">define</span>(<span style="color:#c41a16">&#39;sumn&#39;</span>, <span style="color:#c41a16">&#39;:n * (:n + 1) / 2&#39;</span>);
+</code></pre></div><p>And then using it as any built-in function:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#000">&gt;</span> <span style="color:#a90d91">select</span> <span style="color:#000">sumn</span>(<span style="color:#1c01ce">5</span>);
+<span style="color:#1c01ce">15</span>
+</code></pre></div><p>User-defined functions can take multiple parameters and call other functions.</p>
+<p>Generate a random <code>N</code> such that <code>a ≤ N ≤ b</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#000">&gt;</span> <span style="color:#a90d91">select</span> <span style="color:#000">define</span>(<span style="color:#c41a16">&#39;randint&#39;</span>, <span style="color:#c41a16">&#39;:a + abs(random()) % (:b - :a + 1)&#39;</span>);
+<span style="color:#000">&gt;</span> <span style="color:#a90d91">select</span> <span style="color:#000">randint</span>(<span style="color:#1c01ce">10</span>, <span style="color:#1c01ce">99</span>);
+<span style="color:#1c01ce">42</span>
+</code></pre></div><p>List user-defined functions:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">*</span> <span style="color:#a90d91">from</span> <span style="color:#000">sqlean_define</span>;
+</code></pre></div><p>Delete a function:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">undefine</span>(<span style="color:#c41a16">&#39;sumn&#39;</span>);
+</code></pre></div><p>There is even a way to return multiple values from a function!</p>
+<p>→ <a href="https://github.com/nalgeon/sqlean/blob/main/docs/define.md"><strong>See the docs for details</strong></a></p>
+]]></content:encoded></item><item><title>JSON Lines</title><link>https://antonz.org/json-lines/</link><pubDate>Thu, 04 Aug 2022 18:30:00 +0000</pubDate><guid>https://antonz.org/json-lines/</guid><description>CSV on steroids.</description><content:encoded><![CDATA[<p>Worked with the <a href="https://jsonlines.org/">JSON Lines</a> format the other day. It&rsquo;s a CSV on steroids:</p>
 <ul>
 <li>each entry is a separate line, as in CSV;</li>
 <li>at the same time it is a full-fledged JSON.</li>
@@ -1119,172 +1137,4 @@ x2.39 to baseline
 <li><a href="https://twitter.com/tymwol">Timothy Wolodzko</a> for the <code>covariance()</code>, <code>correlation()</code>, and <code>linear_regression()</code> functions in the <code>statistics</code> module;</li>
 <li><a href="https://twitter.com/victorstinner">Victor Stinner</a> for the <code>random.randbytes()</code> method.</li>
 </ul>
-]]></content:encoded></item><item><title>Storing state in the URL</title><link>https://antonz.org/storing-state/</link><pubDate>Sun, 08 May 2022 11:30:00 +0000</pubDate><guid>https://antonz.org/storing-state/</guid><description>So that the app does not reset to zero after page refresh.</description><content:encoded><![CDATA[<p>If you are developing a web application, sooner or later you will face the problem of saving the local system state for the user.</p>
-<p>Imagine you sell elite potatoes over the Internet. The buyer visits the website and enters the search criteria:</p>
-<ul>
-<li>strictly from Bolivia or South Africa,</li>
-<li>harvest of 2022,</li>
-<li>tuber size from 3 to 7 cm,</li>
-<li>preferably in the form of a sea seal.</li>
-</ul>
-<p>The buyer then receives a list of 300 items (seal-shaped potatoes are quite popular in South Africa), split into 6 pages of 50 items each. They load the third page, open the potato card and freeze in silent admiration for a few seconds. And then accidentally refresh the page. What will your application do?</p>
-<p>It depends on how the application stores the filter state. Let&rsquo;s look at the options, and then consider one of them in more detail.</p>
-<h2 id="how-to-store-state">How to store state</h2>
-<p>JavaScript applications traditionally work with local state in the form of in-memory objects. This is convenient because it supports complex data structures without storage limits, and one does not have to deal with serialization. But will it suit our potato shop? Let&rsquo;s figure it out.</p>
-<h3 id="dont-store-state-at-all">Don&rsquo;t store state at all</h3>
-<p>Let&rsquo;s say you didn&rsquo;t bother to store the state and keep it in memory. Then after page reload the current context will be lost. The user will be redirected to the main page, where they will stare in disbelief at the giant &ldquo;ELITE POTATOES&rdquo; heading.</p>
-<p>This is how Google calendar used to behave. No matter how you navigate around the calendar, no matter what filters you apply, the URL always stayed the same:</p>
-<pre><code>https://www.google.com/calendar/render
-</code></pre>
-<p>Refresh the page — and the calendar happily resets to the current week. Ouch.</p>
-<h3 id="store-state-locally">Store state locally</h3>
-<p>Most services understand that it is not OK to lose context after page refresh. They store the state on the client side (using Web Storage, IndexedDB or other means). This solves the problem with page refreshes, but still won&rsquo;t help with bookmarking.</p>
-<p>Plus, such approach creates a problem with conflicting state changes. I opened two browser tabs, went to your potato website, searched for &ldquo;young potatoes&rdquo; in the first tab and for &ldquo;bushy leaves&rdquo; in the second one. Which query will the app remember?</p>
-<h3 id="store-a-set-of-url-parameters">Store a set of URL parameters</h3>
-<p>Ever since the days when the dynamic nature of websites was limited to the <code>&lt;blink&gt;</code> tag, some considered a best practice to store the state in the URL (<em>URL parameters</em>, also known as <em>GET parameters</em> or <em>query string</em>). Such URL is great for emailing or bookmarking — there is no problem restoring the context:</p>
-<pre><code>https://potato.shop/catalog/?search=wild+potatoes&amp;country=bo,za&amp;size=3-7&amp;page=5
-</code></pre>
-<p>URL state makes each browser tab completely independent. No shared data in the local storage means no conflicts. It simplifies developer&rsquo;s life, and the user does not have to scratch their head over the mysterious system glitches.</p>
-<h3 id="store-serialized-state">Store serialized state</h3>
-<p>URL parameters do an excellent job with scalar values (strings, numbers, booleans). But they are less suitable for collections and more complex structures. That&rsquo;s why programmers sometimes do this:</p>
-<ul>
-<li>represent the state in the form of a dictionary;</li>
-<li>serialize it to Base64;</li>
-<li>pass it as the single URL parameter.</li>
-</ul>
-<p>For example, for this state:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
-    <span style="color:#000">&#34;search&#34;</span>: <span style="color:#c41a16">&#34;wild potatoes&#34;</span>,
-    <span style="color:#000">&#34;country&#34;</span>: [<span style="color:#c41a16">&#34;bo&#34;</span>, <span style="color:#c41a16">&#34;za&#34;</span>],
-    <span style="color:#000">&#34;size&#34;</span>: { <span style="color:#000">&#34;min&#34;</span>: <span style="color:#1c01ce">3</span>, <span style="color:#000">&#34;max&#34;</span>: <span style="color:#1c01ce">7</span> },
-    <span style="color:#000">&#34;page&#34;</span>: <span style="color:#1c01ce">5</span>
-}
-</code></pre></div><p>One will get this URL:</p>
-<pre><code>https://potato.shop/catalog/?state=eyJzZWFyY2giOiJ3aWxkIHBvdGF0b2VzIiwiY291bnRyeSI6WyJibyIsInphIl0sInNpemUiOnsibWluIjozLCJtYXgiOjd9LCJwYWdlIjo1fQ==
-</code></pre>
-<h3 id="hybrid-approaches">Hybrid approaches</h3>
-<p>One can store only the main parameters in the URL, and additional ones in the local storage:</p>
-<pre><code>https://potato.shop/catalog/?search=wild+potatoes&amp;page=10
-</code></pre>
-<p>One can pass the main parameters explicitly, and the additional ones as the serialized blob:</p>
-<pre><code>https://potato.shop/catalog/?search=wild+potatoes&amp;state=eyJjb3VudHJ5IjpbImJvIiwiemEiXSwic2l6ZSI6eyJtaW4iOjMsIm1heCI6N30sInBhZ2UiOjV9
-</code></pre>
-<p>There are also more creative options.</p>
-<p>For example, one can store the state of the potato list locally. When a visitor requests a specific potato item, open it in a new tab — to not bother restoring the list state later.</p>
-<p>Or one can implement an URL shortener of sorts. Store the full state on the server, generate a unique link like <code>https://potato.shop/catalog/xKda7</code> and serve it to the client.</p>
-<p>We have sorted out the options, now let&rsquo;s look at one of them in more detail.</p>
-<h2 id="how-to-store-state-in-url-parameters">How to store state in URL parameters</h2>
-<p>At first glance, storing the state as a set of URL parameters is all nice and easy.</p>
-<p>State:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
-    <span style="color:#000">&#34;search&#34;</span>: <span style="color:#c41a16">&#34;wild potatoes&#34;</span>,
-    <span style="color:#000">&#34;page&#34;</span>: <span style="color:#1c01ce">5</span>
-}
-</code></pre></div><p>URL params (this and further examples do not use url escaping):</p>
-<pre><code>?search=wild+potatoes&amp;page=5
-</code></pre>
-<p>Indeed, it is easy to pass strings and numbers in the parameters. It gets more interesting with other data types.</p>
-<h3 id="boolean-value">Boolean value</h3>
-<p>Booleans are typically passed as <code>true</code> / <code>false</code> or <code>1</code> / <code>0</code>.</p>
-<p>State:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
-    <span style="color:#000">&#34;search&#34;</span>: <span style="color:#c41a16">&#34;potatoes&#34;</span>,
-    <span style="color:#000">&#34;popular&#34;</span>: <span style="color:#a90d91">true</span>
-}
-</code></pre></div><p>URL params:</p>
-<pre><code>?search=potatoes&amp;popular=true
-?search=potatoes&amp;popular=1
-</code></pre>
-<h3 id="date-and-time">Date and time</h3>
-<p>Date/time typically uses <a href="https://datatracker.ietf.org/doc/html/rfc3339">RFC 3339</a> (<code>2020-01-02T10:11:12Z</code>) or <a href="https://en.wikipedia.org/wiki/Unix_time">Unix Time</a> (seconds after midnight 01/01/1970).</p>
-<p>State (since the example is in JSON, I pass the date in RFC3339; your language has a native representation):</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
-    <span style="color:#000">&#34;search&#34;</span>: <span style="color:#c41a16">&#34;potatoes&#34;</span>,
-    <span style="color:#000">&#34;after&#34;</span>: <span style="color:#c41a16">&#34;2020-01-02T10:11:12Z&#34;</span>
-}
-</code></pre></div><p>URL params:</p>
-<pre><code>?search=potatoes&amp;after=2020-01-02T10:11:12Z
-?search=potatoes&amp;after=1577959872
-</code></pre>
-<p>Unix time in milliseconds is less common:</p>
-<pre><code>?search=potatoes&amp;after=1577959872000
-</code></pre>
-<h3 id="empty-value">Empty value</h3>
-<p>If some property is not set, it is usually passed empty, or not passed at all.</p>
-<p>State:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
-    <span style="color:#000">&#34;search&#34;</span>: <span style="color:#c41a16">&#34;potatoes&#34;</span>,
-    <span style="color:#000">&#34;country&#34;</span>: <span style="color:#a90d91">null</span>
-}
-</code></pre></div><p>URL params:</p>
-<pre><code>?search=potatoes&amp;country=
-?search=potatoes
-</code></pre>
-<p>Sometimes devs use a special empty value (e.g. <code>null</code>):</p>
-<pre><code>?search=potatoes&amp;country=null
-</code></pre>
-<h3 id="list-array">List (array)</h3>
-<p>So far we have been dealing with scalar values. It becomes more fun with lists.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
-    <span style="color:#000">&#34;search&#34;</span>: <span style="color:#c41a16">&#34;potatoes&#34;</span>,
-    <span style="color:#000">&#34;country&#34;</span>: [<span style="color:#c41a16">&#34;bo&#34;</span>, <span style="color:#c41a16">&#34;za&#34;</span>]
-}
-</code></pre></div><p>The classic option is to repeat the property name for each value, as dictated by <a href="https://datatracker.ietf.org/doc/html/rfc6570#section-2.4.2">RFC 6570</a>:</p>
-<pre><code>?search=potatoes&amp;country=bo&amp;country=za
-</code></pre>
-<p>Sometimes a <code>[]</code> is added to stress the list nature:</p>
-<pre><code>?search=potatoes&amp;country[]=bo&amp;country[]=za
-</code></pre>
-<p>Sometimes even with an index:</p>
-<pre><code>?search=potatoes&amp;country[0]=bo&amp;country[1]=za
-</code></pre>
-<p>Brevity fans pass the property name once, and separate the values with a comma:</p>
-<pre><code>?search=potatoes&amp;country=bo,za
-</code></pre>
-<h3 id="dictionary-map">Dictionary (map)</h3>
-<p>A list includes a set of values. A dictionary contains nested properties:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
-    <span style="color:#000">&#34;search&#34;</span>: <span style="color:#c41a16">&#34;potatoes&#34;</span>,
-    <span style="color:#000">&#34;size&#34;</span>: { <span style="color:#000">&#34;min&#34;</span>: <span style="color:#1c01ce">3</span>, <span style="color:#000">&#34;max&#34;</span>: <span style="color:#1c01ce">7</span> }
-}
-</code></pre></div><p>Internet standards do not mention passing composite objects in the URL. So the developers have invented their own options.</p>
-<p>Most often people repeat the top-level property name and pass nested property names in <code>[]</code>:</p>
-<pre><code>?search=potatoes&amp;size[min]=3&amp;size[max]=7
-</code></pre>
-<p>Dot notation is more rare:</p>
-<pre><code>?search=potatoes&amp;size.min=3&amp;size.max=7
-</code></pre>
-<p>Deeper nesting is not typically used. It would be very nontrivial to deserialize such URL parameters back into the object.</p>
-<h2 id="summary">Summary</h2>
-<p>The main ways of storing the local state are:</p>
-<ul>
-<li>no storage;</li>
-<li>local storage;</li>
-<li>URL parameters;</li>
-<li>serialized blob.</li>
-</ul>
-<p>Memory and local storage are great for &ldquo;private&rdquo; state — settings, caches, history. URL parameters are good for the &ldquo;public&rdquo; state, so that one could bookmark or forward the stateful link. URLs with parameters are self-evident and allow one to pass rather complex data structures.</p>
-<div class="row">
-<div class="col-xs-12 col-sm-4">
-<figure><img alt="String or number" src="state-scalar.png"></figure>
-</div>
-<div class="col-xs-12 col-sm-4">
-<figure><img alt="Boolean value" src="state-bool.png"></figure>
-</div>
-<div class="col-xs-12 col-sm-4">
-<figure><img alt="Date and time" src="state-date.png"></figure>
-</div>
-</div>
-<div class="row">
-<div class="col-xs-12 col-sm-4">
-<figure><img alt="Empty value" src="state-empty.png"></figure>
-</div>
-<div class="col-xs-12 col-sm-4">
-<figure><img alt="List (array)" src="state-list.png"></figure>
-</div>
-<div class="col-xs-12 col-sm-4">
-<figure><img alt="Dictionary (map)" src="state-dict.png"></figure>
-</div>
-</div>
-<p>Most importantly, whichever approach you choose — make sure to save and restore the context transparently for the user.</p>
 ]]></content:encoded></item></channel></rss>

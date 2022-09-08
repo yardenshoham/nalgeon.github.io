@@ -1,0 +1,126 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>User-defined functions in SQLite</title>
+<meta name=description content="Write functions in plain SQL.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.65f0a52d2e69e5dbfd825b3072b88215fc0b75fca7c9690febf6b43535d86a5e.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/sqlean-define/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="User-defined functions in SQLite">
+<meta property="og:description" content="Write functions in plain SQL.">
+<meta property="og:url" content="https://antonz.org/sqlean-define/">
+<meta property="og:image" content="https://antonz.org/sqlean/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="User-defined functions in SQLite">
+<meta name=twitter:description content="Write functions in plain SQL.">
+<meta name=twitter:url content="https://antonz.org/sqlean-define/">
+<meta name=twitter:site content="@nalgeon">
+<meta name=twitter:image content="https://antonz.org/sqlean/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/stopwar.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>User-defined functions in SQLite</h1>
+</header>
+<p>SQLite does not support user-defined functions. Sure, one can write a function in C or Python and register it within SQLite. But not in SQL itself.</p>
+<p>Luckily for us, SQLite provides an extension mechanism. One of such extensions — <code>define</code> — allows writing functions in regular SQL.</p>
+<p>With <code>define</code> writing a custom function becomes as easy as:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>define</span>(<span style=color:#c41a16>&#39;sumn&#39;</span>, <span style=color:#c41a16>&#39;:n * (:n + 1) / 2&#39;</span>);
+</code></pre></div><p>And then using it as any built-in function:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#000>&gt;</span> <span style=color:#a90d91>select</span> <span style=color:#000>sumn</span>(<span style=color:#1c01ce>5</span>);
+<span style=color:#1c01ce>15</span>
+</code></pre></div><p>User-defined functions can take multiple parameters and call other functions.</p>
+<p>Generate a random <code>N</code> such that <code>a ≤ N ≤ b</code>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#000>&gt;</span> <span style=color:#a90d91>select</span> <span style=color:#000>define</span>(<span style=color:#c41a16>&#39;randint&#39;</span>, <span style=color:#c41a16>&#39;:a + abs(random()) % (:b - :a + 1)&#39;</span>);
+<span style=color:#000>&gt;</span> <span style=color:#a90d91>select</span> <span style=color:#000>randint</span>(<span style=color:#1c01ce>10</span>, <span style=color:#1c01ce>99</span>);
+<span style=color:#1c01ce>42</span>
+</code></pre></div><p>List user-defined functions:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>sqlean_define</span>;
+</code></pre></div><p>Delete a function:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>undefine</span>(<span style=color:#c41a16>&#39;sumn&#39;</span>);
+</code></pre></div><p>There is even a way to return multiple values from a function!</p>
+<p>→ <a href=https://github.com/nalgeon/sqlean/blob/main/docs/define.md><strong>See the docs for details</strong></a></p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter and <a href=http://digest.antonz.org/><strong>subscribe by email</strong></a> to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2022-09-08 15:30:00 +0000 UTC">08 Sep, 2022</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/sqlite/>sqlite</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/json-lines/>JSON Lines</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/cte/>Common Table Expressions in SQL</a></p>
+<p><a href=/temp-tables/>Temporary tables in SQLite</a></p>
+<p><a href=/json-virtual-columns/>JSON and virtual columns in SQLite</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=http://digest.antonz.org/ class=footer__social-link><i class="fas fa-envelope"></i><span>Email</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
