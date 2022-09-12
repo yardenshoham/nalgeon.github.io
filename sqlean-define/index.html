@@ -59,19 +59,24 @@
 <header>
 <h1>User-defined functions in SQLite</h1>
 </header>
-<p>SQLite does not support user-defined functions. Sure, one can write a function in C or Python and register it within SQLite. But not in SQL itself.</p>
+<p><em>Write functions in plain SQL using the &lsquo;define&rsquo; extension.</em></p>
+<p>SQLite does not directly support user-defined functions. Sure, one can write a function in C or Python and register it within SQLite. But not in SQL itself.</p>
 <p>Luckily for us, SQLite provides an extension mechanism. One of such extensions — <code>define</code> — allows writing functions in regular SQL.</p>
 <p>With <code>define</code> writing a custom function becomes as easy as:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>define</span>(<span style=color:#c41a16>&#39;sumn&#39;</span>, <span style=color:#c41a16>&#39;:n * (:n + 1) / 2&#39;</span>);
 </code></pre></div><p>And then using it as any built-in function:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#000>&gt;</span> <span style=color:#a90d91>select</span> <span style=color:#000>sumn</span>(<span style=color:#1c01ce>5</span>);
-<span style=color:#1c01ce>15</span>
-</code></pre></div><p>User-defined functions can take multiple parameters and call other functions.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>sumn</span>(<span style=color:#1c01ce>5</span>);
+<span style=color:#177500>-- 15
+</span></code></pre></div><p>User-defined functions can take multiple parameters and call other functions.</p>
 <p>Generate a random <code>N</code> such that <code>a ≤ N ≤ b</code>:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#000>&gt;</span> <span style=color:#a90d91>select</span> <span style=color:#000>define</span>(<span style=color:#c41a16>&#39;randint&#39;</span>, <span style=color:#c41a16>&#39;:a + abs(random()) % (:b - :a + 1)&#39;</span>);
-<span style=color:#000>&gt;</span> <span style=color:#a90d91>select</span> <span style=color:#000>randint</span>(<span style=color:#1c01ce>10</span>, <span style=color:#1c01ce>99</span>);
-<span style=color:#1c01ce>42</span>
-</code></pre></div><p>List user-defined functions:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>define</span>(<span style=color:#c41a16>&#39;randint&#39;</span>, <span style=color:#c41a16>&#39;:a + abs(random()) % (:b - :a + 1)&#39;</span>);
+<span style=color:#a90d91>select</span> <span style=color:#000>randint</span>(<span style=color:#1c01ce>10</span>, <span style=color:#1c01ce>99</span>);
+<span style=color:#177500>-- 42
+</span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#000>randint</span>(<span style=color:#1c01ce>10</span>, <span style=color:#1c01ce>99</span>);
+<span style=color:#177500>-- 17
+</span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#000>randint</span>(<span style=color:#1c01ce>10</span>, <span style=color:#1c01ce>99</span>);
+<span style=color:#177500>-- 29
+</span></code></pre></div><p>List user-defined functions:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>sqlean_define</span>;
 </code></pre></div><p>Delete a function:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>undefine</span>(<span style=color:#c41a16>&#39;sumn&#39;</span>);
