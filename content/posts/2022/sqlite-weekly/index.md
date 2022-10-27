@@ -1,5 +1,5 @@
 +++
-date = 2022-09-14T08:51:00Z
+date = 2022-09-14T08:50:00Z
 title = "SQLite Weekly"
 description = "Weekly SQLite news, articles and extensions."
 image = "/sqlite-weekly/cover.png"
