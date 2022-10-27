@@ -5,6 +5,7 @@ description = "Weekly SQLite news, articles and extensions."
 image = "/sqlite-weekly/cover.png"
 slug = "sqlite-weekly"
 tags = ["sqlite"]
+draft = true
 +++
 
 SQLite is getting a lot of attention lately. That's great!
