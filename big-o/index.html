@@ -1,0 +1,243 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Speed of algorithms (with cats)</title>
+<meta name=description content="Analyzing fast and slow algorithms with silly cat examples.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.65f0a52d2e69e5dbfd825b3072b88215fc0b75fca7c9690febf6b43535d86a5e.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/big-o/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Speed of algorithms (with cats)">
+<meta property="og:description" content="Analyzing fast and slow algorithms with silly cat examples.">
+<meta property="og:url" content="https://antonz.org/big-o/">
+<meta property="og:image" content="https://antonz.org/big-o/cover.jpg">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Speed of algorithms (with cats)">
+<meta name=twitter:description content="Analyzing fast and slow algorithms with silly cat examples.">
+<meta name=twitter:url content="https://antonz.org/big-o/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/big-o/cover.jpg"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Speed of algorithms (with cats)</h1>
+</header>
+<p>Let&rsquo;s see how programmers evaluate fast and slow algorithms. Since the topic is pretty boring, we&rsquo;ll use silly cat examples.</p>
+<h2 id=constant-time-o1>Constant time: O(1)</h2>
+<p>This is your best option. The algorithm speed does not depend on the number of cats.</p>
+<div class=row>
+<div class="col-xs-12 col-sm-6 flex">
+<div class=boxed>
+<p><strong>🐾 Example</strong></p>
+<p>You are the lucky owner of <code>N</code> cats. Every kitten knows their name. If you call "Felix!", only one will come running, and the rest of the <code>N-1</code> fluffs don't care.</p>
+</div>
+</div>
+<div class="col-xs-12 col-sm-6">
+<figure>
+<img alt="Constant time" src=01-constant.jpg class=img-bordered-thin>
+</figure>
+</div>
+</div>
+<h2 id=logarithmic-time-ologn>Logarithmic time: O(log n)</h2>
+<p>On <code>N</code> cats the algorithm completes in <code>log(N)</code> steps. It&rsquo;s fast! 1,000,000 kittens → 20 operations total.</p>
+<div class=row>
+<div class="col-xs-12 col-sm-6 flex">
+<div class=boxed>
+<p><strong>🐾 Example</strong></p>
+<p>Cat's bowls are arranged alphabetically. When you adopt a new cat, the place for its bowl can be found in <code>log(N)</code> steps.</p>
+</div>
+</div>
+<div class="col-xs-12 col-sm-6">
+<figure>
+<img alt="Logarithmic time" src=02-log.jpg class=img-bordered-thin>
+</figure>
+</div>
+</div>
+<h2 id=linear-time-on>Linear time: O(n)</h2>
+<p>On <code>N</code> cats the algorithm completes in <code>N</code> steps. It means that every time you have to traverse all cats. Not great, not terrible.</p>
+<div class=row>
+<div class="col-xs-12 col-sm-6 flex">
+<div class=boxed>
+<p><strong>🐾 Example</strong></p>
+<p>Your kittens rebelled and stopped responding to nicknames. Now you have to look through <code>N</code> fluffs to find the right one.</p>
+</div>
+</div>
+<div class="col-xs-12 col-sm-6">
+<figure>
+<img alt="Linear time" src=03-linear.jpg class=img-bordered-thin>
+</figure>
+</div>
+</div>
+<h2 id=log-linear-time-onlogn>Log-linear time: O(n log n)</h2>
+<p>On <code>N</code> cats the algorithm completes in <code>N</code> × <code>log(N)</code> steps. This is slower than in linear time, but not by much (the logarithm of <code>N</code> is much smaller than <code>N</code>, remember?).</p>
+<div class=row>
+<div class="col-xs-12 col-sm-6 flex">
+<div class=boxed>
+<p><strong>🐾 Example</strong></p>
+<p>Waiting for guests, you decided to seat kittens in the order of their size. The quick sort algorithm will handle this in <code>N</code> × <code>log(N)</code> steps.</p>
+</div>
+</div>
+<div class="col-xs-12 col-sm-6">
+<figure>
+<img alt="Log-linear time" src=04-log-linear.jpg class=img-bordered-thin>
+</figure>
+</div>
+</div>
+<p>Next in line, we have lazy polynomial cats and snail-speed superpolynomial ones.</p>
+<h2 id=quadratic-time-on>Quadratic time: O(n²)</h2>
+<p>On <code>N</code> cats the algorithm completes in <code>N²</code> steps. So slow.</p>
+<div class=row>
+<div class="col-xs-12 col-sm-6 flex">
+<div class=boxed>
+<p><strong>🐾 Example</strong></p>
+<p>Your competitor claims that his <code>N</code> kittens are smoother and happier than yours. A special commission will compare the cats in pairs and make a fair verdict. You will need ~ <code>N²</code> comparisons.</p>
+</div>
+</div>
+<div class="col-xs-12 col-sm-6">
+<figure>
+<img alt="Quadratic time" src=05-quadratic.jpg class=img-bordered-thin>
+</figure>
+</div>
+</div>
+<h2 id=polynomial-time-onᵏ>Polynomial time: O(nᵏ)</h2>
+<p>On <code>N</code> cats the algorithm completes in <code>N³</code> steps, <code>N⁴</code> steps, <code>N⁵</code> steps, or even longer. Ugh. Don&rsquo;t be like that.</p>
+<div class=row>
+<div class="col-xs-12 col-sm-6 flex">
+<div class=boxed>
+<p><strong>🐾 Example</strong></p>
+<p>Photoshoot! Each of the <code>N</code> kittens will be photographed in pairs with others, and the photographer takes <code>N</code> pictures for each pair. <code>N</code> × <code>N</code> × <code>N</code> ≃ <code>N³</code> steps.</p>
+</div>
+</div>
+<div class="col-xs-12 col-sm-6">
+<figure>
+<img alt="Polynomial time" src=06-polinomial.jpg class=img-bordered-thin>
+</figure>
+</div>
+</div>
+<p>Polynomial algorithms are not famous for their speed. But compared to superpolynomial ones, they are as fast as a Flash. Sadly, the only &ldquo;super&rdquo; part of superpolynomial algorithms is a name. Let me show you.</p>
+<h2 id=exponential-time-o2ⁿ>Exponential time: O(2ⁿ)</h2>
+<p>On <code>N</code> cats the algorithm completes in <code>2ⁿ</code> steps. It&rsquo;s a long time, you&rsquo;re probably not gonna wait.</p>
+<div class=row>
+<div class="col-xs-12 col-sm-6 flex">
+<div class=boxed>
+<p><strong>🐾 Example</strong></p>
+<p>Kittens are going to the cat show. Everyone will be weighed and rated in stars. But the cat transport can handle a maximum of X kilograms (or pounds). How to choose the most stellar cast? The answer will require <code>2ⁿ</code> steps.</p>
+</div>
+</div>
+<div class="col-xs-12 col-sm-6">
+<figure>
+<img alt="Exponential time" src=07-exponential.jpg class=img-bordered-thin>
+</figure>
+</div>
+</div>
+<h2 id=factorial-time-on>Factorial time: O(n!)</h2>
+<p>On <code>N</code> cats the algorithm completes in <code>N</code> ×<code>(N-1)</code> ×<code>(N-2)</code> ×&mldr; × <code>1</code> steps. This is crazy! With 20 cats it&rsquo;s already a couple of quintillion operations.</p>
+<div class=row>
+<div class="col-xs-12 col-sm-6 flex">
+<div class=boxed>
+<p><strong>🐾 Example</strong></p>
+<p>Kittens spread out across the apartment. You want to pet everyone, but you're lazy and don't like walking. What is the shortest route to visit all fluffs? This is ~ <code>N!</code> comparisons.</p>
+</div>
+</div>
+<div class="col-xs-12 col-sm-6">
+<figure>
+<img alt="Factorial time" src=08-factorial.jpg class=img-bordered-thin>
+</figure>
+</div>
+</div>
+<h2 id=summary>Summary</h2>
+<p>Here are the algorithms we&rsquo;ve covered:</p>
+<ul>
+<li>Constant <code>O(1)</code></li>
+<li>Logarithmic <code>O(log n)</code></li>
+<li>Linear <code>O(n)</code></li>
+<li>Log-Linear <code>O(n log n)</code></li>
+<li>Quadratic <code>O(n²)</code></li>
+<li>Polynomial <code>O(nᵏ)</code></li>
+<li>Exponential <code>O(2ⁿ)</code></li>
+<li>Factorial <code>O(n!)</code></li>
+</ul>
+<p>A constant algorithm is always the best option, and a logarithmic one is almost always. Linear and polynomial ones are more complex — it all depends on the task with them. Sometimes it&rsquo;s a shame to choose <code>O(n)</code>, and sometimes <code>O(n²)</code> is a huge success.</p>
+<p><code>O(2ⁿ)</code> and <code>O(n!)</code> are insanely slow. So in practice, people often use suboptimal but fast algorithms.</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2022-12-21 16:50:00 +0000 UTC">21 Dec, 2022</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/software/>software</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/sqlean-define/>User-defined functions in SQLite</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/storing-state/>Storing state in the URL</a></p>
+<p><a href=/good-code/>Good Code Criterion</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
