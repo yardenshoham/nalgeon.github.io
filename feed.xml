@@ -1,4 +1,96 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 21 Dec 2022 16:50:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Speed of algorithms (with cats)</title><link>https://antonz.org/big-o/</link><pubDate>Wed, 21 Dec 2022 16:50:00 +0000</pubDate><guid>https://antonz.org/big-o/</guid><description>Analyzing fast and slow algorithms with silly cat examples.</description><content:encoded><![CDATA[<p>Let&rsquo;s see how programmers evaluate fast and slow algorithms. Since the topic is pretty boring, we&rsquo;ll use silly cat examples.</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 11 Jan 2023 11:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Idempotent Close in Go</title><link>https://antonz.org/idempotent-close/</link><pubDate>Wed, 11 Jan 2023 11:00:00 +0000</pubDate><guid>https://antonz.org/idempotent-close/</guid><description>How to free the resources safely.</description><content:encoded><![CDATA[<p><em>Idempotence</em> is when a repeated call to an operation on an object does not result in changes or errors. Idempotence is a handy development tool.</p>
+<p>Let&rsquo;s see how idempotence helps to free the occupied resources safely.</p>
+<h2 id="idempotent-close">Idempotent Close</h2>
+<p>Suppose we have a gate:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a90d91">type</span> <span style="color:#000">Gate</span> <span style="color:#a90d91">struct</span>{
+    <span style="color:#177500">// internal state
+</span><span style="color:#177500"></span>    <span style="color:#177500">// ...
+</span><span style="color:#177500"></span>}
+</code></pre></div><p>The <code>NewGate()</code> constructor opens the gate, acquires some system resources, and returns an instance of the <code>Gate</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">g</span> <span style="color:#000">:=</span> <span style="color:#000">NewGate</span>()
+</code></pre></div><p>In the end, we must release the occupied resources:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a90d91">func</span> (<span style="color:#000">g</span> <span style="color:#000">*</span><span style="color:#000">Gate</span>) <span style="color:#000">Close</span>() <span style="color:#a90d91">error</span> {
+    <span style="color:#177500">// free acquired resources
+</span><span style="color:#177500"></span>    <span style="color:#177500">// ...
+</span><span style="color:#177500"></span>    <span style="color:#a90d91">return</span> <span style="color:#a90d91">nil</span>
+}
+
+<span style="color:#000">g</span> <span style="color:#000">:=</span> <span style="color:#000">NewGate</span>()
+<span style="color:#a90d91">defer</span> <span style="color:#000">g</span>.<span style="color:#000">Close</span>()
+<span style="color:#177500">// do stuff
+</span><span style="color:#177500">// ...
+</span></code></pre></div><p>Problems arise when in some branch of the code, we want to close the gate explicitly:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">g</span> <span style="color:#000">:=</span> <span style="color:#000">NewGate</span>()
+<span style="color:#a90d91">defer</span> <span style="color:#000">g</span>.<span style="color:#000">Close</span>()
+
+<span style="color:#000">err</span> <span style="color:#000">:=</span> <span style="color:#000">checkSomething</span>()
+<span style="color:#a90d91">if</span> <span style="color:#000">err</span> <span style="color:#000">!=</span> <span style="color:#a90d91">nil</span> {
+    <span style="color:#000">g</span>.<span style="color:#000">Close</span>()
+    <span style="color:#177500">// do something else
+</span><span style="color:#177500"></span>    <span style="color:#177500">// ...
+</span><span style="color:#177500"></span>    <span style="color:#a90d91">return</span>
+}
+
+<span style="color:#177500">// do more stuff
+</span><span style="color:#177500">// ...
+</span></code></pre></div><p>The first <code>Close()</code> will work, but the second (via <code>defer</code>) will break because the resources have already been released.</p>
+<p>The solution is to make <code>Close()</code> idempotent so that repeated calls do nothing if the gate is already closed:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a90d91">type</span> <span style="color:#000">Gate</span> <span style="color:#a90d91">struct</span>{
+    <span style="color:#000">closed</span> <span style="color:#a90d91">bool</span>
+    <span style="color:#177500">// internal state
+</span><span style="color:#177500"></span>    <span style="color:#177500">// ...
+</span><span style="color:#177500"></span>}
+
+<span style="color:#a90d91">func</span> (<span style="color:#000">g</span> <span style="color:#000">*</span><span style="color:#000">Gate</span>) <span style="color:#000">Close</span>() <span style="color:#a90d91">error</span> {
+    <span style="color:#a90d91">if</span> <span style="color:#000">g</span>.<span style="color:#000">closed</span> {
+        <span style="color:#a90d91">return</span> <span style="color:#a90d91">nil</span>
+    }
+    <span style="color:#177500">// free acquired resources
+</span><span style="color:#177500"></span>    <span style="color:#177500">// ...
+</span><span style="color:#177500"></span>    <span style="color:#000">g</span>.<span style="color:#000">closed</span> = <span style="color:#a90d91">true</span>
+    <span style="color:#a90d91">return</span> <span style="color:#a90d91">nil</span>
+}
+</code></pre></div><p><a href="https://go.dev/play/p/LFEThpm1nTs">playground</a></p>
+<p>Now we can call <code>Close()</code> repeatedly without any problems. Until we try to close the gate from different goroutines — then everything will fall apart.</p>
+<h2 id="idempotency-in-a-concurrent-environment">Idempotency in a concurrent environment</h2>
+<p>We have made the gate closing idempotent — safe for repeated calls:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a90d91">func</span> (<span style="color:#000">g</span> <span style="color:#000">*</span><span style="color:#000">Gate</span>) <span style="color:#000">Close</span>() <span style="color:#a90d91">error</span> {
+    <span style="color:#a90d91">if</span> <span style="color:#000">g</span>.<span style="color:#000">closed</span> {
+        <span style="color:#a90d91">return</span> <span style="color:#a90d91">nil</span>
+    }
+    <span style="color:#177500">// free acquired resources
+</span><span style="color:#177500"></span>    <span style="color:#177500">// ...
+</span><span style="color:#177500"></span>    <span style="color:#000">g</span>.<span style="color:#000">closed</span> = <span style="color:#a90d91">true</span>
+    <span style="color:#a90d91">return</span> <span style="color:#a90d91">nil</span>
+}
+</code></pre></div><p>But if several goroutines use the same <code>Gate</code> instance, a simultaneous call to <code>Close()</code> will lead to races — a concurrent modification of the <code>closed</code> field. We don&rsquo;t want this.</p>
+<p>We have to protect the <code>closed</code> field access with a mutex:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a90d91">type</span> <span style="color:#000">Gate</span> <span style="color:#a90d91">struct</span> {
+    <span style="color:#000">mu</span>     <span style="color:#000">sync</span>.<span style="color:#000">Mutex</span>
+    <span style="color:#000">closed</span> <span style="color:#a90d91">bool</span>
+    <span style="color:#177500">// internal state
+</span><span style="color:#177500"></span>    <span style="color:#177500">// ...
+</span><span style="color:#177500"></span>}
+
+<span style="color:#a90d91">func</span> (<span style="color:#000">g</span> <span style="color:#000">*</span><span style="color:#000">Gate</span>) <span style="color:#000">Close</span>() <span style="color:#a90d91">error</span> {
+    <span style="color:#000">g</span>.<span style="color:#000">mu</span>.<span style="color:#000">Lock</span>()
+
+    <span style="color:#a90d91">if</span> <span style="color:#000">g</span>.<span style="color:#000">closed</span> {
+        <span style="color:#000">g</span>.<span style="color:#000">mu</span>.<span style="color:#000">Unlock</span>()
+        <span style="color:#a90d91">return</span> <span style="color:#a90d91">nil</span>
+    }
+    <span style="color:#177500">// free acquired resources
+</span><span style="color:#177500"></span>    <span style="color:#177500">// ...
+</span><span style="color:#177500"></span>
+    <span style="color:#000">g</span>.<span style="color:#000">closed</span> = <span style="color:#a90d91">true</span>
+    <span style="color:#000">g</span>.<span style="color:#000">mu</span>.<span style="color:#000">Unlock</span>()
+    <span style="color:#a90d91">return</span> <span style="color:#a90d91">nil</span>
+}
+</code></pre></div><p><a href="https://go.dev/play/p/i3pFy362YEi">playground</a></p>
+<p>The mutex ensures that only a single goroutine executes the code between <code>Lock()</code> and <code>Unlock()</code> at any given time.</p>
+<p>Now multiple calls to <code>Close()</code> work correctly in a concurrent environment.</p>
+<p>That&rsquo;s it!</p>
+]]></content:encoded></item><item><title>Speed of algorithms (with cats)</title><link>https://antonz.org/big-o/</link><pubDate>Wed, 21 Dec 2022 16:50:00 +0000</pubDate><guid>https://antonz.org/big-o/</guid><description>Analyzing fast and slow algorithms with silly cat examples.</description><content:encoded><![CDATA[<p>Let&rsquo;s see how programmers evaluate fast and slow algorithms. Since the topic is pretty boring, we&rsquo;ll use silly cat examples.</p>
 <h2 id="constant-time-o1">Constant time: O(1)</h2>
 <p>This is your best option. The algorithm speed does not depend on the number of cats.</p>
 <div class="row">
@@ -620,155 +712,4 @@ Success: no issues found in <span style="color:#1c01ce">1</span> <span style="co
 <span style="color:#a90d91">where</span> <span style="color:#000">object_id</span> <span style="color:#000">=</span> <span style="color:#1c01ce">11</span>;
 </code></pre></div><p>Thanks to virtual columns, we almost have a NoSQL database ツ</p>
 <p><a href="https://sqlime.org/#gist:c284f7c22684eb74b5dab92d98f7d773">Playground</a></p>
-]]></content:encoded></item><item><title>Compact objects in Python</title><link>https://antonz.org/compact-objects/</link><pubDate>Fri, 13 May 2022 20:25:00 +0000</pubDate><guid>https://antonz.org/compact-objects/</guid><description>Tuple vs dataclass, until numpy interferes</description><content:encoded><![CDATA[<p>Python is an object language. This is nice and cozy until you are out of memory holding 10 million objects at once. Let&rsquo;s talk about how to reduce appetite.</p>
-<p><em>Visit the <a href="https://colab.research.google.com/drive/16GK-Xbv_kOvDC9Hfa_0O8E0Nyo4L9JwO?usp=sharing">Playground</a> to try out the code samples</em></p>
-<h2 id="tuples">Tuples</h2>
-<p>Imagine you have a simple <code>Pet</code> object with the <code>name</code> (string) and <code>price</code> (integer) attributes. Intuitively, it seems that the most compact representation is a tuple:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">(<span style="color:#c41a16">&#34;Frank the Pigeon&#34;</span>, <span style="color:#1c01ce">50000</span>)
-</code></pre></div><p>Let&rsquo;s measure how much memory this beauty eats:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">import</span> <span style="color:#000">random</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">pympler.asizeof</span> <span style="color:#a90d91">import</span> <span style="color:#000">asizeof</span>
-
-<span style="color:#a90d91">def</span> <span style="color:#000">fields</span>():
-    <span style="color:#000">name_gen</span> <span style="color:#000">=</span> (<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">choice</span>(<span style="color:#000">string</span><span style="color:#000">.</span><span style="color:#000">ascii_uppercase</span>) <span style="color:#a90d91">for</span> <span style="color:#000">_</span> <span style="color:#000">in</span> <span style="color:#a90d91">range</span>(<span style="color:#1c01ce">10</span>))
-    <span style="color:#000">name</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#34;&#34;</span><span style="color:#000">.</span><span style="color:#000">join</span>(<span style="color:#000">name_gen</span>)
-    <span style="color:#000">price</span> <span style="color:#000">=</span> <span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">randint</span>(<span style="color:#1c01ce">10000</span>, <span style="color:#1c01ce">99999</span>)
-    <span style="color:#a90d91">return</span> (<span style="color:#000">name</span>, <span style="color:#000">price</span>)
-
-<span style="color:#a90d91">def</span> <span style="color:#000">measure</span>(<span style="color:#000">name</span>, <span style="color:#000">fn</span>, <span style="color:#000">n</span><span style="color:#000">=</span><span style="color:#1c01ce">10_000</span>):
-    <span style="color:#000">pets</span> <span style="color:#000">=</span> [<span style="color:#000">fn</span>() <span style="color:#a90d91">for</span> <span style="color:#000">_</span> <span style="color:#000">in</span> <span style="color:#a90d91">range</span>(<span style="color:#000">n</span>)]
-    <span style="color:#000">size</span> <span style="color:#000">=</span> <span style="color:#a90d91">round</span>(<span style="color:#000">asizeof</span>(<span style="color:#000">pets</span>) <span style="color:#000">/</span> <span style="color:#000">n</span>)
-    <span style="color:#a90d91">print</span>(<span style="color:#c41a16">f</span><span style="color:#c41a16">&#34;Pet size (</span><span style="color:#c41a16">{</span><span style="color:#000">name</span><span style="color:#c41a16">}</span><span style="color:#c41a16">) = </span><span style="color:#c41a16">{</span><span style="color:#000">size</span><span style="color:#c41a16">}</span><span style="color:#c41a16"> bytes&#34;</span>)
-    <span style="color:#a90d91">return</span> <span style="color:#000">size</span>
-
-<span style="color:#000">baseline</span> <span style="color:#000">=</span> <span style="color:#000">measure</span>(<span style="color:#c41a16">&#34;tuple&#34;</span>, <span style="color:#000">fields</span>)
-</code></pre></div><pre tabindex="0"><code>Pet size (tuple) = 161 bytes
-</code></pre><p>161 bytes. Let&rsquo;s use it as a baseline for further comparison.</p>
-<h2 id="dataclasses-vs-named-tuples">Dataclasses vs named tuples</h2>
-<p>But who works with tuples these days? You would probably choose a dataclass:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">from</span> <span style="color:#000">dataclasses</span> <span style="color:#a90d91">import</span> <span style="color:#000">dataclass</span>
-
-<span style="color:#000">@dataclass</span>
-<span style="color:#a90d91">class</span> <span style="color:#3f6e75">PetData</span>:
-    <span style="color:#000">name</span>: <span style="color:#a90d91">str</span>
-    <span style="color:#000">price</span>: <span style="color:#a90d91">int</span>
-
-<span style="color:#000">fn</span> <span style="color:#000">=</span> <span style="color:#a90d91">lambda</span>: <span style="color:#000">PetData</span>(<span style="color:#000">*</span><span style="color:#000">fields</span>())
-<span style="color:#000">measure</span>(<span style="color:#c41a16">&#34;dataclass&#34;</span>, <span style="color:#000">fn</span>)
-</code></pre></div><pre tabindex="0"><code>Pet size (dataclass) = 257 bytes
-x1.60 to baseline
-</code></pre><p>Thing is, it&rsquo;s 1.6 times larger than a tuple.</p>
-<p>Let&rsquo;s try a named tuple then:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">from</span> <span style="color:#000">typing</span> <span style="color:#a90d91">import</span> <span style="color:#000">NamedTuple</span>
-
-<span style="color:#a90d91">class</span> <span style="color:#3f6e75">PetTuple</span>(<span style="color:#000">NamedTuple</span>):
-    <span style="color:#000">name</span>: <span style="color:#a90d91">str</span>
-    <span style="color:#000">price</span>: <span style="color:#a90d91">int</span>
-
-
-<span style="color:#000">fn</span> <span style="color:#000">=</span> <span style="color:#a90d91">lambda</span>: <span style="color:#000">PetTuple</span>(<span style="color:#000">*</span><span style="color:#000">fields</span>())
-<span style="color:#000">measure</span>(<span style="color:#c41a16">&#34;named tuple&#34;</span>, <span style="color:#000">fn</span>)
-</code></pre></div><pre tabindex="0"><code>Pet size (named tuple) = 161 bytes
-x1.00 to baseline
-</code></pre><p>Looks like a dataclass, works like a tuple. Perfect. Or not?</p>
-<h2 id="slots">Slots</h2>
-<p>Python 3.10 received dataclasses with slots:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">@dataclass</span>(<span style="color:#000">slots</span><span style="color:#000">=</span><span style="color:#a90d91">True</span>)
-<span style="color:#a90d91">class</span> <span style="color:#3f6e75">PetData</span>:
-    <span style="color:#000">name</span>: <span style="color:#a90d91">str</span>
-    <span style="color:#000">price</span>: <span style="color:#a90d91">int</span>
-
-
-<span style="color:#000">fn</span> <span style="color:#000">=</span> <span style="color:#a90d91">lambda</span>: <span style="color:#000">PetData</span>(<span style="color:#000">*</span><span style="color:#000">fields</span>())
-<span style="color:#000">measure</span>(<span style="color:#c41a16">&#34;dataclass w/slots&#34;</span>, <span style="color:#000">fn</span>)
-</code></pre></div><pre tabindex="0"><code>Pet size (dataclass w/slots) = 153 bytes
-x0.95 to baseline
-</code></pre><p>Wow! Slots magic creates special skinny objects without an underlying dictionary, unlike regular Python objects. Such dataclass is even lighter than a tuple.</p>
-<p>What if 3.10 is out of the question yet? Use <code>NamedTuple</code>. Or add a slots dunder manually:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">@dataclass</span>
-<span style="color:#a90d91">class</span> <span style="color:#3f6e75">PetData</span>:
-    <span style="color:#000">__slots__</span> <span style="color:#000">=</span> (<span style="color:#c41a16">&#34;name&#34;</span>, <span style="color:#c41a16">&#34;price&#34;</span>)
-    <span style="color:#000">name</span>: <span style="color:#a90d91">str</span>
-    <span style="color:#000">price</span>: <span style="color:#a90d91">int</span>
-</code></pre></div><p>Slot objects have their own shortcomings. But they are great for simple cases (without inheritance and other complex stuff).</p>
-<h2 id="numpy-arrays">numpy arrays</h2>
-<p>The real winner, of course, is the <code>numpy</code> array:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">import</span> <span style="color:#000">string</span>
-<span style="color:#a90d91">import</span> <span style="color:#000">numpy</span> <span style="color:#a90d91">as</span> <span style="color:#000">np</span>
-
-<span style="color:#000">PetNumpy</span> <span style="color:#000">=</span> <span style="color:#000">np</span><span style="color:#000">.</span><span style="color:#000">dtype</span>([(<span style="color:#c41a16">&#34;name&#34;</span>, <span style="color:#c41a16">&#34;S10&#34;</span>), (<span style="color:#c41a16">&#34;price&#34;</span>, <span style="color:#c41a16">&#34;i4&#34;</span>)])
-<span style="color:#000">generator</span> <span style="color:#000">=</span> (<span style="color:#000">fields</span>() <span style="color:#a90d91">for</span> <span style="color:#000">_</span> <span style="color:#000">in</span> <span style="color:#a90d91">range</span>(<span style="color:#000">n</span>))
-<span style="color:#000">pets</span> <span style="color:#000">=</span> <span style="color:#000">np</span><span style="color:#000">.</span><span style="color:#000">fromiter</span>(<span style="color:#000">generator</span>, <span style="color:#000">dtype</span><span style="color:#000">=</span><span style="color:#000">PetNumpy</span>)
-<span style="color:#000">size</span> <span style="color:#000">=</span> <span style="color:#a90d91">round</span>(<span style="color:#000">asizeof</span>(<span style="color:#000">pets</span>) <span style="color:#000">/</span> <span style="color:#000">n</span>)
-</code></pre></div><pre tabindex="0"><code>Pet size (numpy array) = 14 bytes
-x0.09 to baseline
-</code></pre><p>This is not a flawless victory, though. If names are unicode (<code>U</code> type instead of <code>S</code>), the advantage is not so impressive:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">PetNumpy</span> <span style="color:#000">=</span> <span style="color:#000">np</span><span style="color:#000">.</span><span style="color:#000">dtype</span>([(<span style="color:#c41a16">&#34;name&#34;</span>, <span style="color:#c41a16">&#34;U10&#34;</span>), (<span style="color:#c41a16">&#34;price&#34;</span>, <span style="color:#c41a16">&#34;i4&#34;</span>)])
-</code></pre></div><pre tabindex="0"><code>Pet size (numpy U10) = 44 bytes
-x0.27 to baseline
-</code></pre><p>If the name length is not strictly 10 characters, but varies, say, up to 50 characters (<code>U50</code> instead of <code>U10</code>) — the advantage disappears completely:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">fields</span>():
-    <span style="color:#000">name_len</span> <span style="color:#000">=</span> <span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">randint</span>(<span style="color:#1c01ce">10</span>, <span style="color:#1c01ce">50</span>)
-    <span style="color:#000">name_gen</span> <span style="color:#000">=</span> (<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">choice</span>(<span style="color:#000">string</span><span style="color:#000">.</span><span style="color:#000">ascii_uppercase</span>) <span style="color:#a90d91">for</span> <span style="color:#000">_</span> <span style="color:#000">in</span> <span style="color:#a90d91">range</span>(<span style="color:#000">name_len</span>))
-    <span style="color:#177500"># ...</span>
-
-<span style="color:#000">PetNumpy</span> <span style="color:#000">=</span> <span style="color:#000">np</span><span style="color:#000">.</span><span style="color:#000">dtype</span>([(<span style="color:#c41a16">&#34;name&#34;</span>, <span style="color:#c41a16">&#34;U50&#34;</span>), (<span style="color:#c41a16">&#34;price&#34;</span>, <span style="color:#c41a16">&#34;i4&#34;</span>)])
-</code></pre></div><pre tabindex="0"><code>Pet size (tuple) = 179 bytes
-
-Pet size (numpy U50) = 204 bytes
-x1.14 to baseline
-</code></pre><h2 id="others">Others</h2>
-<p>Let&rsquo;s consider alternatives for completeness.</p>
-<p>A <strong>regular class</strong> is no different than a dataclass:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">class</span> <span style="color:#3f6e75">PetClass</span>:
-    <span style="color:#a90d91">def</span> <span style="color:#000">__init__</span>(<span style="color:#5b269a">self</span>, <span style="color:#000">name</span>: <span style="color:#a90d91">str</span>, <span style="color:#000">price</span>: <span style="color:#a90d91">int</span>):
-        <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">name</span> <span style="color:#000">=</span> <span style="color:#000">name</span>
-        <span style="color:#5b269a">self</span><span style="color:#000">.</span><span style="color:#000">price</span> <span style="color:#000">=</span> <span style="color:#000">price</span>
-</code></pre></div><pre tabindex="0"><code>Pet size (class) = 257 bytes
-x1.60 to baseline
-</code></pre><p>And a <strong>frozen</strong> (immutable) dataclass too:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">@dataclass</span>(<span style="color:#000">frozen</span><span style="color:#000">=</span><span style="color:#a90d91">True</span>)
-<span style="color:#a90d91">class</span> <span style="color:#3f6e75">PetDataFrozen</span>:
-    <span style="color:#000">name</span>: <span style="color:#a90d91">str</span>
-    <span style="color:#000">price</span>: <span style="color:#a90d91">int</span>
-</code></pre></div><pre tabindex="0"><code>Pet size (frozen dataclass) = 257 bytes
-x1.60 to baseline
-</code></pre><p>A <strong>dict</strong> is even worse:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">names</span> <span style="color:#000">=</span> (<span style="color:#c41a16">&#34;name&#34;</span>, <span style="color:#c41a16">&#34;price&#34;</span>)
-<span style="color:#000">fn</span> <span style="color:#000">=</span> <span style="color:#a90d91">lambda</span>: <span style="color:#a90d91">dict</span>(<span style="color:#a90d91">zip</span>(<span style="color:#000">names</span>, <span style="color:#000">fields</span>()))
-<span style="color:#000">measure</span>(<span style="color:#c41a16">&#34;dict&#34;</span>, <span style="color:#000">fn</span>)
-</code></pre></div><pre tabindex="0"><code>Pet size (dict) = 355 bytes
-x1.98 to baseline
-</code></pre><p><strong>Pydantic model</strong> sets an anti-record (no wonder, it uses inheritance):</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">from</span> <span style="color:#000">pydantic</span> <span style="color:#a90d91">import</span> <span style="color:#000">BaseModel</span>
-
-<span style="color:#a90d91">class</span> <span style="color:#3f6e75">PetModel</span>(<span style="color:#000">BaseModel</span>):
-    <span style="color:#000">name</span>: <span style="color:#a90d91">str</span>
-    <span style="color:#000">price</span>: <span style="color:#a90d91">int</span>
-</code></pre></div><pre tabindex="0"><code>Pet size (pydantic) = 385 bytes
-x2.39 to baseline
-</code></pre><p class="align-center">⌘&nbsp;⌘&nbsp;⌘</p>
-<p>Compact (and not so compact) objects in Python:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-4">
-<figure><img alt="Tuple" src="tuple.png"></figure>
-</div>
-<div class="col-xs-12 col-sm-4">
-<figure><img alt="Dataclass" src="dataclass.png"></figure>
-</div>
-<div class="col-xs-12 col-sm-4">
-<figure><img alt="Named tuple" src="named-tuple.png"></figure>
-</div>
-</div>
-<div class="row">
-<div class="col-xs-12 col-sm-4">
-<figure><img alt="Dataclass with slots" src="dataclass-slots.png"></figure>
-</div>
-<div class="col-xs-12 col-sm-4">
-<figure><img alt="Manual slots" src="manual-slots.png"></figure>
-</div>
-<div class="col-xs-12 col-sm-4">
-<figure><img alt="numpy array" src="np-array.png"></figure>
-</div>
-</div>
 ]]></content:encoded></item></channel></rss>

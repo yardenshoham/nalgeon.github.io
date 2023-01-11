@@ -1,0 +1,189 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Idempotent Close in Go</title>
+<meta name=description content="How to free the resources safely.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.f342be16da7afd80ded73261e42b58a7f7abd44fe9bb160d1bf39f1699c2048f.css>
+<link rel=icon href=/assets/favicon/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=/assets/favicon/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/assets/favicon/favicon-32x32.png>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=mask-icon href=/assets/favicon/safari-pinned-tab.svg>
+<meta name=theme-color content="#fff">
+<meta name=msapplication-TileColor content="#fff">
+<link rel=canonical href=https://antonz.org/idempotent-close/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Idempotent Close in Go">
+<meta property="og:description" content="How to free the resources safely.">
+<meta property="og:url" content="https://antonz.org/idempotent-close/">
+<meta property="og:image" content="https://antonz.org/idempotent-close/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Idempotent Close in Go">
+<meta name=twitter:description content="How to free the resources safely.">
+<meta name=twitter:url content="https://antonz.org/idempotent-close/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/idempotent-close/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Idempotent Close in Go</h1>
+</header>
+<p><em>Idempotence</em> is when a repeated call to an operation on an object does not result in changes or errors. Idempotence is a handy development tool.</p>
+<p>Let&rsquo;s see how idempotence helps to free the occupied resources safely.</p>
+<h2 id=idempotent-close>Idempotent Close</h2>
+<p>Suppose we have a gate:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>type</span> <span style=color:#000>Gate</span> <span style=color:#a90d91>struct</span>{
+    <span style=color:#177500>// internal state
+</span><span style=color:#177500></span>    <span style=color:#177500>// ...
+</span><span style=color:#177500></span>}
+</code></pre></div><p>The <code>NewGate()</code> constructor opens the gate, acquires some system resources, and returns an instance of the <code>Gate</code>.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>g</span> <span style=color:#000>:=</span> <span style=color:#000>NewGate</span>()
+</code></pre></div><p>In the end, we must release the occupied resources:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>func</span> (<span style=color:#000>g</span> <span style=color:#000>*</span><span style=color:#000>Gate</span>) <span style=color:#000>Close</span>() <span style=color:#a90d91>error</span> {
+    <span style=color:#177500>// free acquired resources
+</span><span style=color:#177500></span>    <span style=color:#177500>// ...
+</span><span style=color:#177500></span>    <span style=color:#a90d91>return</span> <span style=color:#a90d91>nil</span>
+}
+
+<span style=color:#000>g</span> <span style=color:#000>:=</span> <span style=color:#000>NewGate</span>()
+<span style=color:#a90d91>defer</span> <span style=color:#000>g</span>.<span style=color:#000>Close</span>()
+<span style=color:#177500>// do stuff
+</span><span style=color:#177500>// ...
+</span></code></pre></div><p>Problems arise when in some branch of the code, we want to close the gate explicitly:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>g</span> <span style=color:#000>:=</span> <span style=color:#000>NewGate</span>()
+<span style=color:#a90d91>defer</span> <span style=color:#000>g</span>.<span style=color:#000>Close</span>()
+
+<span style=color:#000>err</span> <span style=color:#000>:=</span> <span style=color:#000>checkSomething</span>()
+<span style=color:#a90d91>if</span> <span style=color:#000>err</span> <span style=color:#000>!=</span> <span style=color:#a90d91>nil</span> {
+    <span style=color:#000>g</span>.<span style=color:#000>Close</span>()
+    <span style=color:#177500>// do something else
+</span><span style=color:#177500></span>    <span style=color:#177500>// ...
+</span><span style=color:#177500></span>    <span style=color:#a90d91>return</span>
+}
+
+<span style=color:#177500>// do more stuff
+</span><span style=color:#177500>// ...
+</span></code></pre></div><p>The first <code>Close()</code> will work, but the second (via <code>defer</code>) will break because the resources have already been released.</p>
+<p>The solution is to make <code>Close()</code> idempotent so that repeated calls do nothing if the gate is already closed:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>type</span> <span style=color:#000>Gate</span> <span style=color:#a90d91>struct</span>{
+    <span style=color:#000>closed</span> <span style=color:#a90d91>bool</span>
+    <span style=color:#177500>// internal state
+</span><span style=color:#177500></span>    <span style=color:#177500>// ...
+</span><span style=color:#177500></span>}
+
+<span style=color:#a90d91>func</span> (<span style=color:#000>g</span> <span style=color:#000>*</span><span style=color:#000>Gate</span>) <span style=color:#000>Close</span>() <span style=color:#a90d91>error</span> {
+    <span style=color:#a90d91>if</span> <span style=color:#000>g</span>.<span style=color:#000>closed</span> {
+        <span style=color:#a90d91>return</span> <span style=color:#a90d91>nil</span>
+    }
+    <span style=color:#177500>// free acquired resources
+</span><span style=color:#177500></span>    <span style=color:#177500>// ...
+</span><span style=color:#177500></span>    <span style=color:#000>g</span>.<span style=color:#000>closed</span> = <span style=color:#a90d91>true</span>
+    <span style=color:#a90d91>return</span> <span style=color:#a90d91>nil</span>
+}
+</code></pre></div><p><a href=https://go.dev/play/p/LFEThpm1nTs>playground</a></p>
+<p>Now we can call <code>Close()</code> repeatedly without any problems. Until we try to close the gate from different goroutines — then everything will fall apart.</p>
+<h2 id=idempotency-in-a-concurrent-environment>Idempotency in a concurrent environment</h2>
+<p>We have made the gate closing idempotent — safe for repeated calls:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>func</span> (<span style=color:#000>g</span> <span style=color:#000>*</span><span style=color:#000>Gate</span>) <span style=color:#000>Close</span>() <span style=color:#a90d91>error</span> {
+    <span style=color:#a90d91>if</span> <span style=color:#000>g</span>.<span style=color:#000>closed</span> {
+        <span style=color:#a90d91>return</span> <span style=color:#a90d91>nil</span>
+    }
+    <span style=color:#177500>// free acquired resources
+</span><span style=color:#177500></span>    <span style=color:#177500>// ...
+</span><span style=color:#177500></span>    <span style=color:#000>g</span>.<span style=color:#000>closed</span> = <span style=color:#a90d91>true</span>
+    <span style=color:#a90d91>return</span> <span style=color:#a90d91>nil</span>
+}
+</code></pre></div><p>But if several goroutines use the same <code>Gate</code> instance, a simultaneous call to <code>Close()</code> will lead to races — a concurrent modification of the <code>closed</code> field. We don&rsquo;t want this.</p>
+<p>We have to protect the <code>closed</code> field access with a mutex:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>type</span> <span style=color:#000>Gate</span> <span style=color:#a90d91>struct</span> {
+    <span style=color:#000>mu</span>     <span style=color:#000>sync</span>.<span style=color:#000>Mutex</span>
+    <span style=color:#000>closed</span> <span style=color:#a90d91>bool</span>
+    <span style=color:#177500>// internal state
+</span><span style=color:#177500></span>    <span style=color:#177500>// ...
+</span><span style=color:#177500></span>}
+
+<span style=color:#a90d91>func</span> (<span style=color:#000>g</span> <span style=color:#000>*</span><span style=color:#000>Gate</span>) <span style=color:#000>Close</span>() <span style=color:#a90d91>error</span> {
+    <span style=color:#000>g</span>.<span style=color:#000>mu</span>.<span style=color:#000>Lock</span>()
+
+    <span style=color:#a90d91>if</span> <span style=color:#000>g</span>.<span style=color:#000>closed</span> {
+        <span style=color:#000>g</span>.<span style=color:#000>mu</span>.<span style=color:#000>Unlock</span>()
+        <span style=color:#a90d91>return</span> <span style=color:#a90d91>nil</span>
+    }
+    <span style=color:#177500>// free acquired resources
+</span><span style=color:#177500></span>    <span style=color:#177500>// ...
+</span><span style=color:#177500></span>
+    <span style=color:#000>g</span>.<span style=color:#000>closed</span> = <span style=color:#a90d91>true</span>
+    <span style=color:#000>g</span>.<span style=color:#000>mu</span>.<span style=color:#000>Unlock</span>()
+    <span style=color:#a90d91>return</span> <span style=color:#a90d91>nil</span>
+}
+</code></pre></div><p><a href=https://go.dev/play/p/i3pFy362YEi>playground</a></p>
+<p>The mutex ensures that only a single goroutine executes the code between <code>Lock()</code> and <code>Unlock()</code> at any given time.</p>
+<p>Now multiple calls to <code>Close()</code> work correctly in a concurrent environment.</p>
+<p>That&rsquo;s it!</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2023-01-11 11:00:00 +0000 UTC">11 Jan, 2023</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/thank-go/>thank go!</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/big-o/>Speed of algorithms (with cats)</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
