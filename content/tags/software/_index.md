@@ -1,3 +1,3 @@
 +++
-title = "software"
+title = "Software"
 +++

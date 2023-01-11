@@ -9,7 +9,7 @@
             {{- if .Params.tags }}
             <div class="post__tags">
                 {{- range ($.GetTerms "tags") }}
-                <a href="{{ .Permalink }}">{{ .LinkTitle }}</a>&nbsp;
+                <a href="{{ .Permalink }}">{{ .LinkTitle | lower }}</a>&nbsp;
                 {{- end }}
             </div>
             {{- end }}

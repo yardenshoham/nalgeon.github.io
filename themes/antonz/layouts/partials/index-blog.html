@@ -3,7 +3,7 @@
         <div class="row">
             <div class="col-xs-12 col-sm-10">
                 <h2 class="storey__header">Latest posts</h2>
-                <p>I occasionally blog about Python, Golang, SQL, and software in general.</p>
+                <p>I occasionally blog about Go, Python, SQL, and software in general.</p>
                 {{- range (where site.RegularPages "Section" "posts").ByDate.Reverse | first 5 }}
                 {{- partial "post-stub.html" . -}}
                 {{- end}}

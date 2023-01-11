@@ -5,7 +5,7 @@
         {{- end}}
         <a class="post-stub__title" href="{{ .RelPermalink }}">{{ .Title }}</a>
         {{- range (.GetTerms "tags") | first 1 }}
-        <span class="post-stub__date nowrap">{{ .LinkTitle }}</span>
+        <span class="post-stub__date nowrap">{{ .LinkTitle | lower}}</span>
         {{- end }}
     </h3>
 </div>
