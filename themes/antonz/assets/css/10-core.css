@@ -133,6 +133,10 @@ img {
     width: auto;
 }
 
+details {
+    margin-bottom: 0.8em;
+}
+
 form input[type="email"],
 form input[type="password"],
 form input[type="text"],
