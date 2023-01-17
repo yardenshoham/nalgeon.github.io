@@ -1,0 +1,220 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Atomic operations composition in Go</title>
+<meta name=description content="Examining atomicity and predictability of operations in a concurrent environment.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.cda56c6542bd0f47af17b9a48f5f699d3ff418a53ef2715180dfec766c3750a7.css>
+<link rel=icon href=/assets/favicon/favicon.ico sizes=any>
+<link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=manifest href=/assets/favicon/manifest.json>
+<link rel=canonical href=https://antonz.org/atomics-composition/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Atomic operations composition in Go">
+<meta property="og:description" content="Examining atomicity and predictability of operations in a concurrent environment.">
+<meta property="og:url" content="https://antonz.org/atomics-composition/">
+<meta property="og:image" content="https://antonz.org/atomics-composition/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Atomic operations composition in Go">
+<meta name=twitter:description content="Examining atomicity and predictability of operations in a concurrent environment.">
+<meta name=twitter:url content="https://antonz.org/atomics-composition/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/atomics-composition/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Atomic operations composition in Go</h1>
+</header>
+<p>An atomic operation in a concurrent program is a great thing. Such operation transforms into a single processor instruction, so it does not require locks. You can safely call it from different goroutines and receive a predictable result.</p>
+<p>But what happens if you abuse atomics? Let&rsquo;s figure it out.</p>
+<h2 id=atomicity>Atomicity</h2>
+<p>Let&rsquo;s look at a function that increments a counter:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>var</span> <span style=color:#000>counter</span> <span style=color:#a90d91>int32</span>
+
+<span style=color:#a90d91>func</span> <span style=color:#000>increment</span>() {
+    <span style=color:#000>counter</span> <span style=color:#000>+=</span> <span style=color:#1c01ce>1</span>
+    <span style=color:#177500>// random sleep up to 10 ms
+</span><span style=color:#177500></span>    <span style=color:#000>sleep</span>(<span style=color:#1c01ce>10</span>)
+    <span style=color:#000>counter</span> <span style=color:#000>+=</span> <span style=color:#1c01ce>1</span>
+}
+</code></pre></div><p>If we call it 100 times in a single goroutine:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>for</span> <span style=color:#000>i</span> <span style=color:#000>:=</span> <span style=color:#1c01ce>0</span>; <span style=color:#000>i</span> &lt; <span style=color:#1c01ce>100</span>; <span style=color:#000>i</span><span style=color:#000>++</span> {
+    <span style=color:#000>increment</span>()
+}
+</code></pre></div><p>then <code>counter</code> is guaranteed to equal 200.</p>
+<p>In a concurrent environment, <code>increment()</code> is unsafe due to races on <code>counter += 1</code>. Now I will try to fix it and propose several options.</p>
+<p>In each case, answer the question: if you call <code>increment()</code> from 100 goroutines, is the final value of the <code>counter</code> guaranteed?</p>
+<p><strong>Example 1</strong></p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>var</span> <span style=color:#000>counter</span> <span style=color:#000>atomic</span>.<span style=color:#000>Int32</span>
+
+<span style=color:#a90d91>func</span> <span style=color:#000>increment</span>() {
+    <span style=color:#000>counter</span>.<span style=color:#000>Add</span>(<span style=color:#1c01ce>1</span>)
+    <span style=color:#000>sleep</span>(<span style=color:#1c01ce>10</span>)
+    <span style=color:#000>counter</span>.<span style=color:#000>Add</span>(<span style=color:#1c01ce>1</span>)
+}
+</code></pre></div><p>Is the <code>counter</code> value guaranteed?</p>
+<details>
+<summary>Answer</summary>
+<p>It is guaranteed.</p>
+</details>
+<p><strong>Example 2</strong></p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>var</span> <span style=color:#000>counter</span> <span style=color:#000>atomic</span>.<span style=color:#000>Int32</span>
+
+<span style=color:#a90d91>func</span> <span style=color:#000>increment</span>() {
+    <span style=color:#a90d91>if</span> <span style=color:#000>counter</span>.<span style=color:#000>Load</span>()<span style=color:#000>%</span><span style=color:#1c01ce>2</span> <span style=color:#000>==</span> <span style=color:#1c01ce>0</span> {
+        <span style=color:#000>sleep</span>(<span style=color:#1c01ce>10</span>)
+        <span style=color:#000>counter</span>.<span style=color:#000>Add</span>(<span style=color:#1c01ce>1</span>)
+    } <span style=color:#a90d91>else</span> {
+        <span style=color:#000>sleep</span>(<span style=color:#1c01ce>10</span>)
+        <span style=color:#000>counter</span>.<span style=color:#000>Add</span>(<span style=color:#1c01ce>2</span>)
+    }
+}
+</code></pre></div><p>Is the <code>counter</code> value guaranteed?</p>
+<details>
+<summary>Answer</summary>
+<p>It's not guaranteed.</p>
+</details>
+<p><strong>Example 3</strong></p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>var</span> <span style=color:#000>delta</span> <span style=color:#000>atomic</span>.<span style=color:#000>Int32</span>
+<span style=color:#a90d91>var</span> <span style=color:#000>counter</span> <span style=color:#000>atomic</span>.<span style=color:#000>Int32</span>
+
+<span style=color:#a90d91>func</span> <span style=color:#000>increment</span>() {
+    <span style=color:#000>delta</span>.<span style=color:#000>Add</span>(<span style=color:#1c01ce>1</span>)
+    <span style=color:#000>sleep</span>(<span style=color:#1c01ce>10</span>)
+    <span style=color:#000>counter</span>.<span style=color:#000>Add</span>(<span style=color:#000>delta</span>.<span style=color:#000>Load</span>())
+}
+</code></pre></div><p>Is the <code>counter</code> value guaranteed?</p>
+<details>
+<summary>Answer</summary>
+<p>It's not guaranteed.</p>
+</details>
+<h2 id=composition-of-atomic-operations>Composition of Atomic Operations</h2>
+<p>People sometimes think that the composition of atomics also magically becomes an atomic operation. But this is not the case.</p>
+<p>For example, the second of the above examples:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>var</span> <span style=color:#000>counter</span> <span style=color:#000>atomic</span>.<span style=color:#000>Int32</span>
+
+<span style=color:#a90d91>func</span> <span style=color:#000>increment</span>() {
+    <span style=color:#a90d91>if</span> <span style=color:#000>counter</span>.<span style=color:#000>Load</span>()<span style=color:#000>%</span><span style=color:#1c01ce>2</span> <span style=color:#000>==</span> <span style=color:#1c01ce>0</span> {
+        <span style=color:#000>sleep</span>(<span style=color:#1c01ce>10</span>)
+        <span style=color:#000>counter</span>.<span style=color:#000>Add</span>(<span style=color:#1c01ce>1</span>)
+    } <span style=color:#a90d91>else</span> {
+        <span style=color:#000>sleep</span>(<span style=color:#1c01ce>10</span>)
+        <span style=color:#000>counter</span>.<span style=color:#000>Add</span>(<span style=color:#1c01ce>2</span>)
+    }
+}
+</code></pre></div><p>Call <code>increment()</code> 100 times from different goroutines:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>var</span> <span style=color:#000>wg</span> <span style=color:#000>sync</span>.<span style=color:#000>WaitGroup</span>
+<span style=color:#000>wg</span>.<span style=color:#000>Add</span>(<span style=color:#1c01ce>100</span>)
+
+<span style=color:#a90d91>for</span> <span style=color:#000>i</span> <span style=color:#000>:=</span> <span style=color:#1c01ce>0</span>; <span style=color:#000>i</span> &lt; <span style=color:#1c01ce>100</span>; <span style=color:#000>i</span><span style=color:#000>++</span> {
+    <span style=color:#a90d91>go</span> <span style=color:#a90d91>func</span>() {
+        <span style=color:#000>increment</span>()
+        <span style=color:#000>wg</span>.<span style=color:#000>Done</span>()
+    }()
+
+}
+
+<span style=color:#000>wg</span>.<span style=color:#000>Wait</span>()
+<span style=color:#000>fmt</span>.<span style=color:#000>Println</span>(<span style=color:#000>counter</span>.<span style=color:#000>Load</span>())
+</code></pre></div><p>Run with the <code>-race</code> flag — there are no races. But can we guarantee what the <code>counter</code> value will be in the end? Nope.</p>
+<pre tabindex=0><code>% go run atomic-2.go
+192
+% go run atomic-2.go
+191
+% go run atomic-2.go
+189
+</code></pre><p>Despite the absence of races, <code>increment()</code> is not atomic.</p>
+<p>Check yourself by answering the question: in which example is <code>increment()</code> an atomic operation?</p>
+<details>
+<summary>Answer</summary>
+<p>In none of them.</p>
+</details>
+<h2 id=atomicity-and-sequence-independence>Atomicity and Sequence-Independence</h2>
+<p>In all examples, <code>increment()</code> is not an atomic operation. The composition of atomics is always non-atomic.</p>
+<p>The first example, however, guarantees the final value of the <code>counter</code> in a concurrent environment:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>var</span> <span style=color:#000>counter</span> <span style=color:#000>atomic</span>.<span style=color:#000>Int32</span>
+
+<span style=color:#a90d91>func</span> <span style=color:#000>increment</span>() {
+    <span style=color:#000>counter</span>.<span style=color:#000>Add</span>(<span style=color:#1c01ce>1</span>)
+    <span style=color:#000>sleep</span>(<span style=color:#1c01ce>10</span>)
+    <span style=color:#000>counter</span>.<span style=color:#000>Add</span>(<span style=color:#1c01ce>1</span>)
+}
+</code></pre></div><p>If we run 100 goroutines, the <code>counter</code> will ultimately equal 200 (if there were no errors during execution).</p>
+<p>The reason is that <code>Add()</code> is a sequence-independent operation. The runtime can perform such operations in any order, and the result will not change.</p>
+<p>The second and third examples use sequence-dependent operations. When we run 100 goroutines, the order of operations is different each time. Therefore, the result is also different.</p>
+<p>In general, despite the apparent simplicity of atomics, use them cautiously. Mutex is less shiny but more error-proof.</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2023-01-17 09:20:00 +0000 UTC">17 Jan, 2023</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/thank-go/>thank go!</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/idempotent-close/>Idempotent Close in Go</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/idempotent-close/>Idempotent Close in Go</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
