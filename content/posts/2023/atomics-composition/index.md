@@ -9,7 +9,7 @@ tags = ["thank-go"]
 
 An atomic operation in a concurrent program is a great thing. Such operation transforms into a single processor instruction, so it does not require locks. You can safely call it from different goroutines and receive a predictable result.
 
-But what happens if you abuse atomics? Let's figure it out.
+But what happens if you misuse atomics? Let's figure it out.
 
 ## Atomicity
 
