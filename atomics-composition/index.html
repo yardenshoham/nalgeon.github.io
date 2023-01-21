@@ -57,7 +57,7 @@
 <h1>Atomic operations composition in Go</h1>
 </header>
 <p>An atomic operation in a concurrent program is a great thing. Such operation transforms into a single processor instruction, so it does not require locks. You can safely call it from different goroutines and receive a predictable result.</p>
-<p>But what happens if you abuse atomics? Let&rsquo;s figure it out.</p>
+<p>But what happens if you misuse atomics? Let&rsquo;s figure it out.</p>
 <h2 id=atomicity>Atomicity</h2>
 <p>Let&rsquo;s look at a function that increments a counter:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>var</span> <span style=color:#000>counter</span> <span style=color:#a90d91>int32</span>
