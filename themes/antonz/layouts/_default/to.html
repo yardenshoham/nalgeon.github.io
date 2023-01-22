@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.Language }}">
+
+<head>
+    {{- partial "head.html" . -}}
+</head>
+
+<body>
+    <section class="storey">
+        <div class="container">
+            <p id="message">Resolving short URL...</p>
+        </div>
+    </section>
+    <script>
+        const routes = {
+            "empsql": "/sql-window-functions/employees.sql",
+            "w22prt": "/sql-window-functions/docs/img/22/partition.gif",
+            "w22rnk": "/sql-window-functions/docs/img/22/rank.gif",
+        }
+
+        function navigate() {
+            const msg = document.getElementById("message");
+            let key = location.hash;
+            if (key == "") {
+                msg.innerHTML = "Missing short URL";
+                return;
+            }
+            key = key.substring(1,)
+            const url = routes[key];
+            if (!url) {
+                msg.innerHTML = "Route not found";
+                return;
+            }
+            msg.innerHTML = "Done ✓"
+            location.replace(url);
+        }
+
+        navigate();
+    </script>
+</body>
+
+</html>
