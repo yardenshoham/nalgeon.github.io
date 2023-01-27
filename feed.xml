@@ -58,7 +58,8 @@
     </figure>
 </div>
 </div>
-<p>Parts 1 and 2 of the book are ready, and I&rsquo;d like some early feedback. If you want to get the book for free in exchange for a review — drop me a line at <a href="mailto:m@antonz.org">m@antonz.org</a> or on Twitter <a href="https://twitter.com/ohmypy">@ohmypy</a>.</p>
+<p>The first six chapters are ready, and I&rsquo;ll release the rest by May 2023. You can buy an early access release for $10:</p>
+<p class="big"><a href="https://antonz.gumroad.com/l/sql-windows">SQL Window Functions Explained</a></p>
 <p>Here is an excerpt from the book:</p>
 <p class="align-center">⌘&nbsp;⌘&nbsp;⌘</p>
 <h2 id="why-use-window-functions">Why use window functions</h2>
@@ -78,10 +79,10 @@
 │ 32 │ Dave     │ London │ sales      │ 96     │
 │ 33 │ Alice    │ Berlin │ sales      │ 100    │
 └────┴──────────┴────────┴────────────┴────────┘
-</code></pre><p>Let&rsquo;s look at some tasks that are convenient to solve with the help of SQL window functions. We&rsquo;ll save the technical details for Part 2. For now, let&rsquo;s review the use cases.</p>
+</code></pre><p>Let&rsquo;s look at some tasks that are convenient to solve with the help of SQL window functions. We&rsquo;ll save the technical details for the following chapters. For now, let&rsquo;s review the use cases.</p>
 <h2 id="ranking">Ranking</h2>
 <p>Ranking means coming up with all kinds of ratings, starting from the winners of the World Swimming Championships and ending with the Forbes 500.</p>
-<p>Using our employee table:</p>
+<p>We will rank employees.</p>
 <h3 id="overall-salary-rating">Overall salary rating</h3>
 <p>Let&rsquo;s make a rating of employees by salary:</p>
 <div class="row">
@@ -91,6 +92,7 @@
     </figure>
 </div>
 </div>
+<p>The <code>rank</code> column shows each employee&rsquo;s position in the overall rating.</p>
 <p>Some colleagues have the same salary (Henry and Irene, Cindy and Dave) — so they receive the same rank.</p>
 <h3 id="salary-rating-by-department">Salary rating by department</h3>
 <p>Similar rating, but created for each department separately instead of the whole company:</p>
@@ -101,6 +103,7 @@
     </figure>
 </div>
 </div>
+<p>The <code>rank</code> column shows each employee&rsquo;s position in the department&rsquo;s rating.</p>
 <h3 id="salary-groups">Salary groups</h3>
 <p>Let&rsquo;s split the employees into three groups according to their salary:</p>
 <ul>
@@ -115,6 +118,7 @@
     </figure>
 </div>
 </div>
+<p>The <code>tile</code> column shows which group each employee belongs to.</p>
 <h3 id="the-most-precious-colleagues">The most &ldquo;precious&rdquo; colleagues</h3>
 <p>Let&rsquo;s find the highest-paid people in each department:</p>
 <div class="row">
@@ -128,7 +132,7 @@
 <h2 id="comparison-with-offset">Comparison with offset</h2>
 <p>Comparing by offset means looking at the difference between neighboring values. For example, comparing the countries that occupy the 5th and 6th places in the world GDP rating — how different are they? What about 1st and 6th place?</p>
 <p>Sometimes we want to compare one of the group values with the group boundaries. For example, there are 100 top tennis players worldwide, and Maria Sakkari is ranked 10th. How do her stats compare to Iga Swiatek, who is ranked 1st? How does she compare to Lin Zhou, who is ranked 50th?</p>
-<p>Using our employee table:</p>
+<p>We will compare employees.</p>
 <h3 id="salary-difference-with-the-neighbor">Salary difference with the neighbor</h3>
 <p>Let&rsquo;s arrange employees by salary and check whether the gap between neighbors is large:</p>
 <div class="row">
@@ -151,7 +155,7 @@
 <p>For each employee, the <code>low</code> column shows the minimum salary in the department, and the <code>high</code> column shows the maximum. As you can see, the HR and Sales salary ranges are narrow, but the IT range is much broader.</p>
 <h2 id="aggregation">Aggregation</h2>
 <p>Aggregation means counting totals or averages. For example, the average salary per city. Or the total number of gold medals for each country in the Olympic Games standings.</p>
-<p>Using our employee table:</p>
+<p>We will aggregate employee salaries.</p>
 <h3 id="comparing-with-the-salary-fund">Comparing with the salary fund</h3>
 <p>Each department has a salary fund — money spent monthly on paying employees' salaries. Let&rsquo;s see what percentage of this fund amounts to the salary of each employee:</p>
 <div class="row">
@@ -174,7 +178,7 @@
 <p>The result confirms the previous observation: IT salaries range from -16% to +20% of the average, while other departments are within 5%.</p>
 <h2 id="rolling-aggregates">Rolling aggregates</h2>
 <p>​Rolling aggregates (aka sliding or moving aggregates) are just totals — sum or average. But instead of calculating them across all elements, we use a different approach.</p>
-<p>Consider an example. Here is a table with the income and expenses of one employee (let it be Irene) for nine months of the year:</p>
+<p>Consider the company our employees work for. Here is a table with its income and expenses for nine months of the year:</p>
 <pre tabindex="0"><code>┌──────┬───────┬────────┬─────────┐
 │ year │ month │ income │ expense │
 ├──────┼───────┼────────┼─────────┤
@@ -189,7 +193,7 @@
 │ 2020 │ 9     │ 104    │ 104     │
 └──────┴───────┴────────┴─────────┘
 </code></pre><h3 id="expenses-moving-average">Expenses moving average</h3>
-<p>Judging by the data, Irene&rsquo;s income is growing: 94 in January → 104 in September. But are the expenses growing as well? It&rsquo;s hard to say right away: expenses differ month by month. To smooth out these spikes, we&rsquo;ll use the &ldquo;3-month average&rdquo; — the average between the previous, current, and next month&rsquo;s expenses for each month:</p>
+<p>Judging by the data, the income is growing: 94 in January → 104 in September. But are the expenses growing as well? It&rsquo;s hard to say right away: expenses differ month by month. To smooth out these spikes, we&rsquo;ll use the &ldquo;3-month average&rdquo; — the average between the previous, current, and next month&rsquo;s expenses for each month:</p>
 <ul>
 <li>moving average for February = (January + February + March) / 3;</li>
 <li>for March = (February + March + April) / 3;</li>
@@ -206,8 +210,8 @@
 </div>
 <p>Now it is clear that expenses are steadily growing.</p>
 <h3 id="cumulative-income">Cumulative income</h3>
-<p>Thanks to the moving average, we know that income and expenses are growing. But how do they relate to each other? I want to understand whether Irene is &ldquo;in the black&rdquo; or &ldquo;in the red&rdquo;, considering all the money earned and spent.</p>
-<p>It is essential to see the values for each month, not only for the end of the year. If at the end of the year everything is OK for Irene, but in June she went into negative — this is a potential problem (companies call this situation a &ldquo;cash gap&rdquo;).</p>
+<p>Thanks to the moving average, we know that income and expenses are growing. But how do they relate to each other? We want to understand whether the company is &ldquo;in the black&rdquo; or &ldquo;in the red&rdquo;, considering all the money earned and spent.</p>
+<p>It is essential to see the values for each month, not only for the end of the year. If at the end of the year everything is OK, but in June the company went into negative — this is a potential problem (companies call this situation a &ldquo;cash gap&rdquo;).</p>
 <p>Let&rsquo;s calculate income and expenses by month as a cumulative total:</p>
 <ul>
 <li>cumulative income for January = January;</li>
@@ -223,7 +227,7 @@
     </figure>
 </div>
 </div>
-<p>Now it is clear that Irene is doing well. In some months, expenses exceed income, but thanks to the accumulated cash reserve, there is no gap.</p>
+<p>Now it is clear the company is doing well. In some months, expenses exceed income, but thanks to the accumulated cash reserve, there is no gap.</p>
 <h2 id="summary">Summary</h2>
 <p>SQL window functions help to solve the following tasks:</p>
 <ul>
@@ -234,7 +238,7 @@
 </ul>
 <p>Of course, this is not an exhaustive list. But I hope now it is clear why window functions are beneficial for data analysis. In the next chapter, we will examine what windows are and how to use them.</p>
 <p class="align-center">⌘&nbsp;⌘&nbsp;⌘</p>
-<p>Interested in the &lsquo;early bird&rsquo; book edition? Drop me a line at <a href="mailto:m@antonz.org">m@antonz.org</a> or on Twitter.</p>
+<p>Interested in the &lsquo;early bird&rsquo; book edition? <strong><a href="https://antonz.gumroad.com/l/sql-windows">Buy it for $10</a></strong></p>
 ]]></content:encoded></item><item><title>Atomic operations composition in Go</title><link>https://antonz.org/atomics-composition/</link><pubDate>Tue, 17 Jan 2023 09:20:00 +0000</pubDate><guid>https://antonz.org/atomics-composition/</guid><description>Examining atomicity and predictability of operations in a concurrent environment.</description><content:encoded><![CDATA[<p>An atomic operation in a concurrent program is a great thing. Such operation transforms into a single processor instruction, so it does not require locks. You can safely call it from different goroutines and receive a predictable result.</p>
 <p>But what happens if you misuse atomics? Let&rsquo;s figure it out.</p>
 <h2 id="atomicity">Atomicity</h2>
