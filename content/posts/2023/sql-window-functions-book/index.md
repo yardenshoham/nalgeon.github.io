@@ -77,7 +77,9 @@ Here is what you will learn:
 </div>
 </div>
 
-Parts 1 and 2 of the book are ready, and I'd like some early feedback. If you want to get the book for free in exchange for a review — drop me a line at [m@antonz.org](mailto:m@antonz.org) or on Twitter [@ohmypy](https://twitter.com/ohmypy).
+The first six chapters are ready, and I'll release the rest by May 2023. You can buy an early access release for $10:
+
+<p class="big"><a href="https://antonz.gumroad.com/l/sql-windows">SQL Window Functions Explained</a></p>
 
 Here is an excerpt from the book:
 
@@ -106,13 +108,13 @@ The easiest way to explain it is through concrete examples. We will work with a 
 └────┴──────────┴────────┴────────────┴────────┘
 ```
 
-Let's look at some tasks that are convenient to solve with the help of SQL window functions. We'll save the technical details for Part 2. For now, let's review the use cases.
+Let's look at some tasks that are convenient to solve with the help of SQL window functions. We'll save the technical details for the following chapters. For now, let's review the use cases.
 
 ## Ranking
 
 Ranking means coming up with all kinds of ratings, starting from the winners of the World Swimming Championships and ending with the Forbes 500.
 
-Using our employee table:
+We will rank employees.
 
 ### Overall salary rating
 
@@ -125,6 +127,8 @@ Let's make a rating of employees by salary:
     </figure>
 </div>
 </div>
+
+The `rank` column shows each employee's position in the overall rating.
 
 Some colleagues have the same salary (Henry and Irene, Cindy and Dave) — so they receive the same rank.
 
@@ -139,6 +143,8 @@ Similar rating, but created for each department separately instead of the whole 
     </figure>
 </div>
 </div>
+
+The `rank` column shows each employee's position in the department's rating.
 
 ### Salary groups
 
@@ -155,6 +161,8 @@ Let's split the employees into three groups according to their salary:
     </figure>
 </div>
 </div>
+
+The `tile` column shows which group each employee belongs to.
 
 ### The most "precious" colleagues
 
@@ -176,7 +184,7 @@ Comparing by offset means looking at the difference between neighboring values. 
 
 Sometimes we want to compare one of the group values with the group boundaries. For example, there are 100 top tennis players worldwide, and Maria Sakkari is ranked 10th. How do her stats compare to Iga Swiatek, who is ranked 1st? How does she compare to Lin Zhou, who is ranked 50th?
 
-Using our employee table:
+We will compare employees.
 
 ### Salary difference with the neighbor
 
@@ -210,7 +218,7 @@ For each employee, the `low` column shows the minimum salary in the department, 
 
 Aggregation means counting totals or averages. For example, the average salary per city. Or the total number of gold medals for each country in the Olympic Games standings.
 
-Using our employee table:
+We will aggregate employee salaries.
 
 ### Comparing with the salary fund
 
@@ -244,7 +252,7 @@ The result confirms the previous observation: IT salaries range from -16% to +20
 
 ​Rolling aggregates (aka sliding or moving aggregates) are just totals — sum or average. But instead of calculating them across all elements, we use a different approach.
 
-Consider an example. Here is a table with the income and expenses of one employee (let it be Irene) for nine months of the year:
+Consider the company our employees work for. Here is a table with its income and expenses for nine months of the year:
 
 ```
 ┌──────┬───────┬────────┬─────────┐
@@ -264,7 +272,7 @@ Consider an example. Here is a table with the income and expenses of one employe
 
 ### Expenses moving average
 
-Judging by the data, Irene's income is growing: 94 in January → 104 in September. But are the expenses growing as well? It's hard to say right away: expenses differ month by month. To smooth out these spikes, we'll use the "3-month average" — the average between the previous, current, and next month's expenses for each month:
+Judging by the data, the income is growing: 94 in January → 104 in September. But are the expenses growing as well? It's hard to say right away: expenses differ month by month. To smooth out these spikes, we'll use the "3-month average" — the average between the previous, current, and next month's expenses for each month:
 
 -   moving average for February = (January + February + March) / 3;
 -   for March = (February + March + April) / 3;
@@ -285,9 +293,9 @@ Now it is clear that expenses are steadily growing.
 
 ### Cumulative income
 
-Thanks to the moving average, we know that income and expenses are growing. But how do they relate to each other? I want to understand whether Irene is "in the black" or "in the red", considering all the money earned and spent.
+Thanks to the moving average, we know that income and expenses are growing. But how do they relate to each other? We want to understand whether the company is "in the black" or "in the red", considering all the money earned and spent.
 
-It is essential to see the values for each month, not only for the end of the year. If at the end of the year everything is OK for Irene, but in June she went into negative — this is a potential problem (companies call this situation a "cash gap").
+It is essential to see the values for each month, not only for the end of the year. If at the end of the year everything is OK, but in June the company went into negative — this is a potential problem (companies call this situation a "cash gap").
 
 Let's calculate income and expenses by month as a cumulative total:
 
@@ -305,7 +313,7 @@ Let's calculate income and expenses by month as a cumulative total:
 </div>
 </div>
 
-Now it is clear that Irene is doing well. In some months, expenses exceed income, but thanks to the accumulated cash reserve, there is no gap.
+Now it is clear the company is doing well. In some months, expenses exceed income, but thanks to the accumulated cash reserve, there is no gap.
 
 ## Summary
 
@@ -320,4 +328,4 @@ Of course, this is not an exhaustive list. But I hope now it is clear why window
 
 <p class="align-center">⌘&nbsp;⌘&nbsp;⌘</p>
 
-Interested in the 'early bird' book edition? Drop me a line at [m@antonz.org](mailto:m@antonz.org) or on Twitter.
+Interested in the 'early bird' book edition? **[Buy it for $10](https://antonz.gumroad.com/l/sql-windows)**
