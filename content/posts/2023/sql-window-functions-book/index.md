@@ -1,6 +1,6 @@
 +++
 date = 2023-01-22T18:00:00Z
-title = "SQL Window Functions Explained Book"
+title = "SQL Window Functions Explained"
 description = "A clear and visual introduction to window functions in SQL."
 image = "/sql-window-functions-book/cover.png"
 slug = "sql-window-functions-book"
