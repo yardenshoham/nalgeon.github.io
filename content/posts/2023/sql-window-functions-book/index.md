@@ -77,7 +77,7 @@ Here is what you will learn:
 </div>
 </div>
 
-The first six chapters are ready, and I'll publish the rest by May 2023. You can buy an early access release for $10:
+10 of the 13 chapters are ready, and I'll publish the rest by May 2023. You can buy an early access release for $10:
 
 <p class="big"><a href="https://antonz.gumroad.com/l/sql-windows">SQL Window Functions Explained</a></p>
 
