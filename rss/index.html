@@ -1,71 +1,7 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 22 Jan 2023 18:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>SQL Window Functions Explained</title><link>https://antonz.org/sql-window-functions-book/</link><pubDate>Sun, 22 Jan 2023 18:00:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-book/</guid><description>A clear and visual introduction to window functions in SQL.</description><content:encoded><![CDATA[<p>Window functions are probably the most confusing section of SQL. You might think, &ldquo;So what? They just came up with some additional functions&rdquo;. Not really. &ldquo;Window functions&rdquo; is a separate language built into regular SQL. And it&rsquo;s more complicated than everything you know about SELECTs.</p>
-<p>In short, window functions assist in making great analytical reports without Excel. Maybe you want to calculate monthly sales percentages over the year? Window functions. Split marketing channels into effective and ineffective ones? Window functions. Choose the top 10 clients for each segment? Same.</p>
-<div class="row">
-<div class="col-xs-12 col-sm-8">
-    <p>I've read several dozen articles explaining SQL window functions. They all suffered from one of two problems:</p>
-    <ol>
-        <li>Easy read without much practical value, describing 10% of features.</li>
-        <li>Difficult to comprehend. If I did not know the subject — I would not understand a thing.</li>
-    </ol>
-</div>
-<div class="col-xs-12 col-sm-4">
-    <figure>
-        <img src="queries.png" alt="How I see complex queries" class="img-bordered-thin"/>
-        <figcaption>
-            <small>SQL window queries can look like this for an unfamiliar reader.</small>
-        </figcaption>
-    </figure>
-</div>
-</div>
-<p>I want people to understand SQL windows better. So I decided to write a book — <em>SQL Window Functions Explained</em>.</p>
-<h2 id="about-the-book">About the book</h2>
-<p>It is a clear and visual introduction to window functions. Clear — because I can describe complex topics in a readable way. Visual — because I have prepared a hundred pictures and GIFs to help you understand SQL windows.</p>
-<p>Window functions are a complex topic. So the book only teaches a little at a time. It gives just enough theory and a lot of practice — because it&rsquo;s the only way to turn abstract knowledge into skills.</p>
-<p>Here is what you will learn:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6">
-<ol>
-    <li>Why use window functions</li>
-    <li>Windows and functions
-        <ul>
-            <li>Ranking</li>
-            <li>Offset</li>
-            <li>Aggregation</li>
-            <li>Rolling aggregates</li>
-        </ul>
-    </li>
-    <li>Frames
-        <ul>
-            <li>ROWS and GROUPS</li>
-            <li>RANGE</li>
-            <li>EXCLUDE</li>
-            <li>FILTER</li>
-        </ul>
-    </li>
-    <li>Practice
-        <ul>
-            <li>Product analytics</li>
-            <li>Handling duplicates</li>
-            <li>Finding the gaps</li>
-        </ul>
-    </li>
-</ol>
-</div>
-<div class="col-xs-12 col-sm-6">
-    <figure>
-        <img src="poster.png" alt="Book poster" class="img-bordered-thin"/>
-        <figcaption>Every chapter covers a single topic in depth</figcaption>
-    </figure>
-</div>
-</div>
-<p>10 of the 13 chapters are ready, and I&rsquo;ll publish the rest by May 2023. You can buy an early access release for $10:</p>
-<p class="big"><a href="https://antonz.gumroad.com/l/sql-windows">SQL Window Functions Explained</a></p>
-<p>Here is an excerpt from the book:</p>
-<p class="align-center">⌘&nbsp;⌘&nbsp;⌘</p>
-<h2 id="why-use-window-functions">Why use window functions</h2>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Tue, 31 Jan 2023 08:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Why Use SQL Window Functions</title><link>https://antonz.org/why-use-sql-window-functions/</link><pubDate>Tue, 31 Jan 2023 08:30:00 +0000</pubDate><guid>https://antonz.org/why-use-sql-window-functions/</guid><description>To build great analytical reports without Excel.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
 <p>​In short, window functions assist in building great analytical reports without Excel.</p>
 <p>The easiest way to explain it is through concrete examples. We will work with a toy employee table:</p>
-<pre tabindex="0"><code class="language-ascii" data-lang="ascii">┌────┬──────────┬────────┬────────────┬────────┐
+<pre tabindex="0"><code>┌────┬──────────┬────────┬────────────┬────────┐
 │ id │   name   │  city  │ department │ salary │
 ├────┼──────────┼────────┼────────────┼────────┤
 │ 11 │ Diane    │ London │ hr         │ 70     │
@@ -237,8 +173,80 @@
 <li>Rolling aggregates (sum and average in dynamics).</li>
 </ul>
 <p>Of course, this is not an exhaustive list. But I hope now it is clear why window functions are beneficial for data analysis. In the next chapter, we will examine what windows are and how to use them.</p>
-<p class="align-center">⌘&nbsp;⌘&nbsp;⌘</p>
-<p>Interested in the &lsquo;early bird&rsquo; book edition? <strong><a href="https://antonz.gumroad.com/l/sql-windows">Buy it for $10</a></strong></p>
+<p>
+    <a class="button valign-middle" href="https://antonz.gumroad.com/l/sql-windows">
+        Get the book
+    </a>
+     or
+    <a class="disabled" href="/sql-windows-ranking">continue reading</a> (coming soon)
+</p>
+]]></content:encoded></item><item><title>SQL Window Functions Explained</title><link>https://antonz.org/sql-window-functions-book/</link><pubDate>Sun, 22 Jan 2023 18:00:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-book/</guid><description>A clear and visual introduction to window functions in SQL.</description><content:encoded><![CDATA[<p>Window functions are probably the most confusing section of SQL. You might think, &ldquo;So what? They just came up with some additional functions&rdquo;. Not really. &ldquo;Window functions&rdquo; is a separate language built into regular SQL. And it&rsquo;s more complicated than everything you know about SELECTs.</p>
+<p>In short, window functions assist in making great analytical reports without Excel. Maybe you want to calculate monthly sales percentages over the year? Window functions. Split marketing channels into effective and ineffective ones? Window functions. Choose the top 10 clients for each segment? Same.</p>
+<div class="row">
+<div class="col-xs-12 col-sm-8">
+    <p>I've read several dozen articles explaining SQL window functions. They all suffered from one of two problems:</p>
+    <ol>
+        <li>Easy read without much practical value, describing 10% of features.</li>
+        <li>Difficult to comprehend. If I did not know the subject — I would not understand a thing.</li>
+    </ol>
+</div>
+<div class="col-xs-12 col-sm-4">
+    <figure>
+        <img src="queries.png" alt="How I see complex queries" class="img-bordered-thin"/>
+        <figcaption>
+            <small>SQL window queries can look like this for an unfamiliar reader.</small>
+        </figcaption>
+    </figure>
+</div>
+</div>
+<p>I want people to understand SQL windows better. So I wrote a book — <em>SQL Window Functions Explained</em>.</p>
+<h2 id="about-the-book">About the book</h2>
+<p>It is a clear and visual introduction to window functions. Clear — because I can describe complex topics in a readable way. Visual — because I have prepared a hundred pictures and GIFs to help you understand SQL windows.</p>
+<p>Window functions are a complex topic. So the book only teaches a little at a time. It gives just enough theory and a lot of practice — because it&rsquo;s the only way to turn abstract knowledge into skills.</p>
+<p>Here is what you will learn:</p>
+<div class="row">
+<div class="col-xs-12 col-sm-6">
+<ol>
+    <li><a href="/why-use-sql-window-functions">Why use window functions</a></li>
+    <li>Windows and functions
+        <ul>
+            <li>Ranking</li>
+            <li>Offset</li>
+            <li>Aggregation</li>
+            <li>Rolling aggregates</li>
+            <li>Statistics</li>
+        </ul>
+    </li>
+    <li>Frames
+        <ul>
+            <li>ROWS and GROUPS</li>
+            <li>RANGE</li>
+            <li>EXCLUDE</li>
+            <li>FILTER</li>
+        </ul>
+    </li>
+    <li>Practice
+        <ul>
+            <li>Product analytics</li>
+            <li>Clustering</li>
+        </ul>
+    </li>
+</ol>
+</div>
+<div class="col-xs-12 col-sm-6">
+    <figure>
+        <img src="poster.png" alt="Book poster" class="img-bordered-thin"/>
+        <figcaption>Every chapter covers a single topic in depth</figcaption>
+    </figure>
+</div>
+</div>
+<p>To preview the first few chapters, visit the links in the table of contents above.</p>
+<p>10 of the 13 chapters are ready, and I&rsquo;ll publish the rest by May 2023. You can buy an early access release for $10.</p>
+<p>
+    <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
+        Get the book
+    </a>
+</p>
 ]]></content:encoded></item><item><title>Atomic operations composition in Go</title><link>https://antonz.org/atomics-composition/</link><pubDate>Tue, 17 Jan 2023 09:20:00 +0000</pubDate><guid>https://antonz.org/atomics-composition/</guid><description>Examining atomicity and predictability of operations in a concurrent environment.</description><content:encoded><![CDATA[<p>An atomic operation in a concurrent program is a great thing. Such operation transforms into a single processor instruction, so it does not require locks. You can safely call it from different goroutines and receive a predictable result.</p>
 <p>But what happens if you misuse atomics? Let&rsquo;s figure it out.</p>
 <h2 id="atomicity">Atomicity</h2>
@@ -813,125 +821,4 @@ Success: no issues found in <span style="color:#1c01ce">1</span> <span style="co
 <p>Last but not least. When testing, <strong>seed</strong> the generator with a constant so that it gives reproducible results:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">seed</span>(<span style="color:#1c01ce">42</span>)
 </code></pre></div><p>On the contrary, use <code>seed()</code> without arguments in production. Python will then use the sources of randomness provided by the operating system.</p>
-]]></content:encoded></item><item><title>Common Table Expressions in SQL</title><link>https://antonz.org/cte/</link><pubDate>Fri, 20 May 2022 16:50:00 +0000</pubDate><guid>https://antonz.org/cte/</guid><description>Use them instead of subqueries.</description><content:encoded><![CDATA[<p>Rule #1 for writing well-readable SQL queries is to use <em>common table expressions</em> (CTE). People are afraid of them, but they really shouldn&rsquo;t. Let&rsquo;s learn CTEs in three minutes, so you don&rsquo;t have to read a weighty SQL book or take an online course.</p>
-<h2 id="problem">Problem</h2>
-<p>Let&rsquo;s say we have a table with monthly sales for two years:</p>
-<pre tabindex="0"><code>┌──────┬───────┬───────┬──────────┬─────────┐
-│ year │ month │ price │ quantity │ revenue │
-├──────┼───────┼───────┼──────────┼─────────┤
-│ 2019 │ 1     │ 60    │ 200      │ 12000   │
-│ 2019 │ 2     │ 60    │ 660      │ 39600   │
-│ 2019 │ 3     │ 60    │ 400      │ 24000   │
-│ 2019 │ 4     │ 60    │ 300      │ 18000   │
-│ 2019 │ 5     │ 60    │ 440      │ 26400   │
-│ 2019 │ 6     │ 60    │ 540      │ 32400   │
-│ 2019 │ 7     │ 60    │ 440      │ 26400   │
-│ 2019 │ 8     │ 60    │ 440      │ 26400   │
-│ 2019 │ 9     │ 60    │ 250      │ 15000   │
-│ 2019 │ 10    │ 60    │ 420      │ 25200   │
-│ ...  │ ...   │ ...   │ ...      │ ...     │
-└──────┴───────┴───────┴──────────┴─────────┘
-</code></pre><p><a href="https://sqlime.org/#gist:858c409b81ae3a676580cba6745d68ea">playground</a></p>
-<p>We want to select only those months for which revenue exceeded the monthly average for the year.</p>
-<p>To begin with, let&rsquo;s calculate the average monthly revenue by year:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#a90d91">year</span>,
-  <span style="color:#a90d91">avg</span>(<span style="color:#000">revenue</span>) <span style="color:#a90d91">as</span> <span style="color:#000">avg_rev</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">sales</span>
-<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>;
-</code></pre></div><pre tabindex="0"><code>┌──────┬─────────┐
-│ year │ avg_rev │
-├──────┼─────────┤
-│ 2019 │ 25125.0 │
-│ 2020 │ 48625.0 │
-└──────┴─────────┘
-</code></pre><p>Now we can select only those records in which <code>revenue</code> is not less than <code>avg_rev</code>:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">sales</span>.<span style="color:#a90d91">year</span>,
-  <span style="color:#000">sales</span>.<span style="color:#a90d91">month</span>,
-  <span style="color:#000">sales</span>.<span style="color:#000">revenue</span>,
-  <span style="color:#000">round</span>(<span style="color:#000">totals</span>.<span style="color:#000">avg_rev</span>) <span style="color:#a90d91">as</span> <span style="color:#000">avg_rev</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">sales</span>
-  <span style="color:#a90d91">join</span> (
-    <span style="color:#a90d91">select</span>
-      <span style="color:#a90d91">year</span>,
-      <span style="color:#a90d91">avg</span>(<span style="color:#000">revenue</span>) <span style="color:#a90d91">as</span> <span style="color:#000">avg_rev</span>
-    <span style="color:#a90d91">from</span> <span style="color:#000">sales</span>
-    <span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>
-  ) <span style="color:#a90d91">as</span> <span style="color:#000">totals</span>
-  <span style="color:#a90d91">on</span> <span style="color:#000">sales</span>.<span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#000">totals</span>.<span style="color:#a90d91">year</span>
-<span style="color:#a90d91">where</span> <span style="color:#000">sales</span>.<span style="color:#000">revenue</span> <span style="color:#000">&gt;=</span> <span style="color:#000">totals</span>.<span style="color:#000">avg_rev</span>;
-</code></pre></div><pre tabindex="0"><code>┌──────┬───────┬─────────┬─────────┐
-│ year │ month │ revenue │ avg_rev │
-├──────┼───────┼─────────┼─────────┤
-│ 2019 │ 2     │ 39600   │ 25125.0 │
-│ 2019 │ 5     │ 26400   │ 25125.0 │
-│ 2019 │ 6     │ 32400   │ 25125.0 │
-│ 2019 │ 7     │ 26400   │ 25125.0 │
-│ ...  │ ...   │ ...     │ ...     │
-└──────┴───────┴─────────┴─────────┘
-</code></pre><p>We solved the task using a subquery:</p>
-<ul>
-<li>the inner query calculates the average monthly revenue;</li>
-<li>the outer query joins with it and filters the results.</li>
-</ul>
-<p>The query as a whole turned out to be a bit complicated. If you revisit it in a month, you&rsquo;ll probably spend some time &ldquo;unraveling&rdquo; things. The problem is that such nested queries have to be read from the inside out:</p>
-<ul>
-<li>find the innermost query and comprehend it;</li>
-<li>join it with the next outer query;</li>
-<li>join them with the next outer query;</li>
-<li>and so on.</li>
-</ul>
-<p>It is OK when there are only two levels, as in our example. In practice, I often encounter three- and four-level subqueries. A pain to read and understand.</p>
-<h2 id="solution">Solution</h2>
-<p>Instead of a subquery, we can use a <em>common table expression</em> (CTE). Every subquery <code>X</code>:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">a</span>, <span style="color:#000">b</span>, <span style="color:#a90d91">c</span>
-<span style="color:#a90d91">from</span> (<span style="color:#000">X</span>)
-<span style="color:#a90d91">where</span> <span style="color:#000">e</span> <span style="color:#000">=</span> <span style="color:#000">f</span>
-</code></pre></div><p>Can be converted to CTE:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#000">cte</span> <span style="color:#a90d91">as</span> (<span style="color:#000">X</span>)
-<span style="color:#a90d91">select</span> <span style="color:#000">a</span>, <span style="color:#000">b</span>, <span style="color:#a90d91">c</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">cte</span>
-<span style="color:#a90d91">where</span> <span style="color:#000">e</span> <span style="color:#000">=</span> <span style="color:#000">f</span>
-</code></pre></div><p>In our example:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#000">totals</span> <span style="color:#a90d91">as</span> (
-  <span style="color:#a90d91">select</span>
-    <span style="color:#a90d91">year</span>,
-    <span style="color:#a90d91">avg</span>(<span style="color:#000">revenue</span>) <span style="color:#a90d91">as</span> <span style="color:#000">avg_rev</span>
-  <span style="color:#a90d91">from</span> <span style="color:#000">sales</span>
-  <span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>
-)
-
-<span style="color:#a90d91">select</span>
-  <span style="color:#000">sales</span>.<span style="color:#a90d91">year</span>,
-  <span style="color:#000">sales</span>.<span style="color:#a90d91">month</span>,
-  <span style="color:#000">sales</span>.<span style="color:#000">revenue</span>,
-  <span style="color:#000">round</span>(<span style="color:#000">totals</span>.<span style="color:#000">avg_rev</span>) <span style="color:#a90d91">as</span> <span style="color:#000">avg_rev</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">sales</span>
-  <span style="color:#a90d91">join</span> <span style="color:#000">totals</span> <span style="color:#a90d91">on</span> <span style="color:#000">totals</span>.<span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#000">sales</span>.<span style="color:#a90d91">year</span>
-<span style="color:#a90d91">where</span> <span style="color:#000">sales</span>.<span style="color:#000">revenue</span> <span style="color:#000">&gt;=</span> <span style="color:#000">totals</span>.<span style="color:#000">avg_rev</span>;
-</code></pre></div><p>With a table expression, the query becomes flat — it&rsquo;s much easier to perceive it this way. Besides, we can reuse the table expression as if it were a regular table:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#000">totals</span> <span style="color:#a90d91">as</span> (...)
-<span style="color:#a90d91">select</span> ... <span style="color:#a90d91">from</span> <span style="color:#000">sales_ru</span> <span style="color:#a90d91">join</span> <span style="color:#000">totals</span> ...
-<span style="color:#a90d91">union</span> <span style="color:#a90d91">all</span>
-<span style="color:#a90d91">select</span> ... <span style="color:#a90d91">from</span> <span style="color:#000">sales_us</span> <span style="color:#a90d91">join</span> <span style="color:#000">totals</span> ...
-</code></pre></div><p>SQL table expressions are somewhat similar to functions in a regular programming language — they reduce the overall complexity:</p>
-<ul>
-<li>You can write an unreadable sheet of code, or you can break the code into understandable individual functions and compose a program out of them.</li>
-<li>You can build a tower of nested subqueries, or you can extract them into CTEs and reference from the main query.</li>
-</ul>
-<h2 id="cte-vs-subquery">CTE vs subquery</h2>
-<p>There is a myth that &ldquo;CTEs are slow&rdquo;. It came from old versions of PostgreSQL (11 and earlier), which always <em>materialized</em> CTE — calculated the full result of a table expression and stored it until the end of the query.</p>
-<p>This is usually a good thing: the engine calculates the result once, and then uses it several times during the main query. But sometimes materialization prevented the engine from optimizing the query:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#000">cte</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">select</span> <span style="color:#000">*</span> <span style="color:#a90d91">from</span> <span style="color:#000">foo</span>)
-<span style="color:#a90d91">select</span> <span style="color:#000">*</span> <span style="color:#a90d91">from</span> <span style="color:#000">cte</span> <span style="color:#a90d91">where</span> <span style="color:#000">id</span> <span style="color:#000">=</span> <span style="color:#1c01ce">500000</span>;
-</code></pre></div><p>The query selects exactly one record by ID, but materialization creates a copy of the <em>entire table</em> in memory. Because of this, the query is terribly slow.</p>
-<p>PostgreSQL 12+ and other modern DBMS have become smarter and no longer do so. Materialization is used when it does more good than harm. Plus, many DBMSs allow you to explicitly control this behavior through the <code>MATERIALIZED</code> / <code>NOT MATERIALIZED</code> instructions.</p>
-<p>So CTEs work no slower than subqueries. And if in doubt, you can try both — a subquery and a table expression — and compare the query plan and execution time.</p>
-<p>How does one know when to use a subquery and when to use CTE? I came up with a simple rule that has never failed me yet:</p>
-<blockquote class="big">
-<p>Always use CTE</p>
-</blockquote>
-<p>That&rsquo;s what I wish you.</p>
-<p>P.S. There are also <em>recursive</em> CTEs, famous for their complexity and terrible naming (they have almost nothing in common with regular CTEs). Let&rsquo;s talk about them some other day.</p>
 ]]></content:encoded></item></channel></rss>
