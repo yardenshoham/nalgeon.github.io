@@ -34,6 +34,10 @@
     text-align: right;
 }
 
+.valign-middle {
+    vertical-align: middle;
+}
+
 .img-inline {
     display: inline !important;
     vertical-align: middle;
@@ -77,6 +81,12 @@
 
 .nowrap {
     white-space: nowrap;
+}
+
+a.disabled {
+    pointer-events: none;
+    color: var(--color-gray);
+    border-bottom-color: rgba(0, 0, 0, 0.14);
 }
 
 @media only screen and (max-width: 48em) {
