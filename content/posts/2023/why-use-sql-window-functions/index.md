@@ -253,5 +253,5 @@ Of course, this is not an exhaustive list. But I hope now it is clear why window
         Get the book
     </a>
      or
-    <a class="disabled" href="/sql-windows-ranking">continue reading</a> (coming soon)
+    <span class="color-gray">continue reading</span> (coming soon)
 </p>
