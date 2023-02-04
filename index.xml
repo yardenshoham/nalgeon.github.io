@@ -120,7 +120,7 @@
 <p>No more salary raise for them, I guess.</p>
 <h2 id="comparison-with-offset">Comparison with offset</h2>
 <p>Comparing by offset means looking at the difference between neighboring values. For example, comparing the countries that occupy the 5th and 6th places in the world GDP rating — how different are they? What about 1st and 6th place?</p>
-<p>Sometimes we want to compare one of the group values with the group boundaries. For example, there are 100 top tennis players worldwide, and Maria Sakkari is ranked 10th. How do her stats compare to Iga Swiatek, who is ranked 1st? How does she compare to Lin Zhou, who is ranked 50th?</p>
+<p>Sometimes we compare with boundaries instead of neighbors. For example, there are 50 top tennis players worldwide, and Maria Sakkari is ranked 10th. How do her stats compare to Iga Swiatek, who is ranked 1st? How does she compare to Lin Zhou, who is ranked 50th?</p>
 <p>We will compare employees.</p>
 <h3 id="salary-difference-with-the-neighbor">Salary difference with the neighbor</h3>
 <p>Let&rsquo;s arrange employees by salary and check whether the gap between neighbors is large:</p>
@@ -650,6 +650,7 @@
 ]]></content:encoded></item><item><title>User-Defined Functions in SQLite</title><link>https://antonz.org/sqlean-define/</link><pubDate>Thu, 08 Sep 2022 15:30:00 +0000</pubDate><guid>https://antonz.org/sqlean-define/</guid><description>Write functions in plain SQL.</description><content:encoded><![CDATA[<p>Most database engines provide a lot of built-in functions. Still, sometimes they are not enough, and people turn to writing their own — <em>user-defined</em> — functions in plain SQL or some SQL-based language (like pl/sql in Oracle or pl/pgsql in Postgres).</p>
 <p>SQLite does not support user-defined functions by default. But you can easily enable them using the <code>define</code> extension.</p>
 <p><strong>Note</strong>. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
+<h2 id="custom-functions">Custom Functions</h2>
 <p>With <code>define</code> writing a custom function becomes as easy as:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">define</span>(<span style="color:#c41a16">&#39;sumn&#39;</span>, <span style="color:#c41a16">&#39;:n * (:n + 1) / 2&#39;</span>);
 </code></pre></div><p>And then using it as any built-in function:</p>
@@ -669,7 +670,16 @@
 </code></pre></div><p>Delete a function:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">undefine</span>(<span style="color:#c41a16">&#39;sumn&#39;</span>);
 </code></pre></div><p>There is even a way to return multiple values from a function!</p>
-<p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/define.md"><strong>documentation</strong></a> for details.</p>
+<h2 id="dynamic-sql">Dynamic SQL</h2>
+<p>To dynamically compose an SQL query and execute it without creating a function, use <code>eval()</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">eval</span>(<span style="color:#c41a16">&#39;select 10 + 32&#39;</span>);
+<span style="color:#177500">-- 42
+</span></code></pre></div><p>Supports any DDL or DML queries:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">eval</span>(<span style="color:#c41a16">&#39;create table tmp(value int)&#39;</span>);
+<span style="color:#a90d91">select</span> <span style="color:#000">eval</span>(<span style="color:#c41a16">&#39;insert into tmp(value) values (1), (2), (3)&#39;</span>);
+<span style="color:#a90d91">select</span> <span style="color:#000">eval</span>(<span style="color:#c41a16">&#39;select value from tmp&#39;</span>);
+<span style="color:#a90d91">select</span> <span style="color:#000">eval</span>(<span style="color:#c41a16">&#39;drop table tmp&#39;</span>);
+</code></pre></div><p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/define.md"><strong>documentation</strong></a> for details.</p>
 ]]></content:encoded></item><item><title>JSON Lines</title><link>https://antonz.org/json-lines/</link><pubDate>Thu, 04 Aug 2022 18:30:00 +0000</pubDate><guid>https://antonz.org/json-lines/</guid><description>CSV on steroids.</description><content:encoded><![CDATA[<p>Worked with the <a href="https://jsonlines.org/">JSON Lines</a> format the other day. It&rsquo;s a CSV on steroids:</p>
 <ul>
 <li>each entry is a separate line, as in CSV;</li>

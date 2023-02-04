@@ -4,7 +4,7 @@
 <title>User-Defined Functions in SQLite</title>
 <meta name=description content="Write functions in plain SQL.">
 <meta name=robots content="index, follow">
-<link rel=stylesheet type=text/css href=/assets/css/style.c2f86e8a28056be4aaf7f4b77a4b6bbab6574b81405f2bda7ee54ab7370da7cd.css>
+<link rel=stylesheet type=text/css href=/assets/css/style.d5574c61892ae0c9bca2eab9c37cfcbc17d93429a85b516e1dd46f7df294f4cc.css>
 <link rel=icon href=/assets/favicon/favicon.ico sizes=any>
 <link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
 <link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
@@ -59,6 +59,7 @@
 <p>Most database engines provide a lot of built-in functions. Still, sometimes they are not enough, and people turn to writing their own — <em>user-defined</em> — functions in plain SQL or some SQL-based language (like pl/sql in Oracle or pl/pgsql in Postgres).</p>
 <p>SQLite does not support user-defined functions by default. But you can easily enable them using the <code>define</code> extension.</p>
 <p><strong>Note</strong>. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
+<h2 id=custom-functions>Custom Functions</h2>
 <p>With <code>define</code> writing a custom function becomes as easy as:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>define</span>(<span style=color:#c41a16>&#39;sumn&#39;</span>, <span style=color:#c41a16>&#39;:n * (:n + 1) / 2&#39;</span>);
 </code></pre></div><p>And then using it as any built-in function:</p>
@@ -78,7 +79,16 @@
 </code></pre></div><p>Delete a function:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>undefine</span>(<span style=color:#c41a16>&#39;sumn&#39;</span>);
 </code></pre></div><p>There is even a way to return multiple values from a function!</p>
-<p>See <a href=https://github.com/nalgeon/sqlean/blob/main/docs/define.md><strong>documentation</strong></a> for details.</p>
+<h2 id=dynamic-sql>Dynamic SQL</h2>
+<p>To dynamically compose an SQL query and execute it without creating a function, use <code>eval()</code>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>eval</span>(<span style=color:#c41a16>&#39;select 10 + 32&#39;</span>);
+<span style=color:#177500>-- 42
+</span></code></pre></div><p>Supports any DDL or DML queries:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>eval</span>(<span style=color:#c41a16>&#39;create table tmp(value int)&#39;</span>);
+<span style=color:#a90d91>select</span> <span style=color:#000>eval</span>(<span style=color:#c41a16>&#39;insert into tmp(value) values (1), (2), (3)&#39;</span>);
+<span style=color:#a90d91>select</span> <span style=color:#000>eval</span>(<span style=color:#c41a16>&#39;select value from tmp&#39;</span>);
+<span style=color:#a90d91>select</span> <span style=color:#000>eval</span>(<span style=color:#c41a16>&#39;drop table tmp&#39;</span>);
+</code></pre></div><p>See <a href=https://github.com/nalgeon/sqlean/blob/main/docs/define.md><strong>documentation</strong></a> for details.</p>
 <p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
 </div>
 </div><footer class=post__footer>
