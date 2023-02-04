@@ -2,7 +2,7 @@
 date = 2022-09-08T15:30:00Z
 title = "User-Defined Functions in SQLite"
 description = "Write functions in plain SQL."
-image = "/sqlean/cover.png"
+image = "/sqlean-define/cover.png"
 slug = "sqlean-define"
 tags = ["sqlite"]
 +++
