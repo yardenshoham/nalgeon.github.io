@@ -1,6 +1,6 @@
 +++
 date = 2022-01-04T13:00:00Z
-title = "The ultimate SQLite extension set"
+title = "The Ultimate SQLite Extension Set"
 description = "Regexes, math, file IO and over 100 other functions."
 image = "/sqlean/cover.png"
 slug = "sqlean"
@@ -20,13 +20,14 @@ I plan to write in detail about each module in a separate article, but for now â
 
 These are the most popular functions missing in SQLite:
 
--   [crypto](https://github.com/nalgeon/sqlean/blob/main/docs/crypto.md): cryptographic hashes like MD5 or SHA-256.
+-   [crypto](https://github.com/nalgeon/sqlean/blob/main/docs/crypto.md): hash functions like MD5 or SHA-256.
+-   [define](/sqlean-define/): user-defined functions and dynamic sql.
 -   [fileio](https://github.com/nalgeon/sqlean/blob/main/docs/fileio.md): read and write files and catalogs.
 -   [fuzzy](https://github.com/nalgeon/sqlean/blob/main/docs/fuzzy.md): fuzzy string matching and phonetics.
 -   [ipaddr](https://github.com/nalgeon/sqlean/blob/main/docs/ipaddr.md): IP address manipulation.
 -   [json1](https://github.com/nalgeon/sqlean/blob/main/docs/json1.md): JSON functions.
 -   [math](https://github.com/nalgeon/sqlean/blob/main/docs/math.md): math functions.
--   [re](https://github.com/nalgeon/sqlean/blob/main/docs/re.md): regular expressions.
+-   [regexp](/sqlean-regexp/): pattern matching using regular expressions.
 -   [stats](https://github.com/nalgeon/sqlean/blob/main/docs/stats.md): math statistics â€” median, percentiles, etc.
 -   [text](https://github.com/nalgeon/sqlean/blob/main/docs/text.md): string functions.
 -   [unicode](https://github.com/nalgeon/sqlean/blob/main/docs/unicode.md): Unicode support.
@@ -50,10 +51,11 @@ These extensions haven't yet made their way to the main set. They may be too bro
 -   [cron](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997427979): match dates against cron patterns.
 -   [dbdump](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1006791300): export database as SQL.
 -   [decimal](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007348326), [fcmp](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997482625) and [ieee754](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007375162): decimal and floating-point arithmetic.
--   [define](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004347222): create scalar and table-valued functions from SQL.
 -   [envfuncs](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997423609): read environment variables.
 -   [eval](https://github.com/nalgeon/sqlean/issues/27#issuecomment-996432840): run arbitrary SQL statements.
 -   [isodate](https://github.com/nalgeon/sqlean/issues/27#issuecomment-998138191): additional date and time functions.
+-   [lines](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1252243005): read files line-by-line.
+-   [path](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1252243356): parsing and querying paths
 -   [pearson](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997417836): Pearson correlation coefficient between two data sets.
 -   [pivotvtab](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997052157): pivot tables.
 -   [prefixes](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007464840): generate string prefixes.
