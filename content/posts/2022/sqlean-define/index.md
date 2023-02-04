@@ -1,17 +1,17 @@
 +++
 date = 2022-09-08T15:30:00Z
-title = "User-defined functions in SQLite"
+title = "User-Defined Functions in SQLite"
 description = "Write functions in plain SQL."
 image = "/sqlean/cover.png"
 slug = "sqlean-define"
 tags = ["sqlite"]
 +++
 
-_Write functions in plain SQL using the 'define' extension._
+Most database engines provide a lot of built-in functions. Still, sometimes they are not enough, and people turn to writing their own — _user-defined_ — functions in plain SQL or some SQL-based language (like pl/sql in Oracle or pl/pgsql in Postgres).
 
-SQLite does not directly support user-defined functions. Sure, one can write a function in C or Python and register it within SQLite. But not in SQL itself.
+SQLite does not support user-defined functions by default. But you can easily enable them using the `define` extension.
 
-Luckily for us, SQLite provides an extension mechanism. One of such extensions — `define` — allows writing functions in regular SQL.
+**Note**. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.
 
 With `define` writing a custom function becomes as easy as:
 
@@ -54,4 +54,4 @@ select undefine('sumn');
 
 There is even a way to return multiple values from a function!
 
-&rarr; [**See the docs for details**](https://github.com/nalgeon/sqlean/blob/main/docs/define.md)
+See [**documentation**](https://github.com/nalgeon/sqlean/blob/main/docs/define.md) for details.
