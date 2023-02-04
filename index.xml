@@ -1,4 +1,57 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Tue, 31 Jan 2023 08:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Why Use SQL Window Functions</title><link>https://antonz.org/why-use-sql-window-functions/</link><pubDate>Tue, 31 Jan 2023 08:30:00 +0000</pubDate><guid>https://antonz.org/why-use-sql-window-functions/</guid><description>To build great analytical reports without Excel.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 04 Feb 2023 11:20:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Regular Expressions in SQLite</title><link>https://antonz.org/sqlean-regexp/</link><pubDate>Sat, 04 Feb 2023 11:20:00 +0000</pubDate><guid>https://antonz.org/sqlean-regexp/</guid><description>Use a robust pattern matching and text replacement tool from SQL.</description><content:encoded><![CDATA[<p>Regular expressions are probably the most powerful text processing tool without programming.</p>
+<p>SQLite does not support regular expressions by default. But you can easily enable them using the <code>regexp</code> extension.</p>
+<p><strong>Note</strong>. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
+<p>With <code>regexp</code>, matching a string against a pattern becomes as easy as:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#177500">-- count messages containing digits
+</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#a90d91">from</span> <span style="color:#000">messages</span>
+<span style="color:#a90d91">where</span> <span style="color:#000">msg_text</span> <span style="color:#000">regexp</span> <span style="color:#c41a16">&#39;\d+&#39;</span>;
+<span style="color:#177500">-- 42
+</span></code></pre></div><h2 id="pattern-matching-and-text-replacement">Pattern matching and text replacement</h2>
+<p>There are three main tasks people usually solve using regular expressions:</p>
+<ol>
+<li>Match a string against the pattern.</li>
+<li>Extract a part of the string that matches the pattern.</li>
+<li>Replace all parts of the string that match the pattern.</li>
+</ol>
+<p><code>regexp</code> provides a separate function for each of these tasks.</p>
+<h3 id="regexp_likesource-pattern"><code>regexp_like(source, pattern)</code></h3>
+<p>Checks if the source string matches the pattern.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">regexp_like</span>(<span style="color:#c41a16">&#39;Meet me at 10:30&#39;</span>, <span style="color:#c41a16">&#39;\d+:\d+&#39;</span>);
+<span style="color:#177500">-- 1
+</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#000">regexp_like</span>(<span style="color:#c41a16">&#39;Meet me at the cinema&#39;</span>, <span style="color:#c41a16">&#39;\d+:\d+&#39;</span>);
+<span style="color:#177500">-- 0
+</span></code></pre></div><h3 id="regexp_substrsource-pattern"><code>regexp_substr(source, pattern)</code></h3>
+<p>Returns a substring of the source string that matches the pattern.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;Meet me at 10:30&#39;</span>, <span style="color:#c41a16">&#39;\d+:\d+&#39;</span>);
+<span style="color:#177500">-- 10:30
+</span><span style="color:#177500"></span>
+<span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;Meet me at 17:05&#39;</span>, <span style="color:#c41a16">&#39;\d+:\d+&#39;</span>);
+<span style="color:#177500">-- 17:05
+</span></code></pre></div><h3 id="regexp_replacesource-pattern-replacement"><code>regexp_replace(source, pattern, replacement)</code></h3>
+<p>Replaces all matching substrings with the replacement string.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">regexp_replace</span>(<span style="color:#c41a16">&#39;password = &#34;123456&#34;&#39;</span>, <span style="color:#c41a16">&#39;&#34;[^&#34;]+&#34;&#39;</span>, <span style="color:#c41a16">&#39;***&#39;</span>);
+<span style="color:#177500">-- password = ***
+</span><span style="color:#177500"></span>
+<span style="color:#a90d91">select</span> <span style="color:#000">regexp_replace</span>(<span style="color:#c41a16">&#39;1 2 3 4&#39;</span>, <span style="color:#c41a16">&#39;[2468]&#39;</span>, <span style="color:#c41a16">&#39;even&#39;</span>);
+<span style="color:#177500">-- 1 even 3 even
+</span></code></pre></div><h2 id="pattern-syntax">Pattern syntax</h2>
+<p><code>regexp</code> supports pretty advanced syntax, including various groups, lazy quantifiers, and look-arounds:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;the year is 2020&#39;</span>, <span style="color:#c41a16">&#39;(\d{2})\1&#39;</span>);
+<span style="color:#177500">-- 2020
+</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;the year is 2021&#39;</span>, <span style="color:#c41a16">&#39;(\d{2})\1&#39;</span>);
+<span style="color:#177500">-- (null)
+</span><span style="color:#177500"></span>
+<span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;1 2 3 2 4 5&#39;</span>, <span style="color:#c41a16">&#39;.*2&#39;</span>);
+<span style="color:#177500">-- 1 2 3 2
+</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;1 2 3 2 4 5&#39;</span>, <span style="color:#c41a16">&#39;.*?2&#39;</span>);
+<span style="color:#177500">-- 1 2
+</span><span style="color:#177500"></span>
+<span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;new year&#39;</span>, <span style="color:#c41a16">&#39;(\w+)\s(?=year)&#39;</span>);
+<span style="color:#177500">-- new
+</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;last year&#39;</span>, <span style="color:#c41a16">&#39;(\w+)\s(?=year)&#39;</span>);
+<span style="color:#177500">-- last
+</span></code></pre></div><p>And much more! See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/regexp.md"><strong>documentation</strong></a> for details.</p>
+]]></content:encoded></item><item><title>Why Use SQL Window Functions</title><link>https://antonz.org/why-use-sql-window-functions/</link><pubDate>Tue, 31 Jan 2023 08:30:00 +0000</pubDate><guid>https://antonz.org/why-use-sql-window-functions/</guid><description>To build great analytical reports without Excel.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
 <p>​In short, window functions assist in building great analytical reports without Excel.</p>
 <p>The easiest way to explain it is through concrete examples. We will work with a toy employee table:</p>
 <pre tabindex="0"><code>┌────┬──────────┬────────┬────────────┬────────┐
@@ -594,9 +647,9 @@
 </ul>
 <p>A constant algorithm is always the best option, and a logarithmic one is almost always. Linear and polynomial ones are more complex — it all depends on the task with them. Sometimes it&rsquo;s a shame to choose <code>O(n)</code>, and sometimes <code>O(n²)</code> is a huge success.</p>
 <p><code>O(2ⁿ)</code> and <code>O(n!)</code> are insanely slow. So in practice, people often use suboptimal but fast algorithms.</p>
-]]></content:encoded></item><item><title>User-defined functions in SQLite</title><link>https://antonz.org/sqlean-define/</link><pubDate>Thu, 08 Sep 2022 15:30:00 +0000</pubDate><guid>https://antonz.org/sqlean-define/</guid><description>Write functions in plain SQL.</description><content:encoded><![CDATA[<p><em>Write functions in plain SQL using the &lsquo;define&rsquo; extension.</em></p>
-<p>SQLite does not directly support user-defined functions. Sure, one can write a function in C or Python and register it within SQLite. But not in SQL itself.</p>
-<p>Luckily for us, SQLite provides an extension mechanism. One of such extensions — <code>define</code> — allows writing functions in regular SQL.</p>
+]]></content:encoded></item><item><title>User-Defined Functions in SQLite</title><link>https://antonz.org/sqlean-define/</link><pubDate>Thu, 08 Sep 2022 15:30:00 +0000</pubDate><guid>https://antonz.org/sqlean-define/</guid><description>Write functions in plain SQL.</description><content:encoded><![CDATA[<p>Most database engines provide a lot of built-in functions. Still, sometimes they are not enough, and people turn to writing their own — <em>user-defined</em> — functions in plain SQL or some SQL-based language (like pl/sql in Oracle or pl/pgsql in Postgres).</p>
+<p>SQLite does not support user-defined functions by default. But you can easily enable them using the <code>define</code> extension.</p>
+<p><strong>Note</strong>. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
 <p>With <code>define</code> writing a custom function becomes as easy as:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">define</span>(<span style="color:#c41a16">&#39;sumn&#39;</span>, <span style="color:#c41a16">&#39;:n * (:n + 1) / 2&#39;</span>);
 </code></pre></div><p>And then using it as any built-in function:</p>
@@ -616,7 +669,7 @@
 </code></pre></div><p>Delete a function:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">undefine</span>(<span style="color:#c41a16">&#39;sumn&#39;</span>);
 </code></pre></div><p>There is even a way to return multiple values from a function!</p>
-<p>→ <a href="https://github.com/nalgeon/sqlean/blob/main/docs/define.md"><strong>See the docs for details</strong></a></p>
+<p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/define.md"><strong>documentation</strong></a> for details.</p>
 ]]></content:encoded></item><item><title>JSON Lines</title><link>https://antonz.org/json-lines/</link><pubDate>Thu, 04 Aug 2022 18:30:00 +0000</pubDate><guid>https://antonz.org/json-lines/</guid><description>CSV on steroids.</description><content:encoded><![CDATA[<p>Worked with the <a href="https://jsonlines.org/">JSON Lines</a> format the other day. It&rsquo;s a CSV on steroids:</p>
 <ul>
 <li>each entry is a separate line, as in CSV;</li>
@@ -782,43 +835,4 @@ Success: no issues found in <span style="color:#1c01ce">1</span> <span style="co
 <h2 id="summary">Summary</h2>
 <p>If your code should work consistently with different types, find their common behavior and specify it in the protocol. Use the protocol type for static code validation using mypy.</p>
 <p>Avoid pigeons, planes, and superheroes whenever possible. They are nothing but problems.</p>
-]]></content:encoded></item><item><title>Random numbers and sequences in Python</title><link>https://antonz.org/random/</link><pubDate>Mon, 23 May 2022 15:30:00 +0000</pubDate><guid>https://antonz.org/random/</guid><description>There is much more than just randint()</description><content:encoded><![CDATA[<p>Everybody knows about <code>random.randint(a, b)</code> in Python, which returns a ≤ n ≤ b:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">randint</span>(<span style="color:#1c01ce">10</span>, <span style="color:#1c01ce">99</span>)
-<span style="color:#177500"># 59</span>
-</code></pre></div><p>But the <code>random</code> module has so much more to offer.</p>
-<p>Like selecting a number from a range <strong>with a step</strong>:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">randrange</span>(<span style="color:#1c01ce">10</span>, <span style="color:#1c01ce">99</span>, <span style="color:#1c01ce">3</span>)
-<span style="color:#177500"># 91</span>
-</code></pre></div><p>Or a random <strong>sequence element</strong>:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">numbers</span> <span style="color:#000">=</span> [<span style="color:#1c01ce">7</span>, <span style="color:#1c01ce">9</span>, <span style="color:#1c01ce">13</span>, <span style="color:#1c01ce">42</span>, <span style="color:#1c01ce">64</span>, <span style="color:#1c01ce">99</span>]
-<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">choice</span>(<span style="color:#000">numbers</span>)
-<span style="color:#177500"># 42</span>
-</code></pre></div><p>Or <strong>multiple</strong> elements:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">numbers</span> <span style="color:#000">=</span> <span style="color:#a90d91">range</span>(<span style="color:#1c01ce">99</span>, <span style="color:#1c01ce">10</span>, <span style="color:#000">-</span><span style="color:#1c01ce">1</span>)
-<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">choices</span>(<span style="color:#000">numbers</span>, <span style="color:#000">k</span><span style="color:#000">=</span><span style="color:#1c01ce">3</span>)
-<span style="color:#177500"># [32, 62, 76]</span>
-</code></pre></div><p>How about choosing some elements <strong>more often</strong> than others? Sure:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">numbers</span> <span style="color:#000">=</span> [<span style="color:#1c01ce">7</span>, <span style="color:#1c01ce">9</span>, <span style="color:#1c01ce">13</span>, <span style="color:#1c01ce">42</span>, <span style="color:#1c01ce">64</span>, <span style="color:#1c01ce">99</span>]
-<span style="color:#000">weights</span> <span style="color:#000">=</span> [<span style="color:#1c01ce">10</span>, <span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">1</span>]
-
-<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">choices</span>(<span style="color:#000">numbers</span>, <span style="color:#000">weights</span>, <span style="color:#000">k</span><span style="color:#000">=</span><span style="color:#1c01ce">3</span>)
-<span style="color:#177500"># [42, 13, 7]</span>
-
-<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">choices</span>(<span style="color:#000">numbers</span>, <span style="color:#000">weights</span>, <span style="color:#000">k</span><span style="color:#000">=</span><span style="color:#1c01ce">3</span>)
-<span style="color:#177500"># [7, 7, 7]</span>
-
-<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">choices</span>(<span style="color:#000">numbers</span>, <span style="color:#000">weights</span>, <span style="color:#000">k</span><span style="color:#000">=</span><span style="color:#1c01ce">3</span>)
-<span style="color:#177500"># [13, 7, 7]</span>
-</code></pre></div><p>Wanna see a sample <strong>without repetitions</strong>? No problem:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">numbers</span> <span style="color:#000">=</span> [<span style="color:#1c01ce">7</span>, <span style="color:#1c01ce">9</span>, <span style="color:#1c01ce">13</span>, <span style="color:#1c01ce">42</span>, <span style="color:#1c01ce">64</span>, <span style="color:#1c01ce">99</span>]
-<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">sample</span>(<span style="color:#000">numbers</span>, <span style="color:#000">k</span><span style="color:#000">=</span><span style="color:#1c01ce">3</span>)
-<span style="color:#177500"># [42, 99, 7]</span>
-</code></pre></div><p>Or even <strong>shuffle</strong> the whole sequence:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">numbers</span> <span style="color:#000">=</span> [<span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">2</span>, <span style="color:#1c01ce">3</span>, <span style="color:#1c01ce">4</span>, <span style="color:#1c01ce">5</span>]
-<span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">shuffle</span>(<span style="color:#000">numbers</span>)
-<span style="color:#177500"># [3, 2, 1, 5, 4]</span>
-</code></pre></div><p>There are also countless <strong>real-valued</strong> distributions like <code>uniform()</code>, <code>gauss()</code>, <code>expovariate()</code>, <code>paretovariate()</code> and many more. Not gonna get into the specifics now — <a href="https://docs.python.org/3/library/random.html#real-valued-distributions">see for yourself</a> if your are a statistics fan.</p>
-<p>Last but not least. When testing, <strong>seed</strong> the generator with a constant so that it gives reproducible results:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">random</span><span style="color:#000">.</span><span style="color:#000">seed</span>(<span style="color:#1c01ce">42</span>)
-</code></pre></div><p>On the contrary, use <code>seed()</code> without arguments in production. Python will then use the sources of randomness provided by the operating system.</p>
 ]]></content:encoded></item></channel></rss>

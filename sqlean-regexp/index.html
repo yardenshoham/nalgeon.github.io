@@ -1,0 +1,157 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Regular Expressions in SQLite</title>
+<meta name=description content="Use a robust pattern matching and text replacement tool from SQL.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.c2f86e8a28056be4aaf7f4b77a4b6bbab6574b81405f2bda7ee54ab7370da7cd.css>
+<link rel=icon href=/assets/favicon/favicon.ico sizes=any>
+<link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=manifest href=/assets/favicon/manifest.json>
+<link rel=canonical href=https://antonz.org/sqlean-regexp/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Regular Expressions in SQLite">
+<meta property="og:description" content="Use a robust pattern matching and text replacement tool from SQL.">
+<meta property="og:url" content="https://antonz.org/sqlean-regexp/">
+<meta property="og:image" content="https://antonz.org/sqlean-regexp/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Regular Expressions in SQLite">
+<meta name=twitter:description content="Use a robust pattern matching and text replacement tool from SQL.">
+<meta name=twitter:url content="https://antonz.org/sqlean-regexp/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/sqlean-regexp/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Regular Expressions in SQLite</h1>
+</header>
+<p>Regular expressions are probably the most powerful text processing tool without programming.</p>
+<p>SQLite does not support regular expressions by default. But you can easily enable them using the <code>regexp</code> extension.</p>
+<p><strong>Note</strong>. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
+<p>With <code>regexp</code>, matching a string against a pattern becomes as easy as:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#177500>-- count messages containing digits
+</span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#a90d91>count</span>(<span style=color:#000>*</span>) <span style=color:#a90d91>from</span> <span style=color:#000>messages</span>
+<span style=color:#a90d91>where</span> <span style=color:#000>msg_text</span> <span style=color:#000>regexp</span> <span style=color:#c41a16>&#39;\d+&#39;</span>;
+<span style=color:#177500>-- 42
+</span></code></pre></div><h2 id=pattern-matching-and-text-replacement>Pattern matching and text replacement</h2>
+<p>There are three main tasks people usually solve using regular expressions:</p>
+<ol>
+<li>Match a string against the pattern.</li>
+<li>Extract a part of the string that matches the pattern.</li>
+<li>Replace all parts of the string that match the pattern.</li>
+</ol>
+<p><code>regexp</code> provides a separate function for each of these tasks.</p>
+<h3 id=regexp_likesource-pattern><code>regexp_like(source, pattern)</code></h3>
+<p>Checks if the source string matches the pattern.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>regexp_like</span>(<span style=color:#c41a16>&#39;Meet me at 10:30&#39;</span>, <span style=color:#c41a16>&#39;\d+:\d+&#39;</span>);
+<span style=color:#177500>-- 1
+</span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#000>regexp_like</span>(<span style=color:#c41a16>&#39;Meet me at the cinema&#39;</span>, <span style=color:#c41a16>&#39;\d+:\d+&#39;</span>);
+<span style=color:#177500>-- 0
+</span></code></pre></div><h3 id=regexp_substrsource-pattern><code>regexp_substr(source, pattern)</code></h3>
+<p>Returns a substring of the source string that matches the pattern.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>regexp_substr</span>(<span style=color:#c41a16>&#39;Meet me at 10:30&#39;</span>, <span style=color:#c41a16>&#39;\d+:\d+&#39;</span>);
+<span style=color:#177500>-- 10:30
+</span><span style=color:#177500></span>
+<span style=color:#a90d91>select</span> <span style=color:#000>regexp_substr</span>(<span style=color:#c41a16>&#39;Meet me at 17:05&#39;</span>, <span style=color:#c41a16>&#39;\d+:\d+&#39;</span>);
+<span style=color:#177500>-- 17:05
+</span></code></pre></div><h3 id=regexp_replacesource-pattern-replacement><code>regexp_replace(source, pattern, replacement)</code></h3>
+<p>Replaces all matching substrings with the replacement string.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>regexp_replace</span>(<span style=color:#c41a16>&#39;password = &#34;123456&#34;&#39;</span>, <span style=color:#c41a16>&#39;&#34;[^&#34;]+&#34;&#39;</span>, <span style=color:#c41a16>&#39;***&#39;</span>);
+<span style=color:#177500>-- password = ***
+</span><span style=color:#177500></span>
+<span style=color:#a90d91>select</span> <span style=color:#000>regexp_replace</span>(<span style=color:#c41a16>&#39;1 2 3 4&#39;</span>, <span style=color:#c41a16>&#39;[2468]&#39;</span>, <span style=color:#c41a16>&#39;even&#39;</span>);
+<span style=color:#177500>-- 1 even 3 even
+</span></code></pre></div><h2 id=pattern-syntax>Pattern syntax</h2>
+<p><code>regexp</code> supports pretty advanced syntax, including various groups, lazy quantifiers, and look-arounds:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>regexp_substr</span>(<span style=color:#c41a16>&#39;the year is 2020&#39;</span>, <span style=color:#c41a16>&#39;(\d{2})\1&#39;</span>);
+<span style=color:#177500>-- 2020
+</span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#000>regexp_substr</span>(<span style=color:#c41a16>&#39;the year is 2021&#39;</span>, <span style=color:#c41a16>&#39;(\d{2})\1&#39;</span>);
+<span style=color:#177500>-- (null)
+</span><span style=color:#177500></span>
+<span style=color:#a90d91>select</span> <span style=color:#000>regexp_substr</span>(<span style=color:#c41a16>&#39;1 2 3 2 4 5&#39;</span>, <span style=color:#c41a16>&#39;.*2&#39;</span>);
+<span style=color:#177500>-- 1 2 3 2
+</span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#000>regexp_substr</span>(<span style=color:#c41a16>&#39;1 2 3 2 4 5&#39;</span>, <span style=color:#c41a16>&#39;.*?2&#39;</span>);
+<span style=color:#177500>-- 1 2
+</span><span style=color:#177500></span>
+<span style=color:#a90d91>select</span> <span style=color:#000>regexp_substr</span>(<span style=color:#c41a16>&#39;new year&#39;</span>, <span style=color:#c41a16>&#39;(\w+)\s(?=year)&#39;</span>);
+<span style=color:#177500>-- new
+</span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#000>regexp_substr</span>(<span style=color:#c41a16>&#39;last year&#39;</span>, <span style=color:#c41a16>&#39;(\w+)\s(?=year)&#39;</span>);
+<span style=color:#177500>-- last
+</span></code></pre></div><p>And much more! See <a href=https://github.com/nalgeon/sqlean/blob/main/docs/regexp.md><strong>documentation</strong></a> for details.</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2023-02-04 11:20:00 +0000 UTC">04 Feb, 2023</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/sqlite/>sqlite</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/why-use-sql-window-functions/>Why Use SQL Window Functions</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sqlean-define/>User-Defined Functions in SQLite</a></p>
+<p><a href=/cte/>Common Table Expressions in SQL</a></p>
+<p><a href=/temp-tables/>Temporary tables in SQLite</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
