@@ -13,6 +13,8 @@ SQLite does not support user-defined functions by default. But you can easily en
 
 **Note**. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.
 
+## Custom Functions
+
 With `define` writing a custom function becomes as easy as:
 
 ```sql
@@ -53,5 +55,23 @@ select undefine('sumn');
 ```
 
 There is even a way to return multiple values from a function!
+
+## Dynamic SQL
+
+To dynamically compose an SQL query and execute it without creating a function, use `eval()`:
+
+```sql
+select eval('select 10 + 32');
+-- 42
+```
+
+Supports any DDL or DML queries:
+
+```sql
+select eval('create table tmp(value int)');
+select eval('insert into tmp(value) values (1), (2), (3)');
+select eval('select value from tmp');
+select eval('drop table tmp');
+```
 
 See [**documentation**](https://github.com/nalgeon/sqlean/blob/main/docs/define.md) for details.
