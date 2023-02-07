@@ -1,0 +1,238 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Cherry-Picked Features from Go 1.20</title>
+<meta name=description content="Multi-errors, context cancellation cause, new date formats, and other notable changes.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.d5574c61892ae0c9bca2eab9c37cfcbc17d93429a85b516e1dd46f7df294f4cc.css>
+<link rel=icon href=/assets/favicon/favicon.ico sizes=any>
+<link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=manifest href=/assets/favicon/manifest.json>
+<link rel=canonical href=https://antonz.org/go-1-20/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Cherry-Picked Features from Go 1.20">
+<meta property="og:description" content="Multi-errors, context cancellation cause, new date formats, and other notable changes.">
+<meta property="og:url" content="https://antonz.org/go-1-20/">
+<meta property="og:image" content="https://antonz.org/go-1-20/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Cherry-Picked Features from Go 1.20">
+<meta name=twitter:description content="Multi-errors, context cancellation cause, new date formats, and other notable changes.">
+<meta name=twitter:url content="https://antonz.org/go-1-20/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/go-1-20/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Cherry-Picked Features from Go 1.20</h1>
+</header>
+<p>Go 1.20 brought a lot of new features and improvements. In this post, I&rsquo;d like to review the ones that caught my eye. This is by no means an exhaustive list; for that, see the official <a href=https://tip.golang.org/doc/go1.20>release notes</a>.</p>
+<p>These are the topics for review:</p>
+<ul>
+<li><a href=#multi-errors>Multi-errors</a></li>
+<li><a href=#context-canceled-cause>&lsquo;Context Canceled&rsquo; Cause</a></li>
+<li><a href=#new-date-formats>New Date Formats</a></li>
+<li><a href=#slice-to-array-conversion>Slice to Array Conversion</a></li>
+<li><a href=#other-notable-changes>Other Notable Changes</a></li>
+</ul>
+<p>Each section has a playground link, so check those out.</p>
+<h2 id=multi-errors>Multi-errors</h2>
+<p>The &ldquo;errors as values&rdquo; concept (as opposed to exceptions) has gained renewed popularity in modern languages such as Go and Rust. You know this well because it&rsquo;s impossible to take a step without tripping over an error value in Go.</p>
+<p>Go 1.20 has brought us new joy — the combination of errors through <code>errors.Join()</code>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>errRaining</span> <span style=color:#000>:=</span> <span style=color:#000>errors</span>.<span style=color:#000>New</span>(<span style=color:#c41a16>&#34;it&#39;s raining&#34;</span>)
+<span style=color:#000>errWindy</span> <span style=color:#000>:=</span> <span style=color:#000>errors</span>.<span style=color:#000>New</span>(<span style=color:#c41a16>&#34;it&#39;s windy&#34;</span>)
+<span style=color:#000>err</span> <span style=color:#000>:=</span> <span style=color:#000>errors</span>.<span style=color:#000>Join</span>(<span style=color:#000>errRaining</span>, <span style=color:#000>errWindy</span>)
+</code></pre></div><p>Now <code>err</code> is both <code>errRaining</code> and <code>errWindy</code> at the same time. The standard functions <code>errors.Is()</code> and <code>errors.As()</code> can work with this:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>if</span> <span style=color:#000>errors</span>.<span style=color:#000>Is</span>(<span style=color:#000>err</span>, <span style=color:#000>errRaining</span>) {
+    <span style=color:#000>fmt</span>.<span style=color:#000>Println</span>(<span style=color:#c41a16>&#34;ouch!&#34;</span>)
+}
+<span style=color:#177500>// ouch!
+</span></code></pre></div><p><code>fmt.Errorf()</code> has also learned to combine errors:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>err</span> <span style=color:#000>:=</span> <span style=color:#000>fmt</span>.<span style=color:#000>Errorf</span>(
+    <span style=color:#c41a16>&#34;reasons to skip work: %w, %w&#34;</span>,
+    <span style=color:#000>errRaining</span>,
+    <span style=color:#000>errWindy</span>,
+)
+</code></pre></div><p>To accept multiple errors in your own error type, return <code>[]error</code> from the <code>Unwrap()</code> method:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>type</span> <span style=color:#000>RefusalErr</span> <span style=color:#a90d91>struct</span> {
+    <span style=color:#000>reasons</span> []<span style=color:#a90d91>error</span>
+}
+
+<span style=color:#a90d91>func</span> (<span style=color:#000>e</span> <span style=color:#000>RefusalErr</span>) <span style=color:#000>Unwrap</span>() []<span style=color:#a90d91>error</span> {
+    <span style=color:#a90d91>return</span> <span style=color:#000>e</span>.<span style=color:#000>reasons</span>
+}
+
+<span style=color:#a90d91>func</span> (<span style=color:#000>e</span> <span style=color:#000>RefusalErr</span>) <span style=color:#000>Error</span>() <span style=color:#a90d91>string</span> {
+    <span style=color:#a90d91>return</span> <span style=color:#000>fmt</span>.<span style=color:#000>Sprintf</span>(<span style=color:#c41a16>&#34;refusing: %v&#34;</span>, <span style=color:#000>e</span>.<span style=color:#000>reasons</span>)
+}
+</code></pre></div><p>If you love errors, this change will definitely be to your liking. If not&mldr; well, you always have panic :)</p>
+<p><a href=https://go.dev/play/p/CftXuesNA1q>playground</a></p>
+<h2 id=context-canceled-cause>&lsquo;Context Canceled&rsquo; Cause</h2>
+<p>A <code>context.Canceled</code> error occurs when the context is canceled. This is no news:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>ctx</span>, <span style=color:#000>cancel</span> <span style=color:#000>:=</span> <span style=color:#000>context</span>.<span style=color:#000>WithCancel</span>(<span style=color:#000>context</span>.<span style=color:#000>Background</span>())
+<span style=color:#000>cancel</span>()
+
+<span style=color:#000>fmt</span>.<span style=color:#000>Println</span>(<span style=color:#000>ctx</span>.<span style=color:#000>Err</span>())
+<span style=color:#177500>// context canceled
+</span></code></pre></div><p>Starting from 1.20, we can create a context using <code>context.WithCancelCause()</code>. Then <code>cancel()</code> will take one parameter — the root <em>cause</em> of the error:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>ctx</span>, <span style=color:#000>cancel</span> <span style=color:#000>:=</span> <span style=color:#000>context</span>.<span style=color:#000>WithCancelCause</span>(<span style=color:#000>context</span>.<span style=color:#000>Background</span>())
+<span style=color:#000>cancel</span>(<span style=color:#000>errors</span>.<span style=color:#000>New</span>(<span style=color:#c41a16>&#34;the night is dark&#34;</span>))
+</code></pre></div><p><code>context.Cause()</code> extracts the cause of the error from the context:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>fmt</span>.<span style=color:#000>Println</span>(<span style=color:#000>ctx</span>.<span style=color:#000>Err</span>())
+<span style=color:#177500>// context canceled
+</span><span style=color:#177500></span>
+<span style=color:#000>fmt</span>.<span style=color:#000>Println</span>(<span style=color:#000>context</span>.<span style=color:#000>Cause</span>(<span style=color:#000>ctx</span>))
+<span style=color:#177500>// the night is dark
+</span></code></pre></div><p>You may ask — why <code>context.Cause()</code>? It seems logical to add the <code>Cause()</code> method to the context itself, similar to the <code>Err()</code> method.</p>
+<p>Sure. But <code>Context</code> is an interface. And any change to the interface breaks backward compatibility. That&rsquo;s why it was done differently.</p>
+<p><a href=https://go.dev/play/p/oDLOGfzSUvS>playground</a></p>
+<h2 id=new-date-formats>New Date Formats</h2>
+<p><em>Please don&rsquo;t be offended by this section if you are a North American. We love you people, but sometimes your view of the world can be a bit&mldr; biased.</em></p>
+<p>You surely know that the Go authors chose a quite unorthodox format for the date and time layout.</p>
+<p>For example, parsing the date <code>2023-01-25 09:30</code> looks like this:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>const</span> <span style=color:#000>layout</span> = <span style=color:#c41a16>&#34;2006-01-02 15:04&#34;</span>
+<span style=color:#000>t</span>, <span style=color:#000>_</span> <span style=color:#000>:=</span> <span style=color:#000>time</span>.<span style=color:#000>Parse</span>(<span style=color:#000>layout</span>, <span style=color:#c41a16>&#34;2023-01-25 09:30&#34;</span>)
+<span style=color:#000>fmt</span>.<span style=color:#000>Println</span>(<span style=color:#000>t</span>)
+<span style=color:#177500>// 2023-01-25 09:30:00 +0000 UTC
+</span></code></pre></div><p>While <code>01/02 03:04:05PM '06</code> may be a nice mnemonic in the US, it&rsquo;s entirely cryptic for the European (or Asian) eye.</p>
+<p>The Go authors have thoughtfully provided 12 standard date/time masks, of which only <code>RFC3339</code> and <code>RFC3339Nano</code> are suitable for non-Americans. Others are as mysterious as the imperial measurement system:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>Layout</span>      = <span style=color:#c41a16>&#34;01/02 03:04:05PM &#39;06 -0700&#34;</span>
+<span style=color:#000>ANSIC</span>       = <span style=color:#c41a16>&#34;Mon Jan _2 15:04:05 2006&#34;</span>
+<span style=color:#000>UnixDate</span>    = <span style=color:#c41a16>&#34;Mon Jan _2 15:04:05 MST 2006&#34;</span>
+<span style=color:#000>RubyDate</span>    = <span style=color:#c41a16>&#34;Mon Jan 02 15:04:05 -0700 2006&#34;</span>
+<span style=color:#000>RFC822</span>      = <span style=color:#c41a16>&#34;02 Jan 06 15:04 MST&#34;</span>
+<span style=color:#000>RFC822Z</span>     = <span style=color:#c41a16>&#34;02 Jan 06 15:04 -0700&#34;</span>
+<span style=color:#000>RFC850</span>      = <span style=color:#c41a16>&#34;Monday, 02-Jan-06 15:04:05 MST&#34;</span>
+<span style=color:#000>RFC1123</span>     = <span style=color:#c41a16>&#34;Mon, 02 Jan 2006 15:04:05 MST&#34;</span>
+<span style=color:#000>RFC1123Z</span>    = <span style=color:#c41a16>&#34;Mon, 02 Jan 2006 15:04:05 -0700&#34;</span>
+<span style=color:#000>Kitchen</span>     = <span style=color:#c41a16>&#34;3:04PM&#34;</span>
+</code></pre></div><p>Ten years have passed, and the Go development team began to suspect something. They learned that there are several other popular date formats worldwide. And, starting with version 1.20, they added three new masks:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>DateTime</span> = <span style=color:#c41a16>&#34;2006-01-02 15:04:05&#34;</span>
+<span style=color:#000>DateOnly</span> = <span style=color:#c41a16>&#34;2006-01-02&#34;</span>
+<span style=color:#000>TimeOnly</span> = <span style=color:#c41a16>&#34;15:04:05&#34;</span>
+</code></pre></div><p>Now we can finally do this:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>t</span>, <span style=color:#000>_</span> <span style=color:#000>:=</span> <span style=color:#000>time</span>.<span style=color:#000>Parse</span>(<span style=color:#000>time</span>.<span style=color:#000>DateOnly</span>, <span style=color:#c41a16>&#34;2023-01-25&#34;</span>)
+<span style=color:#000>fmt</span>.<span style=color:#000>Println</span>(<span style=color:#000>t</span>)
+<span style=color:#177500>// 2023-01-25 00:00:00 +0000 UTC
+</span></code></pre></div><p>Nice!</p>
+<p><a href=https://go.dev/play/p/d3Vfyt43c0v>playground</a></p>
+<h2 id=slice-to-array-conversion>Slice to Array Conversion</h2>
+<p>Starting from version 1.17, we can get a pointer to an array under the slice:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>s</span> <span style=color:#000>:=</span> []<span style=color:#a90d91>int</span>{<span style=color:#1c01ce>1</span>, <span style=color:#1c01ce>2</span>, <span style=color:#1c01ce>3</span>}
+<span style=color:#000>arrp</span> <span style=color:#000>:=</span> (<span style=color:#000>*</span>[<span style=color:#1c01ce>3</span>]<span style=color:#a90d91>int</span>)(<span style=color:#000>s</span>)
+</code></pre></div><p>By changing the array through the pointer, we are also changing the slice:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>arrp</span>[<span style=color:#1c01ce>2</span>] = <span style=color:#1c01ce>42</span>
+<span style=color:#000>fmt</span>.<span style=color:#000>Println</span>(<span style=color:#000>s</span>)
+<span style=color:#177500>// [1 2 42]
+</span></code></pre></div><p>In Go 1.20, we can also get a copy of the array under the slice:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>s</span> <span style=color:#000>:=</span> []<span style=color:#a90d91>int</span>{<span style=color:#1c01ce>1</span>, <span style=color:#1c01ce>2</span>, <span style=color:#1c01ce>3</span>}
+<span style=color:#000>arr</span> <span style=color:#000>:=</span> [<span style=color:#1c01ce>3</span>]<span style=color:#a90d91>int</span>(<span style=color:#000>s</span>)
+</code></pre></div><p>Changes in such an array are not reflected in the slice:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>arr</span>[<span style=color:#1c01ce>2</span>] = <span style=color:#1c01ce>42</span>
+<span style=color:#000>fmt</span>.<span style=color:#000>Println</span>(<span style=color:#000>arr</span>)
+<span style=color:#177500>// [1 2 42]
+</span><span style=color:#177500></span><span style=color:#000>fmt</span>.<span style=color:#000>Println</span>(<span style=color:#000>s</span>)
+<span style=color:#177500>// [1 2 3]
+</span></code></pre></div><p>This is, in essence, syntactic sugar because we could get a copy of the array before:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>s</span> <span style=color:#000>:=</span> []<span style=color:#a90d91>int</span>{<span style=color:#1c01ce>1</span>, <span style=color:#1c01ce>2</span>, <span style=color:#1c01ce>3</span>}
+<span style=color:#000>arr</span> <span style=color:#000>:=</span> <span style=color:#000>*</span>(<span style=color:#000>*</span>[<span style=color:#1c01ce>3</span>]<span style=color:#a90d91>int</span>)(<span style=color:#000>s</span>)
+</code></pre></div><p>The new notation is cleaner, of course.</p>
+<p><a href=https://go.dev/play/p/9eTgSj2MO4V>playground</a></p>
+<h2 id=other-notable-changes>Other Notable Changes</h2>
+<p><strong>bytes.Clone()</strong> function clones a byte slice:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>b</span> <span style=color:#000>:=</span> []<span style=color:#a90d91>byte</span>(<span style=color:#c41a16>&#34;abc&#34;</span>)
+<span style=color:#000>clone</span> <span style=color:#000>:=</span> <span style=color:#000>bytes</span>.<span style=color:#000>Clone</span>(<span style=color:#000>b</span>)
+</code></pre></div><p><strong>math/rand</strong> package now automatically initializes the random number generator with a random starting value, so there is no need for a separate <code>rand.Seed()</code> call.</p>
+<p><strong>strings.CutPrefix()</strong> and <code>strings.CutSuffix()</code> functions trim a prefix/suffix from a string similarly to <code>TrimPrefix</code>/<code>TrimSuffix</code>, but they also indicate whether the prefix was present in the string:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>s</span> <span style=color:#000>:=</span> <span style=color:#c41a16>&#34;&gt; go!&#34;</span>
+<span style=color:#000>s</span>, <span style=color:#000>found</span> <span style=color:#000>:=</span> <span style=color:#000>strings</span>.<span style=color:#000>CutPrefix</span>(<span style=color:#000>s</span>, <span style=color:#c41a16>&#34;&gt; &#34;</span>)
+<span style=color:#000>fmt</span>.<span style=color:#000>Println</span>(<span style=color:#000>s</span>, <span style=color:#000>found</span>)
+<span style=color:#177500>// go! true
+</span></code></pre></div><p><strong>sync.Map</strong> now has atomic methods <code>Swap</code>, <code>CompareAndSwap</code>, and <code>CompareAndDelete</code>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#a90d91>var</span> <span style=color:#000>m</span> <span style=color:#000>sync</span>.<span style=color:#000>Map</span>
+<span style=color:#000>m</span>.<span style=color:#000>Store</span>(<span style=color:#c41a16>&#34;name&#34;</span>, <span style=color:#c41a16>&#34;Alice&#34;</span>)
+<span style=color:#000>prev</span>, <span style=color:#000>ok</span> <span style=color:#000>:=</span> <span style=color:#000>m</span>.<span style=color:#000>Swap</span>(<span style=color:#c41a16>&#34;name&#34;</span>, <span style=color:#c41a16>&#34;Bob&#34;</span>)
+<span style=color:#000>fmt</span>.<span style=color:#000>Println</span>(<span style=color:#000>prev</span>, <span style=color:#000>ok</span>)
+<span style=color:#177500>// Alice true
+</span></code></pre></div><p><strong>time.Compare()</strong> function compares two times and returns -1/0/1 based on the comparison results:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#000>t1</span> <span style=color:#000>:=</span> <span style=color:#000>time</span>.<span style=color:#000>Now</span>()
+<span style=color:#000>t2</span> <span style=color:#000>:=</span> <span style=color:#000>t1</span>.<span style=color:#000>Add</span>(<span style=color:#1c01ce>10</span> <span style=color:#000>*</span> <span style=color:#000>time</span>.<span style=color:#000>Minute</span>)
+<span style=color:#000>cmp</span> <span style=color:#000>:=</span> <span style=color:#000>t2</span>.<span style=color:#000>Compare</span>(<span style=color:#000>t1</span>)
+<span style=color:#000>fmt</span>.<span style=color:#000>Println</span>(<span style=color:#000>cmp</span>)
+<span style=color:#177500>// 1
+</span></code></pre></div><p>Overall, a great release! Looking forward to trying everything in production.</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2023-02-07 12:00:00 +0000 UTC">07 Feb, 2023</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/thank-go/>thank go!</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/sqlean-regexp/>Regular Expressions in SQLite</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/atomics-composition/>Atomic operations composition in Go</a></p>
+<p><a href=/idempotent-close/>Idempotent Close in Go</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>

@@ -1,4 +1,139 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 04 Feb 2023 11:20:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Regular Expressions in SQLite</title><link>https://antonz.org/sqlean-regexp/</link><pubDate>Sat, 04 Feb 2023 11:20:00 +0000</pubDate><guid>https://antonz.org/sqlean-regexp/</guid><description>Use a robust pattern matching and text replacement tool from SQL.</description><content:encoded><![CDATA[<p>Regular expressions are probably the most powerful text processing tool without programming.</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Tue, 07 Feb 2023 12:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Cherry-Picked Features from Go 1.20</title><link>https://antonz.org/go-1-20/</link><pubDate>Tue, 07 Feb 2023 12:00:00 +0000</pubDate><guid>https://antonz.org/go-1-20/</guid><description>Multi-errors, context cancellation cause, new date formats, and other notable changes.</description><content:encoded><![CDATA[<p>Go 1.20 brought a lot of new features and improvements. In this post, I&rsquo;d like to review the ones that caught my eye. This is by no means an exhaustive list; for that, see the official <a href="https://tip.golang.org/doc/go1.20">release notes</a>.</p>
+<p>These are the topics for review:</p>
+<ul>
+<li><a href="#multi-errors">Multi-errors</a></li>
+<li><a href="#context-canceled-cause">&lsquo;Context Canceled&rsquo; Cause</a></li>
+<li><a href="#new-date-formats">New Date Formats</a></li>
+<li><a href="#slice-to-array-conversion">Slice to Array Conversion</a></li>
+<li><a href="#other-notable-changes">Other Notable Changes</a></li>
+</ul>
+<p>Each section has a playground link, so check those out.</p>
+<h2 id="multi-errors">Multi-errors</h2>
+<p>The &ldquo;errors as values&rdquo; concept (as opposed to exceptions) has gained renewed popularity in modern languages such as Go and Rust. You know this well because it&rsquo;s impossible to take a step without tripping over an error value in Go.</p>
+<p>Go 1.20 has brought us new joy — the combination of errors through <code>errors.Join()</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">errRaining</span> <span style="color:#000">:=</span> <span style="color:#000">errors</span>.<span style="color:#000">New</span>(<span style="color:#c41a16">&#34;it&#39;s raining&#34;</span>)
+<span style="color:#000">errWindy</span> <span style="color:#000">:=</span> <span style="color:#000">errors</span>.<span style="color:#000">New</span>(<span style="color:#c41a16">&#34;it&#39;s windy&#34;</span>)
+<span style="color:#000">err</span> <span style="color:#000">:=</span> <span style="color:#000">errors</span>.<span style="color:#000">Join</span>(<span style="color:#000">errRaining</span>, <span style="color:#000">errWindy</span>)
+</code></pre></div><p>Now <code>err</code> is both <code>errRaining</code> and <code>errWindy</code> at the same time. The standard functions <code>errors.Is()</code> and <code>errors.As()</code> can work with this:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a90d91">if</span> <span style="color:#000">errors</span>.<span style="color:#000">Is</span>(<span style="color:#000">err</span>, <span style="color:#000">errRaining</span>) {
+    <span style="color:#000">fmt</span>.<span style="color:#000">Println</span>(<span style="color:#c41a16">&#34;ouch!&#34;</span>)
+}
+<span style="color:#177500">// ouch!
+</span></code></pre></div><p><code>fmt.Errorf()</code> has also learned to combine errors:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">err</span> <span style="color:#000">:=</span> <span style="color:#000">fmt</span>.<span style="color:#000">Errorf</span>(
+    <span style="color:#c41a16">&#34;reasons to skip work: %w, %w&#34;</span>,
+    <span style="color:#000">errRaining</span>,
+    <span style="color:#000">errWindy</span>,
+)
+</code></pre></div><p>To accept multiple errors in your own error type, return <code>[]error</code> from the <code>Unwrap()</code> method:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a90d91">type</span> <span style="color:#000">RefusalErr</span> <span style="color:#a90d91">struct</span> {
+    <span style="color:#000">reasons</span> []<span style="color:#a90d91">error</span>
+}
+
+<span style="color:#a90d91">func</span> (<span style="color:#000">e</span> <span style="color:#000">RefusalErr</span>) <span style="color:#000">Unwrap</span>() []<span style="color:#a90d91">error</span> {
+    <span style="color:#a90d91">return</span> <span style="color:#000">e</span>.<span style="color:#000">reasons</span>
+}
+
+<span style="color:#a90d91">func</span> (<span style="color:#000">e</span> <span style="color:#000">RefusalErr</span>) <span style="color:#000">Error</span>() <span style="color:#a90d91">string</span> {
+    <span style="color:#a90d91">return</span> <span style="color:#000">fmt</span>.<span style="color:#000">Sprintf</span>(<span style="color:#c41a16">&#34;refusing: %v&#34;</span>, <span style="color:#000">e</span>.<span style="color:#000">reasons</span>)
+}
+</code></pre></div><p>If you love errors, this change will definitely be to your liking. If not&hellip; well, you always have panic :)</p>
+<p><a href="https://go.dev/play/p/CftXuesNA1q">playground</a></p>
+<h2 id="context-canceled-cause">&lsquo;Context Canceled&rsquo; Cause</h2>
+<p>A <code>context.Canceled</code> error occurs when the context is canceled. This is no news:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">ctx</span>, <span style="color:#000">cancel</span> <span style="color:#000">:=</span> <span style="color:#000">context</span>.<span style="color:#000">WithCancel</span>(<span style="color:#000">context</span>.<span style="color:#000">Background</span>())
+<span style="color:#000">cancel</span>()
+
+<span style="color:#000">fmt</span>.<span style="color:#000">Println</span>(<span style="color:#000">ctx</span>.<span style="color:#000">Err</span>())
+<span style="color:#177500">// context canceled
+</span></code></pre></div><p>Starting from 1.20, we can create a context using <code>context.WithCancelCause()</code>. Then <code>cancel()</code> will take one parameter — the root <em>cause</em> of the error:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">ctx</span>, <span style="color:#000">cancel</span> <span style="color:#000">:=</span> <span style="color:#000">context</span>.<span style="color:#000">WithCancelCause</span>(<span style="color:#000">context</span>.<span style="color:#000">Background</span>())
+<span style="color:#000">cancel</span>(<span style="color:#000">errors</span>.<span style="color:#000">New</span>(<span style="color:#c41a16">&#34;the night is dark&#34;</span>))
+</code></pre></div><p><code>context.Cause()</code> extracts the cause of the error from the context:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">fmt</span>.<span style="color:#000">Println</span>(<span style="color:#000">ctx</span>.<span style="color:#000">Err</span>())
+<span style="color:#177500">// context canceled
+</span><span style="color:#177500"></span>
+<span style="color:#000">fmt</span>.<span style="color:#000">Println</span>(<span style="color:#000">context</span>.<span style="color:#000">Cause</span>(<span style="color:#000">ctx</span>))
+<span style="color:#177500">// the night is dark
+</span></code></pre></div><p>You may ask — why <code>context.Cause()</code>? It seems logical to add the <code>Cause()</code> method to the context itself, similar to the <code>Err()</code> method.</p>
+<p>Sure. But <code>Context</code> is an interface. And any change to the interface breaks backward compatibility. That&rsquo;s why it was done differently.</p>
+<p><a href="https://go.dev/play/p/oDLOGfzSUvS">playground</a></p>
+<h2 id="new-date-formats">New Date Formats</h2>
+<p><em>Please don&rsquo;t be offended by this section if you are a North American. We love you people, but sometimes your view of the world can be a bit&hellip; biased.</em></p>
+<p>You surely know that the Go authors chose a quite unorthodox format for the date and time layout.</p>
+<p>For example, parsing the date <code>2023-01-25 09:30</code> looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a90d91">const</span> <span style="color:#000">layout</span> = <span style="color:#c41a16">&#34;2006-01-02 15:04&#34;</span>
+<span style="color:#000">t</span>, <span style="color:#000">_</span> <span style="color:#000">:=</span> <span style="color:#000">time</span>.<span style="color:#000">Parse</span>(<span style="color:#000">layout</span>, <span style="color:#c41a16">&#34;2023-01-25 09:30&#34;</span>)
+<span style="color:#000">fmt</span>.<span style="color:#000">Println</span>(<span style="color:#000">t</span>)
+<span style="color:#177500">// 2023-01-25 09:30:00 +0000 UTC
+</span></code></pre></div><p>While <code>01/02 03:04:05PM '06</code> may be a nice mnemonic in the US, it&rsquo;s entirely cryptic for the European (or Asian) eye.</p>
+<p>The Go authors have thoughtfully provided 12 standard date/time masks, of which only <code>RFC3339</code> and <code>RFC3339Nano</code> are suitable for non-Americans. Others are as mysterious as the imperial measurement system:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">Layout</span>      = <span style="color:#c41a16">&#34;01/02 03:04:05PM &#39;06 -0700&#34;</span>
+<span style="color:#000">ANSIC</span>       = <span style="color:#c41a16">&#34;Mon Jan _2 15:04:05 2006&#34;</span>
+<span style="color:#000">UnixDate</span>    = <span style="color:#c41a16">&#34;Mon Jan _2 15:04:05 MST 2006&#34;</span>
+<span style="color:#000">RubyDate</span>    = <span style="color:#c41a16">&#34;Mon Jan 02 15:04:05 -0700 2006&#34;</span>
+<span style="color:#000">RFC822</span>      = <span style="color:#c41a16">&#34;02 Jan 06 15:04 MST&#34;</span>
+<span style="color:#000">RFC822Z</span>     = <span style="color:#c41a16">&#34;02 Jan 06 15:04 -0700&#34;</span>
+<span style="color:#000">RFC850</span>      = <span style="color:#c41a16">&#34;Monday, 02-Jan-06 15:04:05 MST&#34;</span>
+<span style="color:#000">RFC1123</span>     = <span style="color:#c41a16">&#34;Mon, 02 Jan 2006 15:04:05 MST&#34;</span>
+<span style="color:#000">RFC1123Z</span>    = <span style="color:#c41a16">&#34;Mon, 02 Jan 2006 15:04:05 -0700&#34;</span>
+<span style="color:#000">Kitchen</span>     = <span style="color:#c41a16">&#34;3:04PM&#34;</span>
+</code></pre></div><p>Ten years have passed, and the Go development team began to suspect something. They learned that there are several other popular date formats worldwide. And, starting with version 1.20, they added three new masks:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">DateTime</span> = <span style="color:#c41a16">&#34;2006-01-02 15:04:05&#34;</span>
+<span style="color:#000">DateOnly</span> = <span style="color:#c41a16">&#34;2006-01-02&#34;</span>
+<span style="color:#000">TimeOnly</span> = <span style="color:#c41a16">&#34;15:04:05&#34;</span>
+</code></pre></div><p>Now we can finally do this:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">t</span>, <span style="color:#000">_</span> <span style="color:#000">:=</span> <span style="color:#000">time</span>.<span style="color:#000">Parse</span>(<span style="color:#000">time</span>.<span style="color:#000">DateOnly</span>, <span style="color:#c41a16">&#34;2023-01-25&#34;</span>)
+<span style="color:#000">fmt</span>.<span style="color:#000">Println</span>(<span style="color:#000">t</span>)
+<span style="color:#177500">// 2023-01-25 00:00:00 +0000 UTC
+</span></code></pre></div><p>Nice!</p>
+<p><a href="https://go.dev/play/p/d3Vfyt43c0v">playground</a></p>
+<h2 id="slice-to-array-conversion">Slice to Array Conversion</h2>
+<p>Starting from version 1.17, we can get a pointer to an array under the slice:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">s</span> <span style="color:#000">:=</span> []<span style="color:#a90d91">int</span>{<span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">2</span>, <span style="color:#1c01ce">3</span>}
+<span style="color:#000">arrp</span> <span style="color:#000">:=</span> (<span style="color:#000">*</span>[<span style="color:#1c01ce">3</span>]<span style="color:#a90d91">int</span>)(<span style="color:#000">s</span>)
+</code></pre></div><p>By changing the array through the pointer, we are also changing the slice:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">arrp</span>[<span style="color:#1c01ce">2</span>] = <span style="color:#1c01ce">42</span>
+<span style="color:#000">fmt</span>.<span style="color:#000">Println</span>(<span style="color:#000">s</span>)
+<span style="color:#177500">// [1 2 42]
+</span></code></pre></div><p>In Go 1.20, we can also get a copy of the array under the slice:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">s</span> <span style="color:#000">:=</span> []<span style="color:#a90d91">int</span>{<span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">2</span>, <span style="color:#1c01ce">3</span>}
+<span style="color:#000">arr</span> <span style="color:#000">:=</span> [<span style="color:#1c01ce">3</span>]<span style="color:#a90d91">int</span>(<span style="color:#000">s</span>)
+</code></pre></div><p>Changes in such an array are not reflected in the slice:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">arr</span>[<span style="color:#1c01ce">2</span>] = <span style="color:#1c01ce">42</span>
+<span style="color:#000">fmt</span>.<span style="color:#000">Println</span>(<span style="color:#000">arr</span>)
+<span style="color:#177500">// [1 2 42]
+</span><span style="color:#177500"></span><span style="color:#000">fmt</span>.<span style="color:#000">Println</span>(<span style="color:#000">s</span>)
+<span style="color:#177500">// [1 2 3]
+</span></code></pre></div><p>This is, in essence, syntactic sugar because we could get a copy of the array before:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">s</span> <span style="color:#000">:=</span> []<span style="color:#a90d91">int</span>{<span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">2</span>, <span style="color:#1c01ce">3</span>}
+<span style="color:#000">arr</span> <span style="color:#000">:=</span> <span style="color:#000">*</span>(<span style="color:#000">*</span>[<span style="color:#1c01ce">3</span>]<span style="color:#a90d91">int</span>)(<span style="color:#000">s</span>)
+</code></pre></div><p>The new notation is cleaner, of course.</p>
+<p><a href="https://go.dev/play/p/9eTgSj2MO4V">playground</a></p>
+<h2 id="other-notable-changes">Other Notable Changes</h2>
+<p><strong>bytes.Clone()</strong> function clones a byte slice:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">b</span> <span style="color:#000">:=</span> []<span style="color:#a90d91">byte</span>(<span style="color:#c41a16">&#34;abc&#34;</span>)
+<span style="color:#000">clone</span> <span style="color:#000">:=</span> <span style="color:#000">bytes</span>.<span style="color:#000">Clone</span>(<span style="color:#000">b</span>)
+</code></pre></div><p><strong>math/rand</strong> package now automatically initializes the random number generator with a random starting value, so there is no need for a separate <code>rand.Seed()</code> call.</p>
+<p><strong>strings.CutPrefix()</strong> and <code>strings.CutSuffix()</code> functions trim a prefix/suffix from a string similarly to <code>TrimPrefix</code>/<code>TrimSuffix</code>, but they also indicate whether the prefix was present in the string:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">s</span> <span style="color:#000">:=</span> <span style="color:#c41a16">&#34;&gt; go!&#34;</span>
+<span style="color:#000">s</span>, <span style="color:#000">found</span> <span style="color:#000">:=</span> <span style="color:#000">strings</span>.<span style="color:#000">CutPrefix</span>(<span style="color:#000">s</span>, <span style="color:#c41a16">&#34;&gt; &#34;</span>)
+<span style="color:#000">fmt</span>.<span style="color:#000">Println</span>(<span style="color:#000">s</span>, <span style="color:#000">found</span>)
+<span style="color:#177500">// go! true
+</span></code></pre></div><p><strong>sync.Map</strong> now has atomic methods <code>Swap</code>, <code>CompareAndSwap</code>, and <code>CompareAndDelete</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a90d91">var</span> <span style="color:#000">m</span> <span style="color:#000">sync</span>.<span style="color:#000">Map</span>
+<span style="color:#000">m</span>.<span style="color:#000">Store</span>(<span style="color:#c41a16">&#34;name&#34;</span>, <span style="color:#c41a16">&#34;Alice&#34;</span>)
+<span style="color:#000">prev</span>, <span style="color:#000">ok</span> <span style="color:#000">:=</span> <span style="color:#000">m</span>.<span style="color:#000">Swap</span>(<span style="color:#c41a16">&#34;name&#34;</span>, <span style="color:#c41a16">&#34;Bob&#34;</span>)
+<span style="color:#000">fmt</span>.<span style="color:#000">Println</span>(<span style="color:#000">prev</span>, <span style="color:#000">ok</span>)
+<span style="color:#177500">// Alice true
+</span></code></pre></div><p><strong>time.Compare()</strong> function compares two times and returns -1/0/1 based on the comparison results:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">t1</span> <span style="color:#000">:=</span> <span style="color:#000">time</span>.<span style="color:#000">Now</span>()
+<span style="color:#000">t2</span> <span style="color:#000">:=</span> <span style="color:#000">t1</span>.<span style="color:#000">Add</span>(<span style="color:#1c01ce">10</span> <span style="color:#000">*</span> <span style="color:#000">time</span>.<span style="color:#000">Minute</span>)
+<span style="color:#000">cmp</span> <span style="color:#000">:=</span> <span style="color:#000">t2</span>.<span style="color:#000">Compare</span>(<span style="color:#000">t1</span>)
+<span style="color:#000">fmt</span>.<span style="color:#000">Println</span>(<span style="color:#000">cmp</span>)
+<span style="color:#177500">// 1
+</span></code></pre></div><p>Overall, a great release! Looking forward to trying everything in production.</p>
+]]></content:encoded></item><item><title>Regular Expressions in SQLite</title><link>https://antonz.org/sqlean-regexp/</link><pubDate>Sat, 04 Feb 2023 11:20:00 +0000</pubDate><guid>https://antonz.org/sqlean-regexp/</guid><description>Use a robust pattern matching and text replacement tool from SQL.</description><content:encoded><![CDATA[<p>Regular expressions are probably the most powerful text processing tool without programming.</p>
 <p>SQLite does not support regular expressions by default. But you can easily enable them using the <code>regexp</code> extension.</p>
 <p><strong>Note</strong>. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
 <p>With <code>regexp</code>, matching a string against a pattern becomes as easy as:</p>
@@ -751,98 +886,4 @@
 <span style="color:#000">print_sum</span>((<span style="color:#1c01ce">1</span>, <span style="color:#1c01ce">2</span>, <span style="color:#1c01ce">3</span>), <span style="color:#a90d91">sum</span>)
 <span style="color:#177500"># 6</span>
 </code></pre></div><p>Other developers use Ellipsis for all sorts of bizarre things ツ</p>
-]]></content:encoded></item><item><title>Flying Pig, or Protocols in Python</title><link>https://antonz.org/protocol/</link><pubDate>Tue, 31 May 2022 17:00:00 +0000</pubDate><guid>https://antonz.org/protocol/</guid><description>Structural subtyping using protocols.</description><content:encoded><![CDATA[<p>Let&rsquo;s say you&rsquo;ve developed a utility that sends everything flying:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">launch</span>(<span style="color:#000">thing</span>):
-    <span style="color:#000">thing</span><span style="color:#000">.</span><span style="color:#000">fly</span>()
-</code></pre></div><p>Well, not exactly <em>everything</em>. Things with the <code>fly()</code> method, to be precise. With a single handy function we launch Frank (he&rsquo;s a pigeon), an airplane, and even Superman:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">class</span> <span style="color:#3f6e75">Frank</span>:
-    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>(<span style="color:#5b269a">self</span>):
-        <span style="color:#a90d91">print</span>(<span style="color:#c41a16">&#34;💩&#34;</span>)
-
-<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Plane</span>:
-    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>(<span style="color:#5b269a">self</span>):
-        <span style="color:#a90d91">print</span>(<span style="color:#c41a16">&#34;Flight delayed&#34;</span>)
-
-<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Superman</span>:
-    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>(<span style="color:#5b269a">self</span>):
-        <span style="color:#a90d91">print</span>(<span style="color:#c41a16">&#34;ε===(っ≧ω≦)っ&#34;</span>)
-</code></pre></div><p>Whoosh:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#000">f</span> <span style="color:#000">=</span> <span style="color:#000">Frank</span>()
-<span style="color:#000">launch</span>(<span style="color:#000">f</span>)
-<span style="color:#177500"># 💩</span>
-
-<span style="color:#000">p</span> <span style="color:#000">=</span> <span style="color:#000">Plane</span>()
-<span style="color:#000">launch</span>(<span style="color:#000">p</span>)
-<span style="color:#177500"># Flight delayed</span>
-
-<span style="color:#000">s</span> <span style="color:#000">=</span> <span style="color:#000">Superman</span>()
-<span style="color:#000">launch</span>(<span style="color:#000">s</span>)
-<span style="color:#177500"># ε===(っ≧ω≦)っ</span>
-</code></pre></div><p>It&rsquo;s not that our heroes are particularly successful at coping with the task, but the launch works for them.</p>
-<p>So far, so good. But sometimes (especially when the program grows) the developer wants to add a little rigor. Make it clear that the <code>thing</code> parameter in <code>launch()</code> is not any object, but necessarily a flying thing with the <code>fly()</code> method. What is the best way to do this?</p>
-<h2 id="using-a-description">Using a description</h2>
-<p>If you prefer to avoid types, then you will go with a variable name or a docstring:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">launch</span>(<span style="color:#000">flyer</span>):
-    <span style="color:#c41a16">&#34;&#34;&#34;Launces a flyer (an object with a `fly()` method)&#34;&#34;&#34;</span>
-    <span style="color:#000">flyer</span><span style="color:#000">.</span><span style="color:#000">fly</span>()
-</code></pre></div><p>The problem is that the more complex the code, the more often the &ldquo;descriptive&rdquo; approach fails.</p>
-<h2 id="using-a-base-class">Using a base class</h2>
-<p>Thanks to some 1990s java programming skills, you end up with a small hierarchy:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">class</span> <span style="color:#3f6e75">Flyer</span>:
-    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>():
-        <span style="color:#000">...</span>
-
-<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Frank</span>(<span style="color:#000">Flyer</span>):
-    <span style="color:#177500"># ...</span>
-
-<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Plane</span>(<span style="color:#000">Flyer</span>):
-    <span style="color:#177500"># ...</span>
-
-<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Superman</span>(<span style="color:#000">Flyer</span>):
-    <span style="color:#177500"># ...</span>
-</code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">launch</span>(<span style="color:#000">thing</span>: <span style="color:#000">Flyer</span>):
-    <span style="color:#000">thing</span><span style="color:#000">.</span><span style="color:#000">fly</span>()
-</code></pre></div><p>This method works:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ mypy flyer.py
-Success: no issues found in <span style="color:#1c01ce">1</span> <span style="color:#a90d91">source</span> file
-</code></pre></div><p>But, as the Python devs say, it is terribly &ldquo;unpythonic&rdquo;:</p>
-<blockquote>
-<p>The problem is that a class has to be explicitly marked, which is unpythonic and unlike what one would normally do in idiomatic dynamically typed Python code.</p>
-</blockquote>
-<p>Indeed. Not only have we modified three classes instead of one function. Not only have we introduced an inheritance hierarchy to our code. But also Frank, the plane and Superman are now burdened by the shared knowledge that they are Flyers. They never asked for this, you know.</p>
-<h2 id="using-a-protocol">Using a protocol</h2>
-<p>The quote above is from <a href="https://peps.python.org/pep-0544/">PEP 544</a> (Python Enhancement Proposal), which was implemented in Python 3.8. Starting with this version, Python recieved <em>protocols</em>.</p>
-<p>Protocols describe behavior. Here is our Flyer:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">from</span> <span style="color:#000">typing</span> <span style="color:#a90d91">import</span> <span style="color:#000">Protocol</span>
-
-<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Flyer</span>(<span style="color:#000">Protocol</span>):
-    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>(<span style="color:#5b269a">self</span>):
-        <span style="color:#000">...</span>
-</code></pre></div><p>We use a protocol to specify that an object should have a specific behavior. The <code>launch()</code> function can only launch Flyers:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">def</span> <span style="color:#000">launch</span>(<span style="color:#000">thing</span>: <span style="color:#000">Flyer</span>):
-    <span style="color:#000">thing</span><span style="color:#000">.</span><span style="color:#000">fly</span>()
-</code></pre></div><p>The objects themselves do not need to know about the protocol. It is enough that they implement the right behavior:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">class</span> <span style="color:#3f6e75">Frank</span>:
-    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>(<span style="color:#5b269a">self</span>):
-        <span style="color:#177500"># ...</span>
-
-<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Plane</span>:
-    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>(<span style="color:#5b269a">self</span>):
-        <span style="color:#177500"># ...</span>
-
-<span style="color:#a90d91">class</span> <span style="color:#3f6e75">Superman</span>:
-    <span style="color:#a90d91">def</span> <span style="color:#000">fly</span>(<span style="color:#5b269a">self</span>):
-        <span style="color:#177500"># ...</span>
-</code></pre></div><p>Protocols are static duck typing:</p>
-<ul>
-<li>the interface is explicitly described in the protocol: a flyer has the <code>fly()</code> method;</li>
-<li>but it is implemented implicitly, according to the &ldquo;duck&rdquo; principle: Superman has the <code>fly()</code> method — so he&rsquo;s a flyer.</li>
-</ul>
-<p>Let&rsquo;s check:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ mypy flyer.py
-Success: no issues found in <span style="color:#1c01ce">1</span> <span style="color:#a90d91">source</span> file
-</code></pre></div><p>Perfect!</p>
-<h2 id="summary">Summary</h2>
-<p>If your code should work consistently with different types, find their common behavior and specify it in the protocol. Use the protocol type for static code validation using mypy.</p>
-<p>Avoid pigeons, planes, and superheroes whenever possible. They are nothing but problems.</p>
 ]]></content:encoded></item></channel></rss>
