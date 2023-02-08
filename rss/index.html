@@ -185,7 +185,19 @@
 <span style="color:#177500">-- new
 </span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;last year&#39;</span>, <span style="color:#c41a16">&#39;(\w+)\s(?=year)&#39;</span>);
 <span style="color:#177500">-- last
-</span></code></pre></div><p>And much more! See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/regexp.md"><strong>documentation</strong></a> for details.</p>
+</span></code></pre></div><h2 id="installation-and-usage">Installation and Usage</h2>
+<ol>
+<li>
+<p>Download the <a href="https://github.com/nalgeon/sqlean/releases/latest">latest release</a></p>
+</li>
+<li>
+<p>Use with SQLite command-line interface:</p>
+</li>
+</ol>
+<pre tabindex="0"><code>sqlite&gt; .load ./regexp
+sqlite&gt; select regexp_like('abcdef', 'b.d');
+</code></pre><p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/install.md">How to Install an Extension</a> for usage with IDE, Python, etc.</p>
+<p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/regexp.md">Extension Documentation</a> for reference.</p>
 ]]></content:encoded></item><item><title>Why Use SQL Window Functions</title><link>https://antonz.org/why-use-sql-window-functions/</link><pubDate>Tue, 31 Jan 2023 08:30:00 +0000</pubDate><guid>https://antonz.org/why-use-sql-window-functions/</guid><description>To build great analytical reports without Excel.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
 <p>​In short, window functions assist in building great analytical reports without Excel.</p>
 <p>The easiest way to explain it is through concrete examples. We will work with a toy employee table:</p>
@@ -814,7 +826,20 @@
 <span style="color:#a90d91">select</span> <span style="color:#000">eval</span>(<span style="color:#c41a16">&#39;insert into tmp(value) values (1), (2), (3)&#39;</span>);
 <span style="color:#a90d91">select</span> <span style="color:#000">eval</span>(<span style="color:#c41a16">&#39;select value from tmp&#39;</span>);
 <span style="color:#a90d91">select</span> <span style="color:#000">eval</span>(<span style="color:#c41a16">&#39;drop table tmp&#39;</span>);
-</code></pre></div><p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/define.md"><strong>documentation</strong></a> for details.</p>
+</code></pre></div><h2 id="installation-and-usage">Installation and Usage</h2>
+<ol>
+<li>
+<p>Download the <a href="https://github.com/nalgeon/sqlean/releases/latest">latest release</a></p>
+</li>
+<li>
+<p>Use with SQLite command-line interface:</p>
+</li>
+</ol>
+<pre tabindex="0"><code>sqlite&gt; .load ./define
+sqlite&gt; select define('sumn', ':n * (:n + 1) / 2');
+sqlite&gt; select sumn(5);
+</code></pre><p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/install.md">How to Install an Extension</a> for usage with IDE, Python, etc.</p>
+<p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/define.md">Extension Documentation</a> for reference.</p>
 ]]></content:encoded></item><item><title>JSON Lines</title><link>https://antonz.org/json-lines/</link><pubDate>Thu, 04 Aug 2022 18:30:00 +0000</pubDate><guid>https://antonz.org/json-lines/</guid><description>CSV on steroids.</description><content:encoded><![CDATA[<p>Worked with the <a href="https://jsonlines.org/">JSON Lines</a> format the other day. It&rsquo;s a CSV on steroids:</p>
 <ul>
 <li>each entry is a separate line, as in CSV;</li>

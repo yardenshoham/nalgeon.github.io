@@ -88,7 +88,20 @@
 <span style=color:#a90d91>select</span> <span style=color:#000>eval</span>(<span style=color:#c41a16>&#39;insert into tmp(value) values (1), (2), (3)&#39;</span>);
 <span style=color:#a90d91>select</span> <span style=color:#000>eval</span>(<span style=color:#c41a16>&#39;select value from tmp&#39;</span>);
 <span style=color:#a90d91>select</span> <span style=color:#000>eval</span>(<span style=color:#c41a16>&#39;drop table tmp&#39;</span>);
-</code></pre></div><p>See <a href=https://github.com/nalgeon/sqlean/blob/main/docs/define.md><strong>documentation</strong></a> for details.</p>
+</code></pre></div><h2 id=installation-and-usage>Installation and Usage</h2>
+<ol>
+<li>
+<p>Download the <a href=https://github.com/nalgeon/sqlean/releases/latest>latest release</a></p>
+</li>
+<li>
+<p>Use with SQLite command-line interface:</p>
+</li>
+</ol>
+<pre tabindex=0><code>sqlite&gt; .load ./define
+sqlite&gt; select define('sumn', ':n * (:n + 1) / 2');
+sqlite&gt; select sumn(5);
+</code></pre><p>See <a href=https://github.com/nalgeon/sqlean/blob/main/docs/install.md>How to Install an Extension</a> for usage with IDE, Python, etc.</p>
+<p>See <a href=https://github.com/nalgeon/sqlean/blob/main/docs/define.md>Extension Documentation</a> for reference.</p>
 <p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
 </div>
 </div><footer class=post__footer>

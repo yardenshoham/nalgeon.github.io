@@ -108,7 +108,19 @@
 <span style=color:#177500>-- new
 </span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#000>regexp_substr</span>(<span style=color:#c41a16>&#39;last year&#39;</span>, <span style=color:#c41a16>&#39;(\w+)\s(?=year)&#39;</span>);
 <span style=color:#177500>-- last
-</span></code></pre></div><p>And much more! See <a href=https://github.com/nalgeon/sqlean/blob/main/docs/regexp.md><strong>documentation</strong></a> for details.</p>
+</span></code></pre></div><h2 id=installation-and-usage>Installation and Usage</h2>
+<ol>
+<li>
+<p>Download the <a href=https://github.com/nalgeon/sqlean/releases/latest>latest release</a></p>
+</li>
+<li>
+<p>Use with SQLite command-line interface:</p>
+</li>
+</ol>
+<pre tabindex=0><code>sqlite&gt; .load ./regexp
+sqlite&gt; select regexp_like('abcdef', 'b.d');
+</code></pre><p>See <a href=https://github.com/nalgeon/sqlean/blob/main/docs/install.md>How to Install an Extension</a> for usage with IDE, Python, etc.</p>
+<p>See <a href=https://github.com/nalgeon/sqlean/blob/main/docs/regexp.md>Extension Documentation</a> for reference.</p>
 <p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
 </div>
 </div><footer class=post__footer>

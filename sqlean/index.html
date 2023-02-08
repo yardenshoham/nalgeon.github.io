@@ -60,7 +60,7 @@
 <p>It has a minor drawback though. There are few built-in functions compared to PostgreSQL or Oracle. Fortunately, the authors provided an extension mechanism, which allows doing almost anything. As a result, there are a lot of SQLite extensions out there, but they are incomplete, inconsistent and scattered across the internet.</p>
 <p>I wanted more consistency. So I started the <strong>sqlean</strong> project, which brings the extensions together, neatly packaged into domain modules, documented, tested, and built for Linux, Windows and macOS. Something like a standard library in Python or Go, only for SQLite.</p>
 <p>I plan to write in detail about each module in a separate article, but for now — here&rsquo;s a brief overview.</p>
-<h2 id=the-main-set>The main set</h2>
+<h2 id=main-set>Main Set</h2>
 <p>These are the most popular functions missing in SQLite:</p>
 <ul>
 <li><a href=https://github.com/nalgeon/sqlean/blob/main/docs/crypto.md>crypto</a>: hash functions like MD5 or SHA-256.</li>
@@ -78,7 +78,7 @@
 <li><a href=https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md>vsv</a>: CSV files as virtual tables.</li>
 </ul>
 <p>There are <a href=https://github.com/nalgeon/sqlean/releases/latest>precompiled binaries</a> for Windows, Linix and macOS.</p>
-<h2 id=the-incubator>The incubator</h2>
+<h2 id=incubator>Incubator</h2>
 <p>These extensions haven&rsquo;t yet made their way to the main set. They may be too broad, too narrow, or without a well-thought API. I&rsquo;m gradually refactoring and merging them into the main set:</p>
 <ul>
 <li><a href=https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004109889>array</a>: one-dimensional arrays.</li>
@@ -95,7 +95,6 @@
 <li><a href=https://github.com/nalgeon/sqlean/issues/27#issuecomment-997423609>envfuncs</a>: read environment variables.</li>
 <li><a href=https://github.com/nalgeon/sqlean/issues/27#issuecomment-996432840>eval</a>: run arbitrary SQL statements.</li>
 <li><a href=https://github.com/nalgeon/sqlean/issues/27#issuecomment-998138191>isodate</a>: additional date and time functions.</li>
-<li><a href=https://github.com/nalgeon/sqlean/issues/27#issuecomment-1252243005>lines</a>: read files line-by-line.</li>
 <li><a href=https://github.com/nalgeon/sqlean/issues/27#issuecomment-1252243356>path</a>: parsing and querying paths</li>
 <li><a href=https://github.com/nalgeon/sqlean/issues/27#issuecomment-997417836>pearson</a>: Pearson correlation coefficient between two data sets.</li>
 <li><a href=https://github.com/nalgeon/sqlean/issues/27#issuecomment-997052157>pivotvtab</a>: pivot tables.</li>
@@ -113,25 +112,33 @@
 </ul>
 <p><a href=https://github.com/nalgeon/sqlean/issues/27>Vote for your favorites</a>! Popular ones will make their way into the main set faster.</p>
 <p>Incubator extensions are also available <a href=https://github.com/nalgeon/sqlean/releases/tag/incubator>for download</a>.</p>
-<h2 id=how-to-load-an-extension>How to load an extension</h2>
-<p>There are three ways to do it. If you are using SQLite CLI (<code>sqlite.exe</code>):</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#000>sqlite</span><span style=color:#000>&gt;</span> .<span style=color:#a90d91>load</span> .<span style=color:#000>/</span><span style=color:#000>stats</span>
-<span style=color:#000>sqlite</span><span style=color:#000>&gt;</span> <span style=color:#a90d91>select</span> <span style=color:#000>median</span>(<span style=color:#000>value</span>) <span style=color:#a90d91>from</span> <span style=color:#000>generate_series</span>(<span style=color:#1c01ce>1</span>, <span style=color:#1c01ce>99</span>);
-</code></pre></div><p>If you are using a tool like DB Browser for SQLite, SQLite Expert or DBeaver:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>load_extension</span>(<span style=color:#c41a16>&#39;c:\Users\anton\sqlite\stats.dll&#39;</span>);
-<span style=color:#a90d91>select</span> <span style=color:#000>median</span>(<span style=color:#000>value</span>) <span style=color:#a90d91>from</span> <span style=color:#000>generate_series</span>(<span style=color:#1c01ce>1</span>, <span style=color:#1c01ce>99</span>);
-</code></pre></div><p>If you are using Python (other languages provide similar means):</p>
+<h2 id=how-to-install-an-extension>How to Install an Extension</h2>
+<p>First, <a href=https://github.com/nalgeon/sqlean/releases/latest>download</a> the extension. Then load it as described below.</p>
+<p>Examples use the <code>stats</code> extension; you can specify any other supported extension.</p>
+<p>SQLite command-line interface (CLI, aka &lsquo;sqlite3.exe&rsquo; on Windows):</p>
+<pre tabindex=0><code>sqlite&gt; .load ./stats
+sqlite&gt; select median(value) from generate_series(1, 99);
+</code></pre><p>IDE, e.g. SQLiteStudio, SQLiteSpy or DBeaver:</p>
+<pre tabindex=0><code>select load_extension('c:\Users\anton\sqlite\stats.dll');
+select median(value) from generate_series(1, 99);
+</code></pre><p>Python:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#a90d91>import</span> <span style=color:#000>sqlite3</span>
 
 <span style=color:#000>connection</span> <span style=color:#000>=</span> <span style=color:#000>sqlite3</span><span style=color:#000>.</span><span style=color:#000>connect</span>(<span style=color:#c41a16>&#34;:memory:&#34;</span>)
 <span style=color:#000>connection</span><span style=color:#000>.</span><span style=color:#000>enable_load_extension</span>(<span style=color:#a90d91>True</span>)
-<span style=color:#000>connection</span><span style=color:#000>.</span><span style=color:#000>load_extension</span>(<span style=color:#c41a16>&#34;./stats.so&#34;</span>)
+<span style=color:#000>connection</span><span style=color:#000>.</span><span style=color:#000>load_extension</span>(<span style=color:#c41a16>&#34;./stats&#34;</span>)
 <span style=color:#000>connection</span><span style=color:#000>.</span><span style=color:#000>execute</span>(<span style=color:#c41a16>&#34;select median(value) from generate_series(1, 99)&#34;</span>)
 <span style=color:#000>connection</span><span style=color:#000>.</span><span style=color:#000>close</span>()
+</code></pre></div><p>Node.js, using <a href=https://github.com/WiseLibs/better-sqlite3>better-sqlite3</a>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-js data-lang=js><span style=color:#a90d91>const</span> <span style=color:#000>sqlite3</span> <span style=color:#000>=</span> <span style=color:#000>require</span>(<span style=color:#c41a16>&#34;better-sqlite3&#34;</span>);
+<span style=color:#a90d91>const</span> <span style=color:#000>db</span> <span style=color:#000>=</span> <span style=color:#a90d91>new</span> <span style=color:#000>sqlite3</span>(<span style=color:#c41a16>&#34;:memory:&#34;</span>);
+<span style=color:#000>db</span>.<span style=color:#000>loadExtension</span>(<span style=color:#c41a16>&#34;./stats&#34;</span>);
+<span style=color:#000>db</span>.<span style=color:#000>exec</span>(<span style=color:#c41a16>&#34;select median(value) from generate_series(1, 99)&#34;</span>);
+<span style=color:#000>db</span>.<span style=color:#000>close</span>();
 </code></pre></div><h2 id=next-steps>Next steps</h2>
 <p>If you feel that you are missing some function in SQLite, check the <a href=https://github.com/nalgeon/sqlean><strong>sqlean</strong></a> repository — you&rsquo;ll probably find one.</p>
 <p>If you want to participate, submit <a href=https://github.com/nalgeon/sqlean/blob/incubator/docs/submit.md>your own</a> or <a href=https://github.com/nalgeon/sqlean/blob/incubator/docs/external.md>third-party</a> extensions.</p>
-<p>I keep adding new extensions to the incubator. I also refactor the extensions from the incubator and merge them into the main set. I plan to write a separate article for each main module, so stay tuned.</p>
+<p>I keep adding new extensions to the incubator. I also refactor the extensions from the incubator and merge them into the main set. I plan to write a separate article for each major extension, so stay tuned.</p>
 <p>SQLite FTW!</p>
 <p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
 </div>
