@@ -971,13 +971,11 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
 <li>Aggregation (sum and average).</li>
 <li>Rolling aggregates (sum and average in dynamics).</li>
 </ul>
-<p>Of course, this is not an exhaustive list. But I hope now it is clear why window functions are beneficial for data analysis. In the next chapter, we will examine what windows are and how to use them.</p>
+<p>Of course, this is not an exhaustive list. But I hope now it is clear why window functions are beneficial for data analysis. In the <a href="/sql-window-functions-ranking">next chapter</a>, we will examine what windows are and how to use them.</p>
 <p>
-    <a class="button valign-middle" href="https://antonz.gumroad.com/l/sql-windows">
+    <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
         Get the book
     </a>
-     or
-    <span class="color-gray">continue reading</span> (coming soon)
 </p>
 ]]></content:encoded></item><item><title>SQL Window Functions Explained</title><link>https://antonz.org/sql-window-functions-book/</link><pubDate>Sun, 22 Jan 2023 18:00:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-book/</guid><description>A clear and visual introduction to window functions in SQL.</description><content:encoded><![CDATA[<p>Window functions are probably the most confusing section of SQL. You might think, &ldquo;So what? They just came up with some additional functions&rdquo;. Not really. &ldquo;Window functions&rdquo; is a separate language built into regular SQL. And it&rsquo;s more complicated than everything you know about SELECTs.</p>
 <p>In short, window functions assist in making great analytical reports without Excel. Maybe you want to calculate monthly sales percentages over the year? Window functions. Split marketing channels into effective and ineffective ones? Window functions. Choose the top 10 clients for each segment? Same.</p>
@@ -1009,7 +1007,7 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
     <li><a href="/why-use-sql-window-functions">Why use window functions</a></li>
     <li>Windows and functions
         <ul>
-            <li>Ranking</li>
+            <li><a href="/sql-window-functions-ranking">Ranking</a></li>
             <li>Offset</li>
             <li>Aggregation</li>
             <li>Rolling aggregates</li>
