@@ -246,12 +246,10 @@ SQL window functions help to solve the following tasks:
 -   Aggregation (sum and average).
 -   Rolling aggregates (sum and average in dynamics).
 
-Of course, this is not an exhaustive list. But I hope now it is clear why window functions are beneficial for data analysis. In the next chapter, we will examine what windows are and how to use them.
+Of course, this is not an exhaustive list. But I hope now it is clear why window functions are beneficial for data analysis. In the [next chapter](/sql-window-functions-ranking), we will examine what windows are and how to use them.
 
 <p>
-    <a class="button valign-middle" href="https://antonz.gumroad.com/l/sql-windows">
+    <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
         Get the book
     </a>
-     or
-    <span class="color-gray">continue reading</span> (coming soon)
 </p>

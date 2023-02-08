@@ -46,7 +46,7 @@ Here is what you will learn:
     <li><a href="/why-use-sql-window-functions">Why use window functions</a></li>
     <li>Windows and functions
         <ul>
-            <li>Ranking</li>
+            <li><a href="/sql-window-functions-ranking">Ranking</a></li>
             <li>Offset</li>
             <li>Aggregation</li>
             <li>Rolling aggregates</li>
