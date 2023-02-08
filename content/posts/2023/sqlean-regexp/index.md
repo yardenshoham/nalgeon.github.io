@@ -88,4 +88,17 @@ select regexp_substr('last year', '(\w+)\s(?=year)');
 -- last
 ```
 
-And much more! See [**documentation**](https://github.com/nalgeon/sqlean/blob/main/docs/regexp.md) for details.
+## Installation and Usage
+
+1. Download the [latest release](https://github.com/nalgeon/sqlean/releases/latest)
+
+2. Use with SQLite command-line interface:
+
+```
+sqlite> .load ./regexp
+sqlite> select regexp_like('abcdef', 'b.d');
+```
+
+See [How to Install an Extension](https://github.com/nalgeon/sqlean/blob/main/docs/install.md) for usage with IDE, Python, etc.
+
+See [Extension Documentation](https://github.com/nalgeon/sqlean/blob/main/docs/regexp.md) for reference.

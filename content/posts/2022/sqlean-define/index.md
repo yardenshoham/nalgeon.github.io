@@ -74,4 +74,18 @@ select eval('select value from tmp');
 select eval('drop table tmp');
 ```
 
-See [**documentation**](https://github.com/nalgeon/sqlean/blob/main/docs/define.md) for details.
+## Installation and Usage
+
+1. Download the [latest release](https://github.com/nalgeon/sqlean/releases/latest)
+
+2. Use with SQLite command-line interface:
+
+```
+sqlite> .load ./define
+sqlite> select define('sumn', ':n * (:n + 1) / 2');
+sqlite> select sumn(5);
+```
+
+See [How to Install an Extension](https://github.com/nalgeon/sqlean/blob/main/docs/install.md) for usage with IDE, Python, etc.
+
+See [Extension Documentation](https://github.com/nalgeon/sqlean/blob/main/docs/define.md) for reference.

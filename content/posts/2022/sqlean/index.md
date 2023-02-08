@@ -16,7 +16,7 @@ I wanted more consistency. So I started the **sqlean** project, which brings the
 
 I plan to write in detail about each module in a separate article, but for now — here's a brief overview.
 
-## The main set
+## Main Set
 
 These are the most popular functions missing in SQLite:
 
@@ -36,7 +36,7 @@ These are the most popular functions missing in SQLite:
 
 There are [precompiled binaries](https://github.com/nalgeon/sqlean/releases/latest) for Windows, Linix and macOS.
 
-## The incubator
+## Incubator
 
 These extensions haven't yet made their way to the main set. They may be too broad, too narrow, or without a well-thought API. I'm gradually refactoring and merging them into the main set:
 
@@ -54,7 +54,6 @@ These extensions haven't yet made their way to the main set. They may be too bro
 -   [envfuncs](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997423609): read environment variables.
 -   [eval](https://github.com/nalgeon/sqlean/issues/27#issuecomment-996432840): run arbitrary SQL statements.
 -   [isodate](https://github.com/nalgeon/sqlean/issues/27#issuecomment-998138191): additional date and time functions.
--   [lines](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1252243005): read files line-by-line.
 -   [path](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1252243356): parsing and querying paths
 -   [pearson](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997417836): Pearson correlation coefficient between two data sets.
 -   [pivotvtab](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997052157): pivot tables.
@@ -74,32 +73,46 @@ These extensions haven't yet made their way to the main set. They may be too bro
 
 Incubator extensions are also available [for download](https://github.com/nalgeon/sqlean/releases/tag/incubator).
 
-## How to load an extension
+## How to Install an Extension
 
-There are three ways to do it. If you are using SQLite CLI (`sqlite.exe`):
+First, [download](https://github.com/nalgeon/sqlean/releases/latest) the extension. Then load it as described below.
 
-```sql
+Examples use the `stats` extension; you can specify any other supported extension.
+
+SQLite command-line interface (CLI, aka 'sqlite3.exe' on Windows):
+
+```
 sqlite> .load ./stats
 sqlite> select median(value) from generate_series(1, 99);
 ```
 
-If you are using a tool like DB Browser for SQLite, SQLite Expert or DBeaver:
+IDE, e.g. SQLiteStudio, SQLiteSpy or DBeaver:
 
-```sql
+```
 select load_extension('c:\Users\anton\sqlite\stats.dll');
 select median(value) from generate_series(1, 99);
 ```
 
-If you are using Python (other languages provide similar means):
+Python:
 
 ```python
 import sqlite3
 
 connection = sqlite3.connect(":memory:")
 connection.enable_load_extension(True)
-connection.load_extension("./stats.so")
+connection.load_extension("./stats")
 connection.execute("select median(value) from generate_series(1, 99)")
 connection.close()
+```
+
+Node.js, using [better-sqlite3](https://github.com/WiseLibs/better-sqlite3):
+
+```js
+const sqlite3 = require("better-sqlite3");
+const db = new sqlite3(":memory:");
+db.loadExtension("./stats");
+db.exec("select median(value) from generate_series(1, 99)");
+db.close();
 ```
 
 ## Next steps
@@ -108,6 +121,6 @@ If you feel that you are missing some function in SQLite, check the [**sqlean**]
 
 If you want to participate, submit [your own](https://github.com/nalgeon/sqlean/blob/incubator/docs/submit.md) or [third-party](https://github.com/nalgeon/sqlean/blob/incubator/docs/external.md) extensions.
 
-I keep adding new extensions to the incubator. I also refactor the extensions from the incubator and merge them into the main set. I plan to write a separate article for each main module, so stay tuned.
+I keep adding new extensions to the incubator. I also refactor the extensions from the incubator and merge them into the main set. I plan to write a separate article for each major extension, so stay tuned.
 
 SQLite FTW!
