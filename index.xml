@@ -44,7 +44,17 @@
 │ beta    │ 10   │ 20   │ 40   │ 80   │
 │ gamma   │ 80   │ 75   │ 78   │ 80   │
 └─────────┴──────┴──────┴──────┴──────┘
-</code></pre><p>Using <code>filter</code> is probably the easiest way when we have few columns. But let&rsquo;s say we&rsquo;ve got ~100 years of sales, and some years may be missing. What do we do?</p>
+</code></pre><p>This universal method works in every DBMS, not only SQLite. Even if your DB engine does not support <code>filter</code>, you can always resort to using <code>case</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#000">product</span>,
+  <span style="color:#a90d91">sum</span>(<span style="color:#a90d91">case</span> <span style="color:#a90d91">when</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2020</span> <span style="color:#a90d91">then</span> <span style="color:#000">income</span> <span style="color:#a90d91">end</span>) <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;2020&#34;</span>,
+  <span style="color:#a90d91">sum</span>(<span style="color:#a90d91">case</span> <span style="color:#a90d91">when</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2021</span> <span style="color:#a90d91">then</span> <span style="color:#000">income</span> <span style="color:#a90d91">end</span>) <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;2021&#34;</span>,
+  <span style="color:#a90d91">sum</span>(<span style="color:#a90d91">case</span> <span style="color:#a90d91">when</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2022</span> <span style="color:#a90d91">then</span> <span style="color:#000">income</span> <span style="color:#a90d91">end</span>) <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;2022&#34;</span>,
+  <span style="color:#a90d91">sum</span>(<span style="color:#a90d91">case</span> <span style="color:#a90d91">when</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2023</span> <span style="color:#a90d91">then</span> <span style="color:#000">income</span> <span style="color:#a90d91">end</span>) <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;2023&#34;</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">sales</span>
+<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#000">product</span>
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">product</span>;
+</code></pre></div><p>Using <code>filter</code> is probably the easiest way when we have few columns. But let&rsquo;s say we&rsquo;ve got ~100 years of sales, and some years may be missing. What do we do?</p>
 <h2 id="2-dynamic-sql">2. Dynamic SQL</h2>
 <p>Let&rsquo;s build our query dynamically without hardcoding year values:</p>
 <ol>
