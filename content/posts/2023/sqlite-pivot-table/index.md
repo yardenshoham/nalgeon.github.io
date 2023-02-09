@@ -72,6 +72,20 @@ Here is our pivot table:
 └─────────┴──────┴──────┴──────┴──────┘
 ```
 
+This universal method works in every DBMS, not only SQLite. Even if your DB engine does not support `filter`, you can always resort to using `case`:
+
+```sql
+select
+  product,
+  sum(case when year = 2020 then income end) as "2020",
+  sum(case when year = 2021 then income end) as "2021",
+  sum(case when year = 2022 then income end) as "2022",
+  sum(case when year = 2023 then income end) as "2023"
+from sales
+group by product
+order by product;
+```
+
 Using `filter` is probably the easiest way when we have few columns. But let's say we've got ~100 years of sales, and some years may be missing. What do we do?
 
 ## 2. Dynamic SQL
