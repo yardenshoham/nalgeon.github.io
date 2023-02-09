@@ -1,0 +1,241 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Building a Pivot Table in SQLite</title>
+<meta name=description content="Three ways to create a pivot table in plain SQL.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.d5574c61892ae0c9bca2eab9c37cfcbc17d93429a85b516e1dd46f7df294f4cc.css>
+<link rel=icon href=/assets/favicon/favicon.ico sizes=any>
+<link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=manifest href=/assets/favicon/manifest.json>
+<link rel=canonical href=https://antonz.org/sqlite-pivot-table/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Building a Pivot Table in SQLite">
+<meta property="og:description" content="Three ways to create a pivot table in plain SQL.">
+<meta property="og:url" content="https://antonz.org/sqlite-pivot-table/">
+<meta property="og:image" content="https://antonz.org/sqlite-pivot-table/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Building a Pivot Table in SQLite">
+<meta name=twitter:description content="Three ways to create a pivot table in plain SQL.">
+<meta name=twitter:url content="https://antonz.org/sqlite-pivot-table/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/sqlite-pivot-table/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Building a Pivot Table in SQLite</h1>
+</header>
+<p>Suppose we have a <code>sales</code> table with product incomes for the years 2020-2023:</p>
+<pre tabindex=0><code>┌─────────┬──────┬────────┐
+│ product │ year │ income │
+├─────────┼──────┼────────┤
+│ alpha   │ 2020 │ 100    │
+│ alpha   │ 2021 │ 120    │
+│ alpha   │ 2022 │ 130    │
+│ alpha   │ 2023 │ 140    │
+│ beta    │ 2020 │ 10     │
+│ beta    │ 2021 │ 20     │
+│ beta    │ 2022 │ 40     │
+│ beta    │ 2023 │ 80     │
+│ gamma   │ 2020 │ 80     │
+│ gamma   │ 2021 │ 75     │
+│ gamma   │ 2022 │ 78     │
+│ gamma   │ 2023 │ 80     │
+└─────────┴──────┴────────┘
+</code></pre><p><a href=https://sqlime.org/#gist:4a46833d948e8635593fec028eb178ba>playground</a> • <a href=./sales.sql>download</a></p>
+<p>And we want to transform it into a so-called <em>pivot table</em>, where products serve as rows and years serve as columns:</p>
+<pre tabindex=0><code>┌─────────┬──────┬──────┬──────┬──────┐
+│ product │ 2020 │ 2021 │ 2022 │ 2023 │
+├─────────┼──────┼──────┼──────┼──────┤
+│ alpha   │ 100  │ 120  │ 130  │ 140  │
+│ beta    │ 10   │ 20   │ 40   │ 80   │
+│ gamma   │ 80   │ 75   │ 78   │ 80   │
+└─────────┴──────┴──────┴──────┴──────┘
+</code></pre><p>Some DBMS, like SQL Server, have a custom <code>pivot</code> operator to do this. SQLite does not. Still, there are multiple ways to solve the problem. Let&rsquo;s examine them.</p>
+<h2 id=1-filtered-totals>1. Filtered totals</h2>
+<p>Let&rsquo;s manually extract each year in a separate column and calculate a filtered total income for that year:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
+  <span style=color:#000>product</span>,
+  <span style=color:#a90d91>sum</span>(<span style=color:#000>income</span>) <span style=color:#000>filter</span> (<span style=color:#a90d91>where</span> <span style=color:#a90d91>year</span> <span style=color:#000>=</span> <span style=color:#1c01ce>2020</span>) <span style=color:#a90d91>as</span> <span style=color:#c41a16>&#34;2020&#34;</span>,
+  <span style=color:#a90d91>sum</span>(<span style=color:#000>income</span>) <span style=color:#000>filter</span> (<span style=color:#a90d91>where</span> <span style=color:#a90d91>year</span> <span style=color:#000>=</span> <span style=color:#1c01ce>2021</span>) <span style=color:#a90d91>as</span> <span style=color:#c41a16>&#34;2021&#34;</span>,
+  <span style=color:#a90d91>sum</span>(<span style=color:#000>income</span>) <span style=color:#000>filter</span> (<span style=color:#a90d91>where</span> <span style=color:#a90d91>year</span> <span style=color:#000>=</span> <span style=color:#1c01ce>2022</span>) <span style=color:#a90d91>as</span> <span style=color:#c41a16>&#34;2022&#34;</span>,
+  <span style=color:#a90d91>sum</span>(<span style=color:#000>income</span>) <span style=color:#000>filter</span> (<span style=color:#a90d91>where</span> <span style=color:#a90d91>year</span> <span style=color:#000>=</span> <span style=color:#1c01ce>2023</span>) <span style=color:#a90d91>as</span> <span style=color:#c41a16>&#34;2023&#34;</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>sales</span>
+<span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> <span style=color:#000>product</span>
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>product</span>;
+</code></pre></div><p>Here is our pivot table:</p>
+<pre tabindex=0><code>┌─────────┬──────┬──────┬──────┬──────┐
+│ product │ 2020 │ 2021 │ 2022 │ 2023 │
+├─────────┼──────┼──────┼──────┼──────┤
+│ alpha   │ 100  │ 120  │ 130  │ 140  │
+│ beta    │ 10   │ 20   │ 40   │ 80   │
+│ gamma   │ 80   │ 75   │ 78   │ 80   │
+└─────────┴──────┴──────┴──────┴──────┘
+</code></pre><p>Using <code>filter</code> is probably the easiest way when we have few columns. But let&rsquo;s say we&rsquo;ve got ~100 years of sales, and some years may be missing. What do we do?</p>
+<h2 id=2-dynamic-sql>2. Dynamic SQL</h2>
+<p>Let&rsquo;s build our query dynamically without hardcoding year values:</p>
+<ol>
+<li>Extract distinct year values.</li>
+<li>Generate a <code>...filter (where year = X) as "X"</code> query line for each year.</li>
+</ol>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>with</span> <span style=color:#000>years</span> <span style=color:#a90d91>as</span> (
+  <span style=color:#a90d91>select</span> <span style=color:#a90d91>distinct</span> <span style=color:#a90d91>year</span> <span style=color:#a90d91>as</span> <span style=color:#a90d91>year</span>
+  <span style=color:#a90d91>from</span> <span style=color:#000>sales</span>
+),
+<span style=color:#000>lines</span> <span style=color:#a90d91>as</span> (
+  <span style=color:#a90d91>select</span> <span style=color:#c41a16>&#39;select product &#39;</span> <span style=color:#a90d91>as</span> <span style=color:#000>part</span>
+  <span style=color:#a90d91>union</span> <span style=color:#a90d91>all</span>
+  <span style=color:#a90d91>select</span> <span style=color:#c41a16>&#39;, sum(income) filter (where year = &#39;</span> <span style=color:#000>||</span> <span style=color:#a90d91>year</span> <span style=color:#000>||</span> <span style=color:#c41a16>&#39;) as &#34;&#39;</span> <span style=color:#000>||</span> <span style=color:#a90d91>year</span> <span style=color:#000>||</span> <span style=color:#c41a16>&#39;&#34; &#39;</span>
+  <span style=color:#a90d91>from</span> <span style=color:#000>years</span>
+  <span style=color:#a90d91>union</span> <span style=color:#a90d91>all</span>
+  <span style=color:#a90d91>select</span> <span style=color:#c41a16>&#39;from sales group by product order by product;&#39;</span>
+)
+<span style=color:#a90d91>select</span> <span style=color:#000>group_concat</span>(<span style=color:#000>part</span>, <span style=color:#c41a16>&#39;&#39;</span>)
+<span style=color:#a90d91>from</span> <span style=color:#000>lines</span>;
+</code></pre></div><p>This query returns the same SQL we wrote manually at the previous step (minus formatting):</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>product</span> , <span style=color:#a90d91>sum</span>(<span style=color:#000>income</span>) <span style=color:#000>filter</span> (<span style=color:#a90d91>where</span> <span style=color:#a90d91>year</span> <span style=color:#000>=</span> <span style=color:#1c01ce>2020</span>) <span style=color:#a90d91>as</span> <span style=color:#c41a16>&#34;2020&#34;</span> , <span style=color:#a90d91>sum</span>(<span style=color:#000>income</span>) <span style=color:#000>filter</span> (<span style=color:#a90d91>where</span> <span style=color:#a90d91>year</span> <span style=color:#000>=</span> <span style=color:#1c01ce>2021</span>) <span style=color:#a90d91>as</span> <span style=color:#c41a16>&#34;2021&#34;</span> , <span style=color:#a90d91>sum</span>(<span style=color:#000>income</span>) <span style=color:#000>filter</span> (<span style=color:#a90d91>where</span> <span style=color:#a90d91>year</span> <span style=color:#000>=</span> <span style=color:#1c01ce>2022</span>) <span style=color:#a90d91>as</span> <span style=color:#c41a16>&#34;2022&#34;</span> , <span style=color:#a90d91>sum</span>(<span style=color:#000>income</span>) <span style=color:#000>filter</span> (<span style=color:#a90d91>where</span> <span style=color:#a90d91>year</span> <span style=color:#000>=</span> <span style=color:#1c01ce>2023</span>) <span style=color:#a90d91>as</span> <span style=color:#c41a16>&#34;2023&#34;</span> <span style=color:#a90d91>from</span> <span style=color:#000>sales</span> <span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> <span style=color:#000>product</span> <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>product</span>;
+</code></pre></div><p>Now we have to execute it. For that, let&rsquo;s use the <code>eval(sql)</code> function available as part of the <a href=https://github.com/nalgeon/sqlean/blob/main/docs/define.md><code>define</code></a> extension:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>load_extension</span>(<span style=color:#c41a16>&#39;./define&#39;</span>);
+
+<span style=color:#a90d91>with</span> <span style=color:#000>years</span> <span style=color:#a90d91>as</span> (
+  <span style=color:#a90d91>select</span> <span style=color:#a90d91>distinct</span> <span style=color:#a90d91>year</span> <span style=color:#a90d91>as</span> <span style=color:#a90d91>year</span>
+  <span style=color:#a90d91>from</span> <span style=color:#000>sales</span>
+),
+<span style=color:#000>lines</span> <span style=color:#a90d91>as</span> (
+  <span style=color:#a90d91>select</span> <span style=color:#c41a16>&#39;drop view if exists v_sales; &#39;</span> <span style=color:#a90d91>as</span> <span style=color:#000>part</span>
+  <span style=color:#a90d91>union</span> <span style=color:#a90d91>all</span>
+  <span style=color:#a90d91>select</span> <span style=color:#c41a16>&#39;create view v_sales as &#39;</span>
+  <span style=color:#a90d91>union</span> <span style=color:#a90d91>all</span>
+  <span style=color:#a90d91>select</span> <span style=color:#c41a16>&#39;select product &#39;</span>
+  <span style=color:#a90d91>union</span> <span style=color:#a90d91>all</span>
+  <span style=color:#a90d91>select</span> <span style=color:#c41a16>&#39;, sum(income) filter (where year = &#39;</span> <span style=color:#000>||</span> <span style=color:#a90d91>year</span> <span style=color:#000>||</span> <span style=color:#c41a16>&#39;) as &#34;&#39;</span> <span style=color:#000>||</span> <span style=color:#a90d91>year</span> <span style=color:#000>||</span> <span style=color:#c41a16>&#39;&#34; &#39;</span>
+  <span style=color:#a90d91>from</span> <span style=color:#000>years</span>
+  <span style=color:#a90d91>union</span> <span style=color:#a90d91>all</span>
+  <span style=color:#a90d91>select</span> <span style=color:#c41a16>&#39;from sales group by product order by product;&#39;</span>
+)
+<span style=color:#a90d91>select</span> <span style=color:#000>eval</span>(<span style=color:#000>group_concat</span>(<span style=color:#000>part</span>, <span style=color:#c41a16>&#39;&#39;</span>))
+<span style=color:#a90d91>from</span> <span style=color:#000>lines</span>;
+</code></pre></div><p><em>Note: extensions do not work in the playground, so you&rsquo;ll have to use your local SQLite to reproduce this step.</em></p>
+<p>Here, we are building a <code>v_sales</code> view which executes the query we&rsquo;ve constructed previously. Let&rsquo;s select the data from it:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>v_sales</span>;
+</code></pre></div><pre tabindex=0><code>┌─────────┬──────┬──────┬──────┬──────┐
+│ product │ 2020 │ 2021 │ 2022 │ 2023 │
+├─────────┼──────┼──────┼──────┼──────┤
+│ alpha   │ 100  │ 120  │ 130  │ 140  │
+│ beta    │ 10   │ 20   │ 40   │ 80   │
+│ gamma   │ 80   │ 75   │ 78   │ 80   │
+└─────────┴──────┴──────┴──────┴──────┘
+</code></pre><p>Nice!</p>
+<h2 id=3-pivot-extension>3. Pivot extension</h2>
+<p>If dynamic SQL seems too much for you, there is a more straightforward solution — the <a href=https://github.com/nalgeon/sqlean/issues/27#issuecomment-997052157><code>pivotvtab</code></a> extension.</p>
+<p>With it, we only have to provide three selects to build a pivot:</p>
+<ol>
+<li>Select row values.</li>
+<li>Select column values.</li>
+<li>Select cell values.</li>
+</ol>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>load_extension</span>(<span style=color:#c41a16>&#39;./pivotvtab&#39;</span>);
+
+<span style=color:#a90d91>create</span> <span style=color:#000>virtual</span> <span style=color:#a90d91>table</span> <span style=color:#000>v_sales</span> <span style=color:#a90d91>using</span> <span style=color:#000>pivot_vtab</span> (
+  <span style=color:#177500>-- rows
+</span><span style=color:#177500></span>  (<span style=color:#a90d91>select</span> <span style=color:#a90d91>distinct</span> <span style=color:#000>product</span> <span style=color:#a90d91>from</span> <span style=color:#000>sales</span>),
+  <span style=color:#177500>-- columns
+</span><span style=color:#177500></span>  (<span style=color:#a90d91>select</span> <span style=color:#a90d91>distinct</span> <span style=color:#a90d91>year</span>, <span style=color:#a90d91>year</span> <span style=color:#a90d91>from</span> <span style=color:#000>sales</span>),
+  <span style=color:#177500>-- cells
+</span><span style=color:#177500></span>  (<span style=color:#a90d91>select</span> <span style=color:#a90d91>sum</span>(<span style=color:#000>income</span>) <span style=color:#a90d91>from</span> <span style=color:#000>sales</span> <span style=color:#a90d91>where</span> <span style=color:#000>product</span> <span style=color:#000>=</span> <span style=color:#000>?</span><span style=color:#1c01ce>1</span> <span style=color:#a90d91>and</span> <span style=color:#a90d91>year</span> <span style=color:#000>=</span> <span style=color:#000>?</span><span style=color:#1c01ce>2</span>)
+);
+</code></pre></div><p>The extension does the rest:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>v_sales</span>;
+</code></pre></div><pre tabindex=0><code>┌─────────┬──────┬──────┬──────┬──────┐
+│ product │ 2020 │ 2021 │ 2022 │ 2023 │
+├─────────┼──────┼──────┼──────┼──────┤
+│ alpha   │ 100  │ 120  │ 130  │ 140  │
+│ beta    │ 10   │ 20   │ 40   │ 80   │
+│ gamma   │ 80   │ 75   │ 78   │ 80   │
+└─────────┴──────┴──────┴──────┴──────┘
+</code></pre><p>That&rsquo;s even easier than the <code>pivot</code> operator in SQL Server!</p>
+<h2 id=summary>Summary</h2>
+<p>There are three ways to build a pivot table in SQLite:</p>
+<ol>
+<li>Using plain SQL and <code>sum()</code> + <code>filter</code> expressions.</li>
+<li>Building and executing a dynamic query with the <code>eval()</code> function.</li>
+<li>Utilizing the <code>pivotvtab</code> extension.</li>
+</ol>
+<p>P.S. Interested in using SQL for data analytics? Check out my book — <a href=/sql-window-functions-book>SQL Window Functions Explained</a></p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2023-02-09 14:00:00 +0000 UTC">09 Feb, 2023</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/sqlite/>sqlite</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/sql-window-functions-ranking/>SQL Window Functions: Ranking</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sqlean-regexp/>Regular Expressions in SQLite</a></p>
+<p><a href=/sqlean-define/>User-Defined Functions in SQLite</a></p>
+<p><a href=/cte/>Common Table Expressions in SQL</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>

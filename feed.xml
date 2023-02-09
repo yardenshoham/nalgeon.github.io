@@ -1,4 +1,141 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 08 Feb 2023 13:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>SQL Window Functions: Ranking</title><link>https://antonz.org/sql-window-functions-ranking/</link><pubDate>Wed, 08 Feb 2023 13:30:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-ranking/</guid><description>Making ratings and dividing data into partitions.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 09 Feb 2023 14:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Building a Pivot Table in SQLite</title><link>https://antonz.org/sqlite-pivot-table/</link><pubDate>Thu, 09 Feb 2023 14:00:00 +0000</pubDate><guid>https://antonz.org/sqlite-pivot-table/</guid><description>Three ways to create a pivot table in plain SQL.</description><content:encoded><![CDATA[<p>Suppose we have a <code>sales</code> table with product incomes for the years 2020-2023:</p>
+<pre tabindex="0"><code>┌─────────┬──────┬────────┐
+│ product │ year │ income │
+├─────────┼──────┼────────┤
+│ alpha   │ 2020 │ 100    │
+│ alpha   │ 2021 │ 120    │
+│ alpha   │ 2022 │ 130    │
+│ alpha   │ 2023 │ 140    │
+│ beta    │ 2020 │ 10     │
+│ beta    │ 2021 │ 20     │
+│ beta    │ 2022 │ 40     │
+│ beta    │ 2023 │ 80     │
+│ gamma   │ 2020 │ 80     │
+│ gamma   │ 2021 │ 75     │
+│ gamma   │ 2022 │ 78     │
+│ gamma   │ 2023 │ 80     │
+└─────────┴──────┴────────┘
+</code></pre><p><a href="https://sqlime.org/#gist:4a46833d948e8635593fec028eb178ba">playground</a> • <a href="./sales.sql">download</a></p>
+<p>And we want to transform it into a so-called <em>pivot table</em>, where products serve as rows and years serve as columns:</p>
+<pre tabindex="0"><code>┌─────────┬──────┬──────┬──────┬──────┐
+│ product │ 2020 │ 2021 │ 2022 │ 2023 │
+├─────────┼──────┼──────┼──────┼──────┤
+│ alpha   │ 100  │ 120  │ 130  │ 140  │
+│ beta    │ 10   │ 20   │ 40   │ 80   │
+│ gamma   │ 80   │ 75   │ 78   │ 80   │
+└─────────┴──────┴──────┴──────┴──────┘
+</code></pre><p>Some DBMS, like SQL Server, have a custom <code>pivot</code> operator to do this. SQLite does not. Still, there are multiple ways to solve the problem. Let&rsquo;s examine them.</p>
+<h2 id="1-filtered-totals">1. Filtered totals</h2>
+<p>Let&rsquo;s manually extract each year in a separate column and calculate a filtered total income for that year:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#000">product</span>,
+  <span style="color:#a90d91">sum</span>(<span style="color:#000">income</span>) <span style="color:#000">filter</span> (<span style="color:#a90d91">where</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2020</span>) <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;2020&#34;</span>,
+  <span style="color:#a90d91">sum</span>(<span style="color:#000">income</span>) <span style="color:#000">filter</span> (<span style="color:#a90d91">where</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2021</span>) <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;2021&#34;</span>,
+  <span style="color:#a90d91">sum</span>(<span style="color:#000">income</span>) <span style="color:#000">filter</span> (<span style="color:#a90d91">where</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2022</span>) <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;2022&#34;</span>,
+  <span style="color:#a90d91">sum</span>(<span style="color:#000">income</span>) <span style="color:#000">filter</span> (<span style="color:#a90d91">where</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2023</span>) <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;2023&#34;</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">sales</span>
+<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#000">product</span>
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">product</span>;
+</code></pre></div><p>Here is our pivot table:</p>
+<pre tabindex="0"><code>┌─────────┬──────┬──────┬──────┬──────┐
+│ product │ 2020 │ 2021 │ 2022 │ 2023 │
+├─────────┼──────┼──────┼──────┼──────┤
+│ alpha   │ 100  │ 120  │ 130  │ 140  │
+│ beta    │ 10   │ 20   │ 40   │ 80   │
+│ gamma   │ 80   │ 75   │ 78   │ 80   │
+└─────────┴──────┴──────┴──────┴──────┘
+</code></pre><p>Using <code>filter</code> is probably the easiest way when we have few columns. But let&rsquo;s say we&rsquo;ve got ~100 years of sales, and some years may be missing. What do we do?</p>
+<h2 id="2-dynamic-sql">2. Dynamic SQL</h2>
+<p>Let&rsquo;s build our query dynamically without hardcoding year values:</p>
+<ol>
+<li>Extract distinct year values.</li>
+<li>Generate a <code>...filter (where year = X) as &quot;X&quot;</code> query line for each year.</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#000">years</span> <span style="color:#a90d91">as</span> (
+  <span style="color:#a90d91">select</span> <span style="color:#a90d91">distinct</span> <span style="color:#a90d91">year</span> <span style="color:#a90d91">as</span> <span style="color:#a90d91">year</span>
+  <span style="color:#a90d91">from</span> <span style="color:#000">sales</span>
+),
+<span style="color:#000">lines</span> <span style="color:#a90d91">as</span> (
+  <span style="color:#a90d91">select</span> <span style="color:#c41a16">&#39;select product &#39;</span> <span style="color:#a90d91">as</span> <span style="color:#000">part</span>
+  <span style="color:#a90d91">union</span> <span style="color:#a90d91">all</span>
+  <span style="color:#a90d91">select</span> <span style="color:#c41a16">&#39;, sum(income) filter (where year = &#39;</span> <span style="color:#000">||</span> <span style="color:#a90d91">year</span> <span style="color:#000">||</span> <span style="color:#c41a16">&#39;) as &#34;&#39;</span> <span style="color:#000">||</span> <span style="color:#a90d91">year</span> <span style="color:#000">||</span> <span style="color:#c41a16">&#39;&#34; &#39;</span>
+  <span style="color:#a90d91">from</span> <span style="color:#000">years</span>
+  <span style="color:#a90d91">union</span> <span style="color:#a90d91">all</span>
+  <span style="color:#a90d91">select</span> <span style="color:#c41a16">&#39;from sales group by product order by product;&#39;</span>
+)
+<span style="color:#a90d91">select</span> <span style="color:#000">group_concat</span>(<span style="color:#000">part</span>, <span style="color:#c41a16">&#39;&#39;</span>)
+<span style="color:#a90d91">from</span> <span style="color:#000">lines</span>;
+</code></pre></div><p>This query returns the same SQL we wrote manually at the previous step (minus formatting):</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">product</span> , <span style="color:#a90d91">sum</span>(<span style="color:#000">income</span>) <span style="color:#000">filter</span> (<span style="color:#a90d91">where</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2020</span>) <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;2020&#34;</span> , <span style="color:#a90d91">sum</span>(<span style="color:#000">income</span>) <span style="color:#000">filter</span> (<span style="color:#a90d91">where</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2021</span>) <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;2021&#34;</span> , <span style="color:#a90d91">sum</span>(<span style="color:#000">income</span>) <span style="color:#000">filter</span> (<span style="color:#a90d91">where</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2022</span>) <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;2022&#34;</span> , <span style="color:#a90d91">sum</span>(<span style="color:#000">income</span>) <span style="color:#000">filter</span> (<span style="color:#a90d91">where</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2023</span>) <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;2023&#34;</span> <span style="color:#a90d91">from</span> <span style="color:#000">sales</span> <span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#000">product</span> <span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">product</span>;
+</code></pre></div><p>Now we have to execute it. For that, let&rsquo;s use the <code>eval(sql)</code> function available as part of the <a href="https://github.com/nalgeon/sqlean/blob/main/docs/define.md"><code>define</code></a> extension:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">load_extension</span>(<span style="color:#c41a16">&#39;./define&#39;</span>);
+
+<span style="color:#a90d91">with</span> <span style="color:#000">years</span> <span style="color:#a90d91">as</span> (
+  <span style="color:#a90d91">select</span> <span style="color:#a90d91">distinct</span> <span style="color:#a90d91">year</span> <span style="color:#a90d91">as</span> <span style="color:#a90d91">year</span>
+  <span style="color:#a90d91">from</span> <span style="color:#000">sales</span>
+),
+<span style="color:#000">lines</span> <span style="color:#a90d91">as</span> (
+  <span style="color:#a90d91">select</span> <span style="color:#c41a16">&#39;drop view if exists v_sales; &#39;</span> <span style="color:#a90d91">as</span> <span style="color:#000">part</span>
+  <span style="color:#a90d91">union</span> <span style="color:#a90d91">all</span>
+  <span style="color:#a90d91">select</span> <span style="color:#c41a16">&#39;create view v_sales as &#39;</span>
+  <span style="color:#a90d91">union</span> <span style="color:#a90d91">all</span>
+  <span style="color:#a90d91">select</span> <span style="color:#c41a16">&#39;select product &#39;</span>
+  <span style="color:#a90d91">union</span> <span style="color:#a90d91">all</span>
+  <span style="color:#a90d91">select</span> <span style="color:#c41a16">&#39;, sum(income) filter (where year = &#39;</span> <span style="color:#000">||</span> <span style="color:#a90d91">year</span> <span style="color:#000">||</span> <span style="color:#c41a16">&#39;) as &#34;&#39;</span> <span style="color:#000">||</span> <span style="color:#a90d91">year</span> <span style="color:#000">||</span> <span style="color:#c41a16">&#39;&#34; &#39;</span>
+  <span style="color:#a90d91">from</span> <span style="color:#000">years</span>
+  <span style="color:#a90d91">union</span> <span style="color:#a90d91">all</span>
+  <span style="color:#a90d91">select</span> <span style="color:#c41a16">&#39;from sales group by product order by product;&#39;</span>
+)
+<span style="color:#a90d91">select</span> <span style="color:#000">eval</span>(<span style="color:#000">group_concat</span>(<span style="color:#000">part</span>, <span style="color:#c41a16">&#39;&#39;</span>))
+<span style="color:#a90d91">from</span> <span style="color:#000">lines</span>;
+</code></pre></div><p><em>Note: extensions do not work in the playground, so you&rsquo;ll have to use your local SQLite to reproduce this step.</em></p>
+<p>Here, we are building a <code>v_sales</code> view which executes the query we&rsquo;ve constructed previously. Let&rsquo;s select the data from it:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">*</span> <span style="color:#a90d91">from</span> <span style="color:#000">v_sales</span>;
+</code></pre></div><pre tabindex="0"><code>┌─────────┬──────┬──────┬──────┬──────┐
+│ product │ 2020 │ 2021 │ 2022 │ 2023 │
+├─────────┼──────┼──────┼──────┼──────┤
+│ alpha   │ 100  │ 120  │ 130  │ 140  │
+│ beta    │ 10   │ 20   │ 40   │ 80   │
+│ gamma   │ 80   │ 75   │ 78   │ 80   │
+└─────────┴──────┴──────┴──────┴──────┘
+</code></pre><p>Nice!</p>
+<h2 id="3-pivot-extension">3. Pivot extension</h2>
+<p>If dynamic SQL seems too much for you, there is a more straightforward solution — the <a href="https://github.com/nalgeon/sqlean/issues/27#issuecomment-997052157"><code>pivotvtab</code></a> extension.</p>
+<p>With it, we only have to provide three selects to build a pivot:</p>
+<ol>
+<li>Select row values.</li>
+<li>Select column values.</li>
+<li>Select cell values.</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">load_extension</span>(<span style="color:#c41a16">&#39;./pivotvtab&#39;</span>);
+
+<span style="color:#a90d91">create</span> <span style="color:#000">virtual</span> <span style="color:#a90d91">table</span> <span style="color:#000">v_sales</span> <span style="color:#a90d91">using</span> <span style="color:#000">pivot_vtab</span> (
+  <span style="color:#177500">-- rows
+</span><span style="color:#177500"></span>  (<span style="color:#a90d91">select</span> <span style="color:#a90d91">distinct</span> <span style="color:#000">product</span> <span style="color:#a90d91">from</span> <span style="color:#000">sales</span>),
+  <span style="color:#177500">-- columns
+</span><span style="color:#177500"></span>  (<span style="color:#a90d91">select</span> <span style="color:#a90d91">distinct</span> <span style="color:#a90d91">year</span>, <span style="color:#a90d91">year</span> <span style="color:#a90d91">from</span> <span style="color:#000">sales</span>),
+  <span style="color:#177500">-- cells
+</span><span style="color:#177500"></span>  (<span style="color:#a90d91">select</span> <span style="color:#a90d91">sum</span>(<span style="color:#000">income</span>) <span style="color:#a90d91">from</span> <span style="color:#000">sales</span> <span style="color:#a90d91">where</span> <span style="color:#000">product</span> <span style="color:#000">=</span> <span style="color:#000">?</span><span style="color:#1c01ce">1</span> <span style="color:#a90d91">and</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#000">?</span><span style="color:#1c01ce">2</span>)
+);
+</code></pre></div><p>The extension does the rest:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">*</span> <span style="color:#a90d91">from</span> <span style="color:#000">v_sales</span>;
+</code></pre></div><pre tabindex="0"><code>┌─────────┬──────┬──────┬──────┬──────┐
+│ product │ 2020 │ 2021 │ 2022 │ 2023 │
+├─────────┼──────┼──────┼──────┼──────┤
+│ alpha   │ 100  │ 120  │ 130  │ 140  │
+│ beta    │ 10   │ 20   │ 40   │ 80   │
+│ gamma   │ 80   │ 75   │ 78   │ 80   │
+└─────────┴──────┴──────┴──────┴──────┘
+</code></pre><p>That&rsquo;s even easier than the <code>pivot</code> operator in SQL Server!</p>
+<h2 id="summary">Summary</h2>
+<p>There are three ways to build a pivot table in SQLite:</p>
+<ol>
+<li>Using plain SQL and <code>sum()</code> + <code>filter</code> expressions.</li>
+<li>Building and executing a dynamic query with the <code>eval()</code> function.</li>
+<li>Utilizing the <code>pivotvtab</code> extension.</li>
+</ol>
+<p>P.S. Interested in using SQL for data analytics? Check out my book — <a href="/sql-window-functions-book">SQL Window Functions Explained</a></p>
+]]></content:encoded></item><item><title>SQL Window Functions: Ranking</title><link>https://antonz.org/sql-window-functions-ranking/</link><pubDate>Wed, 08 Feb 2023 13:30:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-ranking/</guid><description>Making ratings and dividing data into partitions.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
 <p>Ranking means coming up with all kinds of ratings, starting from the winners of the World Swimming Championships and ending with the Forbes 500.</p>
 <p>We will rank records from the toy <code>employees</code> table:</p>
 <pre tabindex="0"><code>┌────┬───────┬────────┬────────────┬────────┐
@@ -1437,47 +1574,4 @@ sqlite&gt; select define('sumn', ':n * (:n + 1) / 2');
 sqlite&gt; select sumn(5);
 </code></pre><p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/install.md">How to Install an Extension</a> for usage with IDE, Python, etc.</p>
 <p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/define.md">Extension Documentation</a> for reference.</p>
-]]></content:encoded></item><item><title>JSON Lines</title><link>https://antonz.org/json-lines/</link><pubDate>Thu, 04 Aug 2022 18:30:00 +0000</pubDate><guid>https://antonz.org/json-lines/</guid><description>CSV on steroids.</description><content:encoded><![CDATA[<p>Worked with the <a href="https://jsonlines.org/">JSON Lines</a> format the other day. It&rsquo;s a CSV on steroids:</p>
-<ul>
-<li>each entry is a separate line, as in CSV;</li>
-<li>at the same time it is a full-fledged JSON.</li>
-</ul>
-<p>For example:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{ <span style="color:#000">&#34;id&#34;</span>:<span style="color:#1c01ce">11</span>, <span style="color:#000">&#34;name&#34;</span>:<span style="color:#c41a16">&#34;Diane&#34;</span>, <span style="color:#000">&#34;city&#34;</span>:<span style="color:#c41a16">&#34;London&#34;</span>, <span style="color:#000">&#34;department&#34;</span>:<span style="color:#c41a16">&#34;hr&#34;</span>, <span style="color:#000">&#34;salary&#34;</span>:<span style="color:#1c01ce">70</span> }
-{ <span style="color:#000">&#34;id&#34;</span>:<span style="color:#1c01ce">12</span>, <span style="color:#000">&#34;name&#34;</span>:<span style="color:#c41a16">&#34;Bob&#34;</span>, <span style="color:#000">&#34;city&#34;</span>:<span style="color:#c41a16">&#34;London&#34;</span>, <span style="color:#000">&#34;department&#34;</span>:<span style="color:#c41a16">&#34;hr&#34;</span>, <span style="color:#000">&#34;salary&#34;</span>:<span style="color:#1c01ce">78</span> }
-{ <span style="color:#000">&#34;id&#34;</span>:<span style="color:#1c01ce">21</span>, <span style="color:#000">&#34;name&#34;</span>:<span style="color:#c41a16">&#34;Emma&#34;</span>, <span style="color:#000">&#34;city&#34;</span>:<span style="color:#c41a16">&#34;London&#34;</span>, <span style="color:#000">&#34;department&#34;</span>:<span style="color:#c41a16">&#34;it&#34;</span>, <span style="color:#000">&#34;salary&#34;</span>:<span style="color:#1c01ce">84</span> }
-{ <span style="color:#000">&#34;id&#34;</span>:<span style="color:#1c01ce">22</span>, <span style="color:#000">&#34;name&#34;</span>:<span style="color:#c41a16">&#34;Grace&#34;</span>, <span style="color:#000">&#34;city&#34;</span>:<span style="color:#c41a16">&#34;Berlin&#34;</span>, <span style="color:#000">&#34;department&#34;</span>:<span style="color:#c41a16">&#34;it&#34;</span>, <span style="color:#000">&#34;salary&#34;</span>:<span style="color:#1c01ce">90</span>}
-{ <span style="color:#000">&#34;id&#34;</span>:<span style="color:#1c01ce">23</span>, <span style="color:#000">&#34;name&#34;</span>:<span style="color:#c41a16">&#34;Henry&#34;</span>, <span style="color:#000">&#34;city&#34;</span>:<span style="color:#c41a16">&#34;London&#34;</span>, <span style="color:#000">&#34;department&#34;</span>:<span style="color:#c41a16">&#34;it&#34;</span>, <span style="color:#000">&#34;salary&#34;</span>:<span style="color:#1c01ce">104</span>}
-</code></pre></div><p>Great stuff:</p>
-<ul>
-<li>Suitable for objects of complex structure (unlike csv);</li>
-<li>Easy to stream read without loading the entire file into memory (unlike json);</li>
-<li>Easy to append new entries to an existing file (unlike json).</li>
-</ul>
-<p>JSON can also be streamed. But look how much easier it is with JSON Lines:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a90d91">import</span> <span style="color:#000">json</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">typing</span> <span style="color:#a90d91">import</span> <span style="color:#000">Iterator</span>
-
-
-<span style="color:#a90d91">def</span> <span style="color:#000">jl_reader</span>(<span style="color:#000">fname</span>: <span style="color:#a90d91">str</span>) <span style="color:#000">-&gt;</span> <span style="color:#000">Iterator</span>[<span style="color:#a90d91">dict</span>]:
-    <span style="color:#a90d91">with</span> <span style="color:#a90d91">open</span>(<span style="color:#000">fname</span>) <span style="color:#a90d91">as</span> <span style="color:#000">file</span>:
-        <span style="color:#a90d91">for</span> <span style="color:#000">line</span> <span style="color:#000">in</span> <span style="color:#000">file</span>:
-            <span style="color:#000">obj</span> <span style="color:#000">=</span> <span style="color:#000">json</span><span style="color:#000">.</span><span style="color:#000">loads</span>(<span style="color:#000">line</span><span style="color:#000">.</span><span style="color:#000">strip</span>())
-            <span style="color:#a90d91">yield</span> <span style="color:#000">obj</span>
-
-
-<span style="color:#a90d91">if</span> <span style="color:#000">__name__</span> <span style="color:#000">==</span> <span style="color:#c41a16">&#34;__main__&#34;</span>:
-    <span style="color:#000">reader</span> <span style="color:#000">=</span> <span style="color:#000">jl_reader</span>(<span style="color:#c41a16">&#34;employees.jl&#34;</span>)
-    <span style="color:#a90d91">for</span> <span style="color:#000">employee</span> <span style="color:#000">in</span> <span style="color:#000">reader</span>:
-        <span style="color:#a90d91">id</span> <span style="color:#000">=</span> <span style="color:#000">employee</span>[<span style="color:#c41a16">&#34;id&#34;</span>]
-        <span style="color:#000">name</span> <span style="color:#000">=</span> <span style="color:#000">employee</span>[<span style="color:#c41a16">&#34;name&#34;</span>]
-        <span style="color:#000">dept</span> <span style="color:#000">=</span> <span style="color:#000">employee</span>[<span style="color:#c41a16">&#34;department&#34;</span>]
-        <span style="color:#a90d91">print</span>(<span style="color:#c41a16">f</span><span style="color:#c41a16">&#34;#</span><span style="color:#c41a16">{</span><span style="color:#a90d91">id</span><span style="color:#c41a16">}</span><span style="color:#c41a16"> - </span><span style="color:#c41a16">{</span><span style="color:#000">name</span><span style="color:#c41a16">}</span><span style="color:#c41a16"> (</span><span style="color:#c41a16">{</span><span style="color:#000">dept</span><span style="color:#c41a16">}</span><span style="color:#c41a16">)&#34;</span>)
-</code></pre></div><pre tabindex="0"><code>#11 - Diane (hr)
-#12 - Bob (hr)
-#21 - Emma (it)
-#22 - Grace (it)
-#23 - Henry (it)
-</code></pre><p><a href="https://replit.com/@antonz/json-lines#main.py">playground</a></p>
-<p>Great fit for logs and data processing pipelines.</p>
 ]]></content:encoded></item></channel></rss>
