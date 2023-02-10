@@ -112,7 +112,7 @@
 <span style=color:#a90d91>from</span> <span style=color:#000>sales</span>
 <span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> <span style=color:#000>product</span>
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>product</span>;
-</code></pre></div><p>Using <code>filter</code> is probably the easiest way when we have few columns. But let&rsquo;s say we&rsquo;ve got ~100 years of sales, and some years may be missing. What do we do?</p>
+</code></pre></div><p>Using <code>filter</code> is probably the easiest way when we know the columns in advance. But what if we don&rsquo;t?</p>
 <h2 id=2-dynamic-sql>2. Dynamic SQL</h2>
 <p>Let&rsquo;s build our query dynamically without hardcoding year values:</p>
 <ol>
