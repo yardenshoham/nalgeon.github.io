@@ -298,7 +298,13 @@ Now commit, push, and enjoy the result in a minute. And let everyone enjoy as we
 
 Aren't they cute?
 
-<p><img class="img-bordered-thin" alt="Readme badges" src="badges.png"></p>
+<div class="row">
+<div class="col-xs-12 col-sm-8">
+<figure>
+  <img class="img-bordered-thin" alt="Readme badges" src="badges.png" width="400">
+</figure>
+</div>
+</div>
 
 ## D. Task automation
 

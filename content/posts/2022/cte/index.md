@@ -180,3 +180,5 @@ How does one know when to use a subquery and when to use CTE? I came up with a s
 That's what I wish you.
 
 P.S. There are also _recursive_ CTEs, famous for their complexity and terrible naming (they have almost nothing in common with regular CTEs). Let's talk about them some other day.
+
+P.P.S. Interested in mastering advanced SQL? Check out my book — [SQL Window Functions Explained](/sql-window-functions-book)

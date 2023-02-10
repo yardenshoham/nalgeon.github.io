@@ -21,7 +21,9 @@ The book provides advice on designing clear, concise, and actionable reports and
 4. How to avoid clutter and increase information density.
 5. How to make everything clear and consistent.
 
-<img alt="Sample report" src="sample.png" class="img-bordered-thin">
+<figure>
+    <img alt="Sample report" src="sample.png" class="img-bordered-thin">
+</figure>
 
 While the guide itself is great, the authors - IBCS Association - made some questionable choices:
 

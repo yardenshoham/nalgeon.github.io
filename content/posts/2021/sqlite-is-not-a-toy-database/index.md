@@ -222,7 +222,7 @@ limit 10;
 Descriptive statistics? Easy: mean, median, percentiles, standard deviation, you name it. You'll have to load an extension, but it's also a single command (and a single file).
 
 ```sql
-.load sqlite3-stats
+.load ./stats
 
 select
   count(*) as book_count,
@@ -245,9 +245,9 @@ from books;
 
 > **Note on extensions**. SQLite is missing a lot of functions compared to other DBMSs like PostgreSQL. But they are easy to add, which is what people do - so it turns out quite a mess.
 >
-> Therefore, I decided to make a consistent set of extensions, divided by domain area and compiled for major operating systems:
+> Therefore, I decided to make a consistent set of extensions, divided by domain area and compiled for major operating systems. Check it out on GitHub:
 >
-> [sqlean @ GitHub](https://github.com/nalgeon/sqlean/)
+> [sqlean](https://github.com/nalgeon/sqlean/)
 
 More fun with statistics. You can plot the data distribution right in the console. Look how cute it is:
 
@@ -354,7 +354,7 @@ QUERY PLAN
 
 > You can also use SQLite as a graph database. A bunch of complex `WITH RECURSIVE` will do the trick, or maybe you'll prefer to add a bit of Python:
 >
-> [simple-graph @ GitHub](https://github.com/dpapathanasiou/simple-graph)
+> [simple-graph](https://github.com/dpapathanasiou/simple-graph)
 
 Full-text search works out of the box:
 
@@ -400,10 +400,12 @@ db = sqlite3.connect("file::memory:?cache=shared")
 
 ## And so much more
 
-There are fancy window functions (just like in PostgreSQL). `UPSERT`, `UPDATE FROM`, and `generate_series()`. R-Tree indexes. Regular expressions, fuzzy-search, and geo. In terms of features, SQLite can compete with any 'big' DBMS.
+There are fancy [window functions](/sql-window-functions-book) (just like in PostgreSQL). `UPSERT`, `UPDATE FROM`, and `generate_series()`. R-Tree indexes. Regular expressions, fuzzy-search, and geo. In terms of features, SQLite can compete with any 'big' DBMS.
 
 There is also great tooling around SQLite. I especially like [Datasette](https://datasette.io/) - an open-source tool for exploring and publishing SQLite datasets. And [DBeaver](https://dbeaver.io/) is an excellent open-source database IDE with the latest SQLite versions support.
 
 I hope this article will inspire you to try SQLite. Thanks for reading!
+
+P.S. Interested in learning advanced SQLite features? Check out my book — [SQL Window Functions Explained](/sql-window-functions-book)
 
 [Comments on Hacker News](https://news.ycombinator.com/item?id=26580614)

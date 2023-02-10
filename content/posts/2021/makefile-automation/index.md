@@ -170,6 +170,6 @@ If basic features are not enough, there are some great in-depth guides:
 
 Here is a Makefile from one of my projects (podcast search tool):
 
-> [podsearch](https://github.com/nalgeon/podsearch-py/blob/master/Makefile)
+-   [podsearch](https://github.com/nalgeon/podsearch-py/blob/master/Makefile)
 
 Makefiles are great for automating routine tasks, regardless of the language you prefer. Use them!

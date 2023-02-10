@@ -110,3 +110,5 @@ To store the temp database in memory, set `PRAGMA temp_store = MEMORY`.
 </div>
 
 Temporary tables are great for experimenting when you're just getting to know the data. Do whatever you want — everything will be forgotten after disconnecting from the database ツ
+
+P.S. Interested in mastering advanced SQL? Check out my book — [SQL Window Functions Explained](/sql-window-functions-book)

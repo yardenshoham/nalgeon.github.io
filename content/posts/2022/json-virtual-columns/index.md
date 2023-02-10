@@ -109,3 +109,5 @@ where object_id = 11;
 Thanks to virtual columns, we almost have a NoSQL database ツ
 
 [Playground](https://sqlime.org/#gist:c284f7c22684eb74b5dab92d98f7d773)
+
+P.S. Interested in mastering advanced SQL? Check out my book — [SQL Window Functions Explained](/sql-window-functions-book)

@@ -144,6 +144,4 @@ Four great features, all in the same release! Awesome ツ
 
 [SQLite 3.35 Release Notes](https://sqlite.org/releaselog/3_35_0.html)
 
-[Download latest version](https://sqlite.org/download.html)
-
 [Comments on Hacker News](https://news.ycombinator.com/item?id=26440397)

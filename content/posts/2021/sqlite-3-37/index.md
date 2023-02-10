@@ -155,4 +155,4 @@ See [The --safe command-line option](https://sqlite.org/cli.html#safemode) for d
 
 Overall, a great release! Strict tables offer a long-awaited alternative to flexible typing, `any` type makes flexibility explicit, and `table_list` pragma is just nice to have.
 
-[Official release notes](https://sqlite.org/releaselog/3_37_0.html) | [Download](https://sqlite.org/download.html)
+[SQLite 3.37 Release Notes](https://sqlite.org/releaselog/3_37_0.html)

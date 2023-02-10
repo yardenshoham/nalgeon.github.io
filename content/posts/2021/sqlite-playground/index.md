@@ -41,6 +41,8 @@ In 2019, Ophir Lojkine compiled SQLite sources into WebAssembly (the 'native' br
 
 sql.js is the perfect engine for an online playground. So I used it.
 
+In 2022 the SQLite team delivered an [official WebAssembly build](https://sqlite.org/wasm), so I switched to it.
+
 ## Loading the database from a file
 
 Get the file from the user via `input[type=file]`, read it with the `FileReader`, convert into an 8-bit array, and upload to SQLite:

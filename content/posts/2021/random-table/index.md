@@ -178,4 +178,6 @@ sqlite> select * from person_data limit 10;
 
 A single query has brought us a million customers. Not bad! It would be great to achieve such results in sales, wouldn't it? ツ
 
+P.S. Interested in mastering advanced SQL? Check out my book — [SQL Window Functions Explained](/sql-window-functions-book)
+
 [Comments on Hacker News](https://news.ycombinator.com/item?id=26564168)
