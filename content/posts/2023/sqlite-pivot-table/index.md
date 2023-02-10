@@ -86,7 +86,7 @@ group by product
 order by product;
 ```
 
-Using `filter` is probably the easiest way when we have few columns. But let's say we've got ~100 years of sales, and some years may be missing. What do we do?
+Using `filter` is probably the easiest way when we know the columns in advance. But what if we don't?
 
 ## 2. Dynamic SQL
 
