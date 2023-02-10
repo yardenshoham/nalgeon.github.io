@@ -210,7 +210,7 @@ select city, foundation_year, timezone from city limit 10;
 <span style=color:#a90d91>limit</span> <span style=color:#1c01ce>10</span>;
 </code></pre></div><h2 id=math-statistics>Math statistics</h2>
 <p>Descriptive statistics? Easy: mean, median, percentiles, standard deviation, you name it. You&rsquo;ll have to load an extension, but it&rsquo;s also a single command (and a single file).</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql>.<span style=color:#a90d91>load</span> <span style=color:#000>sqlite3</span><span style=color:#000>-</span><span style=color:#000>stats</span>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql>.<span style=color:#a90d91>load</span> .<span style=color:#000>/</span><span style=color:#000>stats</span>
 
 <span style=color:#a90d91>select</span>
   <span style=color:#a90d91>count</span>(<span style=color:#000>*</span>) <span style=color:#a90d91>as</span> <span style=color:#000>book_count</span>,
@@ -228,8 +228,8 @@ select city, foundation_year, timezone from city limit 10;
 └────────────┴──────┴────────┴──────┴─────┴─────┴──────┘
 </code></pre><blockquote>
 <p><strong>Note on extensions</strong>. SQLite is missing a lot of functions compared to other DBMSs like PostgreSQL. But they are easy to add, which is what people do - so it turns out quite a mess.</p>
-<p>Therefore, I decided to make a consistent set of extensions, divided by domain area and compiled for major operating systems:</p>
-<p><a href=https://github.com/nalgeon/sqlean/>sqlean @ GitHub</a></p>
+<p>Therefore, I decided to make a consistent set of extensions, divided by domain area and compiled for major operating systems. Check it out on GitHub:</p>
+<p><a href=https://github.com/nalgeon/sqlean/>sqlean</a></p>
 </blockquote>
 <p>More fun with statistics. You can plot the data distribution right in the console. Look how cute it is:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>with</span> <span style=color:#000>slots</span> <span style=color:#a90d91>as</span> (
@@ -308,7 +308,7 @@ select city, foundation_year, timezone from city limit 10;
 <span style=color:#000>`</span><span style=color:#177500>--SEARCH TABLE currency USING INDEX currency_code_idx (code=?)
 </span></code></pre></div><blockquote>
 <p>You can also use SQLite as a graph database. A bunch of complex <code>WITH RECURSIVE</code> will do the trick, or maybe you&rsquo;ll prefer to add a bit of Python:</p>
-<p><a href=https://github.com/dpapathanasiou/simple-graph>simple-graph @ GitHub</a></p>
+<p><a href=https://github.com/dpapathanasiou/simple-graph>simple-graph</a></p>
 </blockquote>
 <p>Full-text search works out of the box:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>create</span> <span style=color:#000>virtual</span> <span style=color:#a90d91>table</span> <span style=color:#000>books_fts</span>
@@ -338,9 +338,10 @@ select city, foundation_year, timezone from city limit 10;
 </code></pre></div><p>You can even access it from multiple connections:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>db</span> <span style=color:#000>=</span> <span style=color:#000>sqlite3</span><span style=color:#000>.</span><span style=color:#000>connect</span>(<span style=color:#c41a16>&#34;file::memory:?cache=shared&#34;</span>)
 </code></pre></div><h2 id=and-so-much-more>And so much more</h2>
-<p>There are fancy window functions (just like in PostgreSQL). <code>UPSERT</code>, <code>UPDATE FROM</code>, and <code>generate_series()</code>. R-Tree indexes. Regular expressions, fuzzy-search, and geo. In terms of features, SQLite can compete with any &lsquo;big&rsquo; DBMS.</p>
+<p>There are fancy <a href=/sql-window-functions-book>window functions</a> (just like in PostgreSQL). <code>UPSERT</code>, <code>UPDATE FROM</code>, and <code>generate_series()</code>. R-Tree indexes. Regular expressions, fuzzy-search, and geo. In terms of features, SQLite can compete with any &lsquo;big&rsquo; DBMS.</p>
 <p>There is also great tooling around SQLite. I especially like <a href=https://datasette.io/>Datasette</a> - an open-source tool for exploring and publishing SQLite datasets. And <a href=https://dbeaver.io/>DBeaver</a> is an excellent open-source database IDE with the latest SQLite versions support.</p>
 <p>I hope this article will inspire you to try SQLite. Thanks for reading!</p>
+<p>P.S. Interested in learning advanced SQLite features? Check out my book — <a href=/sql-window-functions-book>SQL Window Functions Explained</a></p>
 <p><a href="https://news.ycombinator.com/item?id=26580614">Comments on Hacker News</a></p>
 <p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
 </div>

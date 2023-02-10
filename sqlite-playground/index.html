@@ -80,6 +80,7 @@
 <p>Many browser vendors thought so at the end of the 00s. That&rsquo;s how Web SQL standard appeared, supported by Apple (Safari), Google (Chrome), and Opera (popular at the time). Not by Mozilla (Firefox), though. As a result, Web SQL was killed in 2010. After that, browser data storage went along the NoSQL path (Indexed Database, Cache API).</p>
 <p>In 2019, Ophir Lojkine compiled SQLite sources into WebAssembly (the &lsquo;native&rsquo; browser binary format) for the <a href=https://github.com/sql-js/sql.js>sql.js</a> project. It is a full-fledged SQLite instance that works in the browser (and quite a small one — the binary takes about 1Mb).</p>
 <p>sql.js is the perfect engine for an online playground. So I used it.</p>
+<p>In 2022 the SQLite team delivered an <a href=https://sqlite.org/wasm>official WebAssembly build</a>, so I switched to it.</p>
 <h2 id=loading-the-database-from-a-file>Loading the database from a file</h2>
 <p>Get the file from the user via <code>input[type=file]</code>, read it with the <code>FileReader</code>, convert into an 8-bit array, and upload to SQLite:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-javascript data-lang=javascript><span style=color:#a90d91>const</span> <span style=color:#000>file</span> <span style=color:#000>=</span> <span style=color:#000>event</span>.<span style=color:#000>target</span>.<span style=color:#000>files</span>[<span style=color:#1c01ce>0</span>];
