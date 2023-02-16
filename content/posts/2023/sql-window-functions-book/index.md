@@ -47,7 +47,7 @@ Here is what you will learn:
     <li>Windows and functions
         <ul>
             <li><a href="/sql-window-functions-ranking">Ranking</a></li>
-            <li>Offset</li>
+            <li><a href="/sql-window-functions-offset">Offset</a></li>
             <li>Aggregation</li>
             <li>Rolling aggregates</li>
             <li>Statistics</li>

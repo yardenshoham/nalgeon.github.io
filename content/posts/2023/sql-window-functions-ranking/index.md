@@ -1,6 +1,6 @@
 +++
 date = 2023-02-08T13:30:00Z
-title = "SQL Window Functions: Ranking"
+title = "Ranking data with SQL Window Functions"
 description = "Making ratings and dividing data into partitions."
 image = "/sql-window-functions-ranking/cover.png"
 slug = "sql-window-functions-ranking"
@@ -757,7 +757,7 @@ rank()<br/>
 
 ## Keep it up
 
-You have learned what "window" and "window functions" are and how to use them to rank data. In the <span class="color-gray">next chapter</span> (coming soon), we will deal with window offsets and comparisons!
+You have learned what "window" and "window functions" are and how to use them to rank data. In the [next chapter](/sql-window-functions-offset), we will deal with window offsets and comparisons!
 
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
