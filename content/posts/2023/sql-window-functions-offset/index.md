@@ -1,6 +1,6 @@
 +++
 date = 2023-02-16T14:00:00Z
-title = "Comparing by offset with SQL Window Functions"
+title = "Comparing by Offset with SQL Window Functions"
 description = "Comparing records with neighbors and boundaries."
 image = "/sql-window-functions-offset/cover.png"
 slug = "sql-window-functions-offset"

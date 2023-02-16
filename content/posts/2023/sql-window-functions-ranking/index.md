@@ -1,6 +1,6 @@
 +++
 date = 2023-02-08T13:30:00Z
-title = "Ranking data with SQL Window Functions"
+title = "Ranking Data with SQL Window Functions"
 description = "Making ratings and dividing data into partitions."
 image = "/sql-window-functions-ranking/cover.png"
 slug = "sql-window-functions-ranking"
