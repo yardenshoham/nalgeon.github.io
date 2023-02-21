@@ -1,7 +1,7 @@
 <!doctype html><html lang=en>
 <head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>How Python list really works</title>
+<title>How Python List Works</title>
 <meta name=description content="And why some methods take constant time while others take linear.">
 <meta name=robots content="index, follow">
 <link rel=stylesheet type=text/css href=/assets/css/style.d5574c61892ae0c9bca2eab9c37cfcbc17d93429a85b516e1dd46f7df294f4cc.css>
@@ -12,12 +12,12 @@
 <link rel=canonical href=https://antonz.org/list-internals/>
 <meta name=author content="Anton Zhiyanov">
 <meta property="og:type" content="article">
-<meta property="og:title" content="How Python list really works">
+<meta property="og:title" content="How Python List Works">
 <meta property="og:description" content="And why some methods take constant time while others take linear.">
 <meta property="og:url" content="https://antonz.org/list-internals/">
 <meta property="og:image" content="https://antonz.org/list-internals/cover.png">
 <meta name=twitter:card content="summary_large_image">
-<meta name=twitter:title content="How Python list really works">
+<meta name=twitter:title content="How Python List Works">
 <meta name=twitter:description content="And why some methods take constant time while others take linear.">
 <meta name=twitter:url content="https://antonz.org/list-internals/">
 <meta name=twitter:site content="@ohmypy">
@@ -54,7 +54,7 @@
 <div class=row>
 <div class="col-xs-12 col-sm-10 article">
 <header>
-<h1>How Python list really works</h1>
+<h1>How Python List Works</h1>
 </header>
 <p><em>This post is largely about the arrays — the #1 data structure in the world. If you are not a data structure guru yet, I guarantee that you will better understand Python lists, their advantages and limitations. If you already know everything — there is no harm in refreshing the key points.</em></p>
 <p>Everybody knows how to work with lists in Python:</p>
@@ -63,7 +63,7 @@
 <span style=color:#c41a16>&#39;Claire&#39;</span>
 </code></pre></div><p>Surely you know that selecting an item by index — <code>guests[idx]</code> — works instantly even on a million elements list. More precisely, selection by index takes constant time O(1) — that is, it does not depend on the number of items in the list.</p>
 <p>Do you know why it works so fast? Let&rsquo;s find out.</p>
-<h2 id=list--array>List = array?</h2>
+<h2 id=list--array>List = Array?</h2>
 <p>The list is based on an array. An array is a set of elements ① of the same size, ② located in memory one after another, without gaps.</p>
 <p>Since elements are the same size and placed contiguously, it is easy to get an array item by index. All we need is the memory address of the very first element (the &ldquo;head&rdquo; of the array).</p>
 <p>Let&rsquo;s say the head is located at the address <code>0×00001234</code>, and each item occupies 8 bytes. Then the element with the <code>idx</code> index is located at <code>0×00001234 + idx*8</code>:</p>
@@ -82,7 +82,7 @@
 <li>The array has a fixed length, but the list should be able to store an arbitrary number of items.</li>
 </ul>
 <p>We&rsquo;ll tackle them a bit later.</p>
-<h2 id=a-very-primitive-list>A very primitive list</h2>
+<h2 id=naive-list>Naive List</h2>
 <p>The best way to master a data structure is to implement it from scratch. Unfortunately, Python is not well suited for such low-level structures as arrays, because it doesn&rsquo;t support explicit pointers (addresses in memory).</p>
 <p>This is probably as close as we can get:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-py data-lang=py><span style=color:#a90d91>class</span> <span style=color:#3f6e75>OhMyList</span>:
@@ -102,7 +102,7 @@
         <span style=color:#a90d91>return</span> <span style=color:#5b269a>self</span><span style=color:#000>.</span><span style=color:#000>array</span>[<span style=color:#000>idx</span>]
 </code></pre></div><p>Our custom list has a fixed capacity (<code>capacity</code> = 8 items) and stores the elements in the <code>array</code> array.</p>
 <p>The <code>ctypes</code> module gives access to the low-level structures on which the standard library is built. In this case, we use it to create a C-style array of <code>capacity</code> elements.</p>
-<h2 id=list--array-of-pointers>List = array of pointers</h2>
+<h2 id=list--array-of-pointers>List = Array of Pointers</h2>
 <p>The list instantly retrieves an item by index, because it has an array inside. And the array is so fast because all the elements are the same size.</p>
 <p>But list items can be of different sizes:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-py data-lang=py><span style=color:#000>guests</span> <span style=color:#000>=</span> [<span style=color:#c41a16>&#34;Frank&#34;</span>, <span style=color:#c41a16>&#34;Claire&#34;</span>, <span style=color:#c41a16>&#34;Zoe&#34;</span>, <span style=color:#a90d91>True</span>, <span style=color:#1c01ce>42</span>]
@@ -121,7 +121,7 @@
 <li>Get the value at that address.</li>
 </ol>
 <p>But it&rsquo;s still constant time O(1).</p>
-<h2 id=list--dynamic-array>List = dynamic array</h2>
+<h2 id=list--dynamic-array>List = Dynamic Array</h2>
 <p>If there are empty spaces left in the array underneath the list, then the <code>.append(item)</code> runs in constant time. All it takes is to write a new value to a free cell and increase the element counter by 1:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-py data-lang=py><span style=color:#a90d91>def</span> <span style=color:#000>append</span>(<span style=color:#5b269a>self</span>, <span style=color:#000>item</span>):
     <span style=color:#5b269a>self</span><span style=color:#000>.</span><span style=color:#000>array</span>[<span style=color:#5b269a>self</span><span style=color:#000>.</span><span style=color:#000>length</span>] <span style=color:#000>=</span> <span style=color:#000>item</span>
@@ -152,7 +152,7 @@
 </code></pre></div><p><code>._resize()</code> is a costly operation, so the new array should be significantly larger than the old one. In the example above, the new array is twice as large. Python uses a more modest coefficient — about 1.12.</p>
 <p>If you remove more than half of the items from the list via <code>.pop()</code>, Python will shrink it. It&rsquo;ll allocate a new, smaller array and move the elements into it.</p>
 <p>Thus, the list juggles arrays all the time so that we don&rsquo;t have to do it ツ</p>
-<h2 id=appending-an-item-to-the-list>Appending an item to the list</h2>
+<h2 id=appending-an-item-to-the-list>Appending an Item to the List</h2>
 <p>Selecting from the list by index takes O(1) time — we have sorted that out. The <code>.append(item)</code> method is also O(1) until Python has to extend the array under the list. But array extension is an O(n) operation. So how long does <code>.append()</code> take after all?</p>
 <p>It would be wrong to measure a single append — as we found out, sometimes it takes O(1), sometimes O(n). So computer scientists came up with <em>amortized analysis</em>. To get an amortized operation time, one estimates the total time that a sequence of K operations will take, then divide it by K.</p>
 <p>Without going into details, I will say that the amortized time for <code>.append(item)</code> turns out to be constant — O(1). So appending to the list works very fast.</p>
@@ -185,7 +185,111 @@
 <span style=color:#177500># amortized O(1)</span>
 <span style=color:#000>lst</span><span style=color:#000>.</span><span style=color:#000>append</span>(<span style=color:#000>item</span>)
 <span style=color:#000>lst</span><span style=color:#000>.</span><span style=color:#000>pop</span>()
-</code></pre></div><h2 id=summary>Summary</h2>
+</code></pre></div><h2 id=list-internals>List Internals</h2>
+<p>We&rsquo;ve discussed the algorithm. Now let&rsquo;s look at the implementation.</p>
+<p>Python core data structures are implemented in C, and the list is no exception. Here is the (massively simplified) list structure from the Python sources (see <a href=https://github.com/python/cpython/blob/main/Include/cpython/listobject.h>listobject.h</a>, <a href=https://github.com/python/cpython/blob/main/Objects/listobject.c>listobject.c</a>):</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#177500>// List data structure.
+</span><span style=color:#177500></span><span style=color:#a90d91>typedef</span> <span style=color:#a90d91>struct</span> {
+    <span style=color:#177500>// List length
+</span><span style=color:#177500></span>    <span style=color:#000>Py_ssize_t</span> <span style=color:#000>ob_size</span>;
+
+    <span style=color:#177500>// Pointers to list items. list[0] is ob_item[0], etc.
+</span><span style=color:#177500></span>    <span style=color:#000>PyObject</span><span style=color:#000>**</span> <span style=color:#000>ob_item</span>;
+
+    <span style=color:#177500>// List capacity
+</span><span style=color:#177500></span>    <span style=color:#177500>/* ob_item contains space for &#39;allocated&#39; elements. The number
+</span><span style=color:#177500>     * currently in use is ob_size.
+</span><span style=color:#177500>     * Invariants:
+</span><span style=color:#177500>     *     0 &lt;= ob_size &lt;= allocated
+</span><span style=color:#177500>     *     len(list) == ob_size
+</span><span style=color:#177500>     *     ob_item == NULL implies ob_size == allocated == 0
+</span><span style=color:#177500>     */</span>
+    <span style=color:#000>Py_ssize_t</span> <span style=color:#000>allocated</span>;
+} <span style=color:#000>PyListObject</span>;
+</code></pre></div><p>Similar to our naive implementation, the real list structure contains the length (<code>ob_size</code>), capacity (<code>allocated</code>), and an array of items (<code>ob_item</code>).</p>
+<p>Here is the list constructor:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#177500>// Creates a new list.
+</span><span style=color:#177500></span><span style=color:#000>PyObject</span><span style=color:#000>*</span> <span style=color:#000>PyList_New</span>(<span style=color:#000>Py_ssize_t</span> <span style=color:#000>size</span>) {
+    <span style=color:#000>PyListObject</span> <span style=color:#000>*</span><span style=color:#000>op</span>;
+
+    <span style=color:#177500>// allocate memory for the list itself (without list items)
+</span><span style=color:#177500></span>    <span style=color:#000>op</span> <span style=color:#000>=</span> <span style=color:#000>PyObject_GC_New</span>(<span style=color:#000>PyListObject</span>, <span style=color:#000>&amp;</span><span style=color:#000>PyList_Type</span>);
+
+    <span style=color:#177500>// allocate memory for list items
+</span><span style=color:#177500></span>    <span style=color:#000>op</span><span style=color:#000>-&gt;</span><span style=color:#000>ob_item</span> <span style=color:#000>=</span> (<span style=color:#000>PyObject</span><span style=color:#000>**</span>) <span style=color:#000>PyMem_Calloc</span>(<span style=color:#000>size</span>, <span style=color:#a90d91>sizeof</span>(<span style=color:#000>PyObject</span> <span style=color:#000>*</span>));
+
+    <span style=color:#a90d91>return</span> (<span style=color:#000>PyObject</span><span style=color:#000>*</span>) <span style=color:#000>op</span>;
+}
+</code></pre></div><p><code>len()</code> implementation simply returns the <code>ob_size</code> field:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#177500>// Returns list length.
+</span><span style=color:#177500></span><span style=color:#a90d91>static</span> <span style=color:#a90d91>inline</span> <span style=color:#000>Py_ssize_t</span> <span style=color:#000>PyList_GET_SIZE</span>(<span style=color:#000>PyListObject</span><span style=color:#000>*</span> <span style=color:#000>self</span>) {
+    <span style=color:#a90d91>return</span> <span style=color:#000>list</span><span style=color:#000>-&gt;</span><span style=color:#000>ob_size</span>;
+}
+</code></pre></div><p>Getting and setting list items is also trivial:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#177500>// Returns list item by index.
+</span><span style=color:#177500></span><span style=color:#a90d91>static</span> <span style=color:#a90d91>inline</span> <span style=color:#000>PyObject</span><span style=color:#000>*</span> <span style=color:#000>PyList_GET_ITEM</span>(<span style=color:#000>PyObject</span><span style=color:#000>*</span> <span style=color:#000>op</span>, <span style=color:#000>Py_ssize_t</span> <span style=color:#000>index</span>) {
+    <span style=color:#000>PyListObject</span><span style=color:#000>*</span> <span style=color:#000>list</span> <span style=color:#000>=</span> <span style=color:#000>_PyList_CAST</span>(<span style=color:#000>op</span>);
+    <span style=color:#a90d91>return</span> <span style=color:#000>list</span><span style=color:#000>-&gt;</span><span style=color:#000>ob_item</span>[<span style=color:#000>index</span>];
+}
+
+<span style=color:#177500>// Sets list item by index.
+</span><span style=color:#177500></span><span style=color:#a90d91>static</span> <span style=color:#a90d91>inline</span> <span style=color:#a90d91>void</span> <span style=color:#000>PyList_SET_ITEM</span>(<span style=color:#000>PyObject</span><span style=color:#000>*</span> <span style=color:#000>op</span>, <span style=color:#000>Py_ssize_t</span> <span style=color:#000>index</span>, <span style=color:#000>PyObject</span><span style=color:#000>*</span> <span style=color:#000>value</span>) {
+    <span style=color:#000>PyListObject</span><span style=color:#000>*</span> <span style=color:#000>list</span> <span style=color:#000>=</span> <span style=color:#000>_PyList_CAST</span>(<span style=color:#000>op</span>);
+    <span style=color:#000>list</span><span style=color:#000>-&gt;</span><span style=color:#000>ob_item</span>[<span style=color:#000>index</span>] <span style=color:#000>=</span> <span style=color:#000>value</span>;
+}
+</code></pre></div><p>Now comes the append:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#177500>// Appends an item to the end of the list.
+</span><span style=color:#177500></span><span style=color:#a90d91>static</span> <span style=color:#000>PyObject</span><span style=color:#000>*</span> <span style=color:#000>list_append</span>(<span style=color:#000>PyListObject</span><span style=color:#000>*</span> <span style=color:#000>self</span>, <span style=color:#000>PyObject</span><span style=color:#000>*</span> <span style=color:#000>object</span>) {
+    <span style=color:#177500>// list length
+</span><span style=color:#177500></span>    <span style=color:#000>Py_ssize_t</span> <span style=color:#000>len</span> <span style=color:#000>=</span> <span style=color:#000>PyList_GET_SIZE</span>(<span style=color:#000>self</span>);
+
+    <span style=color:#177500>// list capacity
+</span><span style=color:#177500></span>    <span style=color:#000>Py_ssize_t</span> <span style=color:#000>allocated</span> <span style=color:#000>=</span> <span style=color:#000>self</span><span style=color:#000>-&gt;</span><span style=color:#000>allocated</span>;
+
+    <span style=color:#177500>// if there is space left in the list (length &lt; capacity),
+</span><span style=color:#177500></span>    <span style=color:#177500>// append the item without resizing the list
+</span><span style=color:#177500></span>    <span style=color:#a90d91>if</span> (<span style=color:#000>allocated</span> <span style=color:#000>&gt;</span> <span style=color:#000>len</span>) {
+        <span style=color:#000>PyList_SET_ITEM</span>(<span style=color:#000>self</span>, <span style=color:#000>len</span>, <span style=color:#000>newitem</span>);
+        <span style=color:#000>Py_SET_SIZE</span>(<span style=color:#000>self</span>, <span style=color:#000>len</span> <span style=color:#000>+</span> <span style=color:#1c01ce>1</span>);
+        <span style=color:#a90d91>return</span> <span style=color:#1c01ce>0</span>;
+    }
+
+    <span style=color:#177500>// otherwise, resize the list
+</span><span style=color:#177500></span>    <span style=color:#000>list_resize</span>(<span style=color:#000>self</span>, <span style=color:#000>len</span> <span style=color:#000>+</span> <span style=color:#1c01ce>1</span>);
+    <span style=color:#177500>// then append the item
+</span><span style=color:#177500></span>    <span style=color:#000>PyList_SET_ITEM</span>(<span style=color:#000>self</span>, <span style=color:#000>len</span>, <span style=color:#000>newitem</span>);
+    <span style=color:#a90d91>return</span> <span style=color:#1c01ce>0</span>;
+}
+</code></pre></div><p>As we&rsquo;ve discussed, sometimes appending new item results in a list resize:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=color:#177500>// Resizes the list, thus increasing its capacity.
+</span><span style=color:#177500></span><span style=color:#a90d91>static</span> <span style=color:#a90d91>int</span> <span style=color:#000>list_resize</span>(<span style=color:#000>PyListObject</span><span style=color:#000>*</span> <span style=color:#000>self</span>, <span style=color:#000>Py_ssize_t</span> <span style=color:#000>newsize</span>) {
+    <span style=color:#177500>// list capacity
+</span><span style=color:#177500></span>    <span style=color:#000>Py_ssize_t</span> <span style=color:#000>allocated</span> <span style=color:#000>=</span> <span style=color:#000>self</span><span style=color:#000>-&gt;</span><span style=color:#000>allocated</span>;
+
+    <span style=color:#177500>/* This over-allocates proportional to the list size, making room
+</span><span style=color:#177500>     * for additional growth. The over-allocation is mild, but is
+</span><span style=color:#177500>     * enough to give linear-time amortized behavior over a long
+</span><span style=color:#177500>     * sequence of appends() in the presence of a poorly-performing
+</span><span style=color:#177500>     * system realloc().
+</span><span style=color:#177500>     * Add padding to make the allocated size multiple of 4.
+</span><span style=color:#177500>     * The growth pattern is:  0, 4, 8, 16, 24, 32, 40, 52, 64, 76, ...
+</span><span style=color:#177500>     */</span>
+    <span style=color:#177500>// calculate new list capacity
+</span><span style=color:#177500></span>    <span style=color:#000>size_t</span> <span style=color:#000>new_allocated</span> <span style=color:#000>=</span> ((<span style=color:#000>size_t</span>)<span style=color:#000>newsize</span> <span style=color:#000>+</span> (<span style=color:#000>newsize</span> <span style=color:#000>&gt;&gt;</span> <span style=color:#1c01ce>3</span>) <span style=color:#000>+</span> <span style=color:#1c01ce>6</span>) <span style=color:#000>&amp;</span> <span style=color:#000>~</span>(<span style=color:#000>size_t</span>)<span style=color:#1c01ce>3</span>;
+
+    <span style=color:#177500>// allocate memory for the new capacity
+</span><span style=color:#177500></span>    <span style=color:#177500>// and copy list items to the new memory block is necessary
+</span><span style=color:#177500></span>    <span style=color:#000>size_t</span> <span style=color:#000>num_allocated_bytes</span> <span style=color:#000>=</span> <span style=color:#000>new_allocated</span> <span style=color:#000>*</span> <span style=color:#a90d91>sizeof</span>(<span style=color:#000>PyObject</span><span style=color:#000>*</span>);
+    <span style=color:#000>PyObject</span><span style=color:#000>**</span> <span style=color:#000>items</span> <span style=color:#000>=</span> (<span style=color:#000>PyObject</span><span style=color:#000>**</span>)<span style=color:#000>PyMem_Realloc</span>(<span style=color:#000>self</span><span style=color:#000>-&gt;</span><span style=color:#000>ob_item</span>, <span style=color:#000>num_allocated_bytes</span>);
+    <span style=color:#000>self</span><span style=color:#000>-&gt;</span><span style=color:#000>ob_item</span> <span style=color:#000>=</span> <span style=color:#000>items</span>;
+
+    <span style=color:#177500>// set new list length and capacity
+</span><span style=color:#177500></span>    <span style=color:#000>Py_SET_SIZE</span>(<span style=color:#000>self</span>, <span style=color:#000>newsize</span>);
+    <span style=color:#000>self</span><span style=color:#000>-&gt;</span><span style=color:#000>allocated</span> <span style=color:#000>=</span> <span style=color:#000>new_allocated</span>;
+    <span style=color:#a90d91>return</span> <span style=color:#1c01ce>0</span>;
+}
+</code></pre></div><p>And that&rsquo;s basically it!</p>
+<h2 id=summary>Summary</h2>
 <p>As we found out, these operations are O(1):</p>
 <ul>
 <li>select an item by index <code>lst[idx]</code></li>
@@ -203,7 +307,6 @@
 <p>On the other hand, if you perform a &ldquo;slow&rdquo; operation on a list of 1000 items a million times — this is quite significant. The same goes if you invoke a single &ldquo;slow&rdquo; operation on a list of a million items.</p>
 <p>Therefore, it is useful to know which list methods take constant time and which take linear time — to make a conscious decision in a specific situation.</p>
 <p>I hope you&rsquo;ll see Python lists in a new way after this article. Thanks for reading!</p>
-<p><a href="https://news.ycombinator.com/item?id=29217038">Comments on Hacker News</a></p>
 <p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
 </div>
 </div><footer class=post__footer>
