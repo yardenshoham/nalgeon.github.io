@@ -1,6 +1,6 @@
 +++
 date = 2021-11-12T17:55:00Z
-title = "How Python list really works"
+title = "How Python List Works"
 description = "And why some methods take constant time while others take linear."
 image = "/list-internals/cover.png"
 slug = "list-internals"
@@ -21,7 +21,7 @@ Surely you know that selecting an item by index — `guests[idx]` — works inst
 
 Do you know why it works so fast? Let's find out.
 
-## List = array?
+## List = Array?
 
 The list is based on an array. An array is a set of elements ① of the same size, ② located in memory one after another, without gaps.
 
@@ -43,12 +43,12 @@ Roughly speaking, this is how Python list works. It stores a pointer to the head
 
 So far so good. But there are a couple of problems:
 
-- All array elements are the same size, but the list should be able to store items of different sizes (true/false, numbers, strings of different lengths).
-- The array has a fixed length, but the list should be able to store an arbitrary number of items.
+-   All array elements are the same size, but the list should be able to store items of different sizes (true/false, numbers, strings of different lengths).
+-   The array has a fixed length, but the list should be able to store an arbitrary number of items.
 
 We'll tackle them a bit later.
 
-## A very primitive list
+## Naive List
 
 The best way to master a data structure is to implement it from scratch. Unfortunately, Python is not well suited for such low-level structures as arrays, because it doesn't support explicit pointers (addresses in memory).
 
@@ -76,7 +76,7 @@ Our custom list has a fixed capacity (`capacity` = 8 items) and stores the eleme
 
 The `ctypes` module gives access to the low-level structures on which the standard library is built. In this case, we use it to create a C-style array of `capacity` elements.
 
-## List = array of pointers
+## List = Array of Pointers
 
 The list instantly retrieves an item by index, because it has an array inside. And the array is so fast because all the elements are the same size.
 
@@ -104,7 +104,7 @@ Since pointers are fixed size (8 bytes on modern 64-bit processors), everything 
 
 But it's still constant time O(1).
 
-## List = dynamic array
+## List = Dynamic Array
 
 If there are empty spaces left in the array underneath the list, then the `.append(item)` runs in constant time. All it takes is to write a new value to a free cell and increase the element counter by 1:
 
@@ -150,7 +150,7 @@ If you remove more than half of the items from the list via `.pop()`, Python wil
 
 Thus, the list juggles arrays all the time so that we don't have to do it ツ
 
-## Appending an item to the list
+## Appending an Item to the List
 
 Selecting from the list by index takes O(1) time — we have sorted that out. The `.append(item)` method is also O(1) until Python has to extend the array under the list. But array extension is an O(n) operation. So how long does `.append()` take after all?
 
@@ -192,20 +192,152 @@ lst.append(item)
 lst.pop()
 ```
 
+## List Internals
+
+We've discussed the algorithm. Now let's look at the implementation.
+
+Python core data structures are implemented in C, and the list is no exception. Here is the (massively simplified) list structure from the Python sources (see [listobject.h](https://github.com/python/cpython/blob/main/Include/cpython/listobject.h), [listobject.c](https://github.com/python/cpython/blob/main/Objects/listobject.c)):
+
+```c
+// List data structure.
+typedef struct {
+    // List length
+    Py_ssize_t ob_size;
+
+    // Pointers to list items. list[0] is ob_item[0], etc.
+    PyObject** ob_item;
+
+    // List capacity
+    /* ob_item contains space for 'allocated' elements. The number
+     * currently in use is ob_size.
+     * Invariants:
+     *     0 <= ob_size <= allocated
+     *     len(list) == ob_size
+     *     ob_item == NULL implies ob_size == allocated == 0
+     */
+    Py_ssize_t allocated;
+} PyListObject;
+```
+
+Similar to our naive implementation, the real list structure contains the length (`ob_size`), capacity (`allocated`), and an array of items (`ob_item`).
+
+Here is the list constructor:
+
+```c
+// Creates a new list.
+PyObject* PyList_New(Py_ssize_t size) {
+    PyListObject *op;
+
+    // allocate memory for the list itself (without list items)
+    op = PyObject_GC_New(PyListObject, &PyList_Type);
+
+    // allocate memory for list items
+    op->ob_item = (PyObject**) PyMem_Calloc(size, sizeof(PyObject *));
+
+    return (PyObject*) op;
+}
+```
+
+`len()` implementation simply returns the `ob_size` field:
+
+```c
+// Returns list length.
+static inline Py_ssize_t PyList_GET_SIZE(PyListObject* self) {
+    return list->ob_size;
+}
+```
+
+Getting and setting list items is also trivial:
+
+```c
+// Returns list item by index.
+static inline PyObject* PyList_GET_ITEM(PyObject* op, Py_ssize_t index) {
+    PyListObject* list = _PyList_CAST(op);
+    return list->ob_item[index];
+}
+
+// Sets list item by index.
+static inline void PyList_SET_ITEM(PyObject* op, Py_ssize_t index, PyObject* value) {
+    PyListObject* list = _PyList_CAST(op);
+    list->ob_item[index] = value;
+}
+```
+
+Now comes the append:
+
+```c
+// Appends an item to the end of the list.
+static PyObject* list_append(PyListObject* self, PyObject* object) {
+    // list length
+    Py_ssize_t len = PyList_GET_SIZE(self);
+
+    // list capacity
+    Py_ssize_t allocated = self->allocated;
+
+    // if there is space left in the list (length < capacity),
+    // append the item without resizing the list
+    if (allocated > len) {
+        PyList_SET_ITEM(self, len, newitem);
+        Py_SET_SIZE(self, len + 1);
+        return 0;
+    }
+
+    // otherwise, resize the list
+    list_resize(self, len + 1);
+    // then append the item
+    PyList_SET_ITEM(self, len, newitem);
+    return 0;
+}
+```
+
+As we've discussed, sometimes appending new item results in a list resize:
+
+```c
+// Resizes the list, thus increasing its capacity.
+static int list_resize(PyListObject* self, Py_ssize_t newsize) {
+    // list capacity
+    Py_ssize_t allocated = self->allocated;
+
+    /* This over-allocates proportional to the list size, making room
+     * for additional growth. The over-allocation is mild, but is
+     * enough to give linear-time amortized behavior over a long
+     * sequence of appends() in the presence of a poorly-performing
+     * system realloc().
+     * Add padding to make the allocated size multiple of 4.
+     * The growth pattern is:  0, 4, 8, 16, 24, 32, 40, 52, 64, 76, ...
+     */
+    // calculate new list capacity
+    size_t new_allocated = ((size_t)newsize + (newsize >> 3) + 6) & ~(size_t)3;
+
+    // allocate memory for the new capacity
+    // and copy list items to the new memory block is necessary
+    size_t num_allocated_bytes = new_allocated * sizeof(PyObject*);
+    PyObject** items = (PyObject**)PyMem_Realloc(self->ob_item, num_allocated_bytes);
+    self->ob_item = items;
+
+    // set new list length and capacity
+    Py_SET_SIZE(self, newsize);
+    self->allocated = new_allocated;
+    return 0;
+}
+```
+
+And that's basically it!
+
 ## Summary
 
 As we found out, these operations are O(1):
 
-- select an item by index `lst[idx]`
-- count items `len(lst)`
-- add an item to the end of the list `.append(item)`
-- remove an item from the end of the list `.pop()`
+-   select an item by index `lst[idx]`
+-   count items `len(lst)`
+-   add an item to the end of the list `.append(item)`
+-   remove an item from the end of the list `.pop()`
 
 Other operations are "slow":
 
-- Insert or delete an item by index. `.insert(idx, item)` and `.pop(idx)` take linear time O(n) because they shift all the elements after the target one.
-- Search or delete an item by value. `item in lst`, `.index(item)` and `.remove(item)` take linear time O(n) because they iterate over all the elements.
-- Select a slice of `k` elements. `lst[from:to]` takes O(k).
+-   Insert or delete an item by index. `.insert(idx, item)` and `.pop(idx)` take linear time O(n) because they shift all the elements after the target one.
+-   Search or delete an item by value. `item in lst`, `.index(item)` and `.remove(item)` take linear time O(n) because they iterate over all the elements.
+-   Select a slice of `k` elements. `lst[from:to]` takes O(k).
 
 Does this mean that you should not use "slow" operations? Of course not. If you have a list of 1000 items, the difference between O(1) and O(n) for a single operation is insignificant.
 
@@ -214,5 +346,3 @@ On the other hand, if you perform a "slow" operation on a list of 1000 items a m
 Therefore, it is useful to know which list methods take constant time and which take linear time — to make a conscious decision in a specific situation.
 
 I hope you'll see Python lists in a new way after this article. Thanks for reading!
-
-[Comments on Hacker News](https://news.ycombinator.com/item?id=29217038)
