@@ -4,7 +4,7 @@
 <title>Comparing by Offset with SQL Window Functions</title>
 <meta name=description content="Comparing records with neighbors and boundaries.">
 <meta name=robots content="index, follow">
-<link rel=stylesheet type=text/css href=/assets/css/style.d5574c61892ae0c9bca2eab9c37cfcbc17d93429a85b516e1dd46f7df294f4cc.css>
+<link rel=stylesheet type=text/css href=/assets/css/style.185535402157d66ce9dae7094285b45fc8308c13a4680f071ebe89263324fb47.css>
 <link rel=icon href=/assets/favicon/favicon.ico sizes=any>
 <link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
 <link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
@@ -427,7 +427,10 @@ Frank  104  ← frame end
 </figure>
 </div>
 </div>
-<p><strong>Why is it so complicated?</strong> <em>If you have such a reaction, I understand completely. There are certain benefits from using frames, but why the authors of the SQL standard chose this unobvious default behavior, I do not know. We just have to deal with it.</em></p>
+<blockquote>
+<p><strong>Why is it so complicated?</strong>
+If you have such a reaction, I understand completely. There are certain benefits from using frames, but why the authors of the SQL standard chose this unobvious default behavior, I do not know. We just have to deal with it.</p>
+</blockquote>
 <p>Let&rsquo;s summarize how <code>first_value()</code> and <code>last_value()</code> work:</p>
 <ol>
 <li>A window consists of one or more partitions (<code>partition by department</code>).</li>
@@ -438,7 +441,9 @@ Frank  104  ← frame end
 <li>The <code>last_value()</code> function returns the value from the last row of the frame.</li>
 </ol>
 <p>Now let&rsquo;s figure out how to nail the frame to the partition — and finish with a department salary range query.</p>
-<p><em>P.S. If you don&rsquo;t quite understand what a frame is and how it is formed, it&rsquo;s okay. Frames are one of the most challenging topics in SQL windows, and they cannot be fully explained in one go. We will study frames throughout the book and gradually sort everything out.</em></p>
+<blockquote>
+<p><strong>Note</strong>. If you don&rsquo;t quite understand what a frame is and how it is formed, it&rsquo;s okay. Frames are one of the most challenging topics in SQL windows, and they cannot be fully explained in one go. We will study frames throughout the book and gradually sort everything out.</p>
+</blockquote>
 <h2 id=department-salary-range-revisited>Department salary range revisited</h2>
 <p>Let&rsquo;s take our window:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (

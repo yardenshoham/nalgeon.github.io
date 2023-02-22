@@ -4,7 +4,7 @@
 <title>Regular Expressions in SQLite</title>
 <meta name=description content="Use a robust pattern matching and text replacement tool from SQL.">
 <meta name=robots content="index, follow">
-<link rel=stylesheet type=text/css href=/assets/css/style.d5574c61892ae0c9bca2eab9c37cfcbc17d93429a85b516e1dd46f7df294f4cc.css>
+<link rel=stylesheet type=text/css href=/assets/css/style.185535402157d66ce9dae7094285b45fc8308c13a4680f071ebe89263324fb47.css>
 <link rel=icon href=/assets/favicon/favicon.ico sizes=any>
 <link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
 <link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
@@ -58,7 +58,9 @@
 </header>
 <p>Regular expressions are probably the most powerful text processing tool without programming.</p>
 <p>SQLite does not support regular expressions by default. But you can easily enable them using the <code>regexp</code> extension.</p>
+<blockquote>
 <p><strong>Note</strong>. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
+</blockquote>
 <p>With <code>regexp</code>, matching a string against a pattern becomes as easy as:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#177500>-- count messages containing digits
 </span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#a90d91>count</span>(<span style=color:#000>*</span>) <span style=color:#a90d91>from</span> <span style=color:#000>messages</span>

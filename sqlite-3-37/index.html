@@ -4,7 +4,7 @@
 <title>What's new in SQLite 3.37</title>
 <meta name=description content="Strict tables, any type and a new pragma.">
 <meta name=robots content="index, follow">
-<link rel=stylesheet type=text/css href=/assets/css/style.d5574c61892ae0c9bca2eab9c37cfcbc17d93429a85b516e1dd46f7df294f4cc.css>
+<link rel=stylesheet type=text/css href=/assets/css/style.185535402157d66ce9dae7094285b45fc8308c13a4680f071ebe89263324fb47.css>
 <link rel=icon href=/assets/favicon/favicon.ico sizes=any>
 <link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
 <link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
@@ -69,7 +69,7 @@
 </ul>
 <p>But, unlike other DBMSs, SQLite can store any type of data in a given cell — regardless of the column type.</p>
 <blockquote>
-<p>SQLite stores the type not only on the column itself, but also on each value in that column. That is why a given column can store values of different types without any problems. The type on the column is used as a hint: when inserting, SQLite tries to cast the value to the column type, but when it fails, it will save the value &ldquo;as is&rdquo;.</p>
+<p><strong>Note</strong>. SQLite stores the type not only on the column itself, but also on each value in that column. That is why a given column can store values of different types without any problems. The type on the column is used as a hint: when inserting, SQLite tries to cast the value to the column type, but when it fails, it will save the value &ldquo;as is&rdquo;.</p>
 </blockquote>
 <p>On the one hand, it is convenient for exploratory data analysis — you can import everything first, and then use SQL to deal with problematic values. Any other DBMS will give an error when importing and force you to crunch the data with scripts or manually.</p>
 <p>On the other hand, it causes a constant flow of criticism against SQLite: you can write things into the production database that you will never be able to sort out.</p>

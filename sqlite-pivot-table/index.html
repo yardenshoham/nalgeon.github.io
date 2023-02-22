@@ -4,7 +4,7 @@
 <title>Building a Pivot Table in SQLite</title>
 <meta name=description content="Three ways to create a pivot table in plain SQL.">
 <meta name=robots content="index, follow">
-<link rel=stylesheet type=text/css href=/assets/css/style.d5574c61892ae0c9bca2eab9c37cfcbc17d93429a85b516e1dd46f7df294f4cc.css>
+<link rel=stylesheet type=text/css href=/assets/css/style.185535402157d66ce9dae7094285b45fc8308c13a4680f071ebe89263324fb47.css>
 <link rel=icon href=/assets/favicon/favicon.ico sizes=any>
 <link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
 <link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
@@ -156,7 +156,9 @@
 )
 <span style=color:#a90d91>select</span> <span style=color:#000>eval</span>(<span style=color:#000>group_concat</span>(<span style=color:#000>part</span>, <span style=color:#c41a16>&#39;&#39;</span>))
 <span style=color:#a90d91>from</span> <span style=color:#000>lines</span>;
-</code></pre></div><p><em>Note: extensions do not work in the playground, so you&rsquo;ll have to use your local SQLite to reproduce this step.</em></p>
+</code></pre></div><blockquote>
+<p>Note: extensions do not work in the playground, so you&rsquo;ll have to use your local SQLite to reproduce this step.</p>
+</blockquote>
 <p>Here, we are building a <code>v_sales</code> view which executes the query we&rsquo;ve constructed previously. Let&rsquo;s select the data from it:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>v_sales</span>;
 </code></pre></div><pre tabindex=0><code>┌─────────┬──────┬──────┬──────┬──────┐

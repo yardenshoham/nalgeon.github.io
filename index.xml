@@ -369,7 +369,10 @@ Frank  104  ← frame end
 </figure>
 </div>
 </div>
-<p><strong>Why is it so complicated?</strong> <em>If you have such a reaction, I understand completely. There are certain benefits from using frames, but why the authors of the SQL standard chose this unobvious default behavior, I do not know. We just have to deal with it.</em></p>
+<blockquote>
+<p><strong>Why is it so complicated?</strong>
+If you have such a reaction, I understand completely. There are certain benefits from using frames, but why the authors of the SQL standard chose this unobvious default behavior, I do not know. We just have to deal with it.</p>
+</blockquote>
 <p>Let&rsquo;s summarize how <code>first_value()</code> and <code>last_value()</code> work:</p>
 <ol>
 <li>A window consists of one or more partitions (<code>partition by department</code>).</li>
@@ -380,7 +383,9 @@ Frank  104  ← frame end
 <li>The <code>last_value()</code> function returns the value from the last row of the frame.</li>
 </ol>
 <p>Now let&rsquo;s figure out how to nail the frame to the partition — and finish with a department salary range query.</p>
-<p><em>P.S. If you don&rsquo;t quite understand what a frame is and how it is formed, it&rsquo;s okay. Frames are one of the most challenging topics in SQL windows, and they cannot be fully explained in one go. We will study frames throughout the book and gradually sort everything out.</em></p>
+<blockquote>
+<p><strong>Note</strong>. If you don&rsquo;t quite understand what a frame is and how it is formed, it&rsquo;s okay. Frames are one of the most challenging topics in SQL windows, and they cannot be fully explained in one go. We will study frames throughout the book and gradually sort everything out.</p>
+</blockquote>
 <h2 id="department-salary-range-revisited">Department salary range revisited</h2>
 <p>Let&rsquo;s take our window:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (
@@ -596,7 +601,9 @@ Frank  104  ← frame end
 )
 <span style="color:#a90d91">select</span> <span style="color:#000">eval</span>(<span style="color:#000">group_concat</span>(<span style="color:#000">part</span>, <span style="color:#c41a16">&#39;&#39;</span>))
 <span style="color:#a90d91">from</span> <span style="color:#000">lines</span>;
-</code></pre></div><p><em>Note: extensions do not work in the playground, so you&rsquo;ll have to use your local SQLite to reproduce this step.</em></p>
+</code></pre></div><blockquote>
+<p>Note: extensions do not work in the playground, so you&rsquo;ll have to use your local SQLite to reproduce this step.</p>
+</blockquote>
 <p>Here, we are building a <code>v_sales</code> view which executes the query we&rsquo;ve constructed previously. Let&rsquo;s select the data from it:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">*</span> <span style="color:#a90d91">from</span> <span style="color:#000">v_sales</span>;
 </code></pre></div><pre tabindex="0"><code>┌─────────┬──────┬──────┬──────┬──────┐
@@ -1379,7 +1386,9 @@ rank()<br/>
 </span></code></pre></div><p>Overall, a great release! Looking forward to trying everything in production.</p>
 ]]></content:encoded></item><item><title>Regular Expressions in SQLite</title><link>https://antonz.org/sqlean-regexp/</link><pubDate>Sat, 04 Feb 2023 11:20:00 +0000</pubDate><guid>https://antonz.org/sqlean-regexp/</guid><description>Use a robust pattern matching and text replacement tool from SQL.</description><content:encoded><![CDATA[<p>Regular expressions are probably the most powerful text processing tool without programming.</p>
 <p>SQLite does not support regular expressions by default. But you can easily enable them using the <code>regexp</code> extension.</p>
+<blockquote>
 <p><strong>Note</strong>. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
+</blockquote>
 <p>With <code>regexp</code>, matching a string against a pattern becomes as easy as:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#177500">-- count messages containing digits
 </span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#a90d91">from</span> <span style="color:#000">messages</span>

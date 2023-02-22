@@ -4,7 +4,7 @@
 <title>Generated columns in SQLite</title>
 <meta name=description content="Simplify queries without storing additional data.">
 <meta name=robots content="index, follow">
-<link rel=stylesheet type=text/css href=/assets/css/style.d5574c61892ae0c9bca2eab9c37cfcbc17d93429a85b516e1dd46f7df294f4cc.css>
+<link rel=stylesheet type=text/css href=/assets/css/style.185535402157d66ce9dae7094285b45fc8308c13a4680f071ebe89263324fb47.css>
 <link rel=icon href=/assets/favicon/favicon.ico sizes=any>
 <link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
 <link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
@@ -79,7 +79,7 @@
 <span style=color:#a90d91>from</span> <span style=color:#000>people</span>;
 </code></pre></div><p>Virtual columns are not stored in the database and are calculated on the fly. But you can build an index on them to speed up data retrieval.</p>
 <blockquote>
-<p>Strictly speaking, SQLite has <em>virtual</em> generated columns and <em>stored</em> ones. The latter are stored on disk, but it is impossible to create them via <code>alter table</code>, so people mostly use virtual ones.</p>
+<p><strong>Note</strong>. Strictly speaking, SQLite has <em>virtual</em> generated columns and <em>stored</em> ones. The latter are stored on disk, but it is impossible to create them via <code>alter table</code>, so people mostly use virtual ones.</p>
 </blockquote>
 <p>In general, the syntax is as follows:</p>
 <pre tabindex=0><code>alter table TABLE
