@@ -73,16 +73,10 @@
 }
 
 .article blockquote {
-    border-left: 0.3em solid #eaeaea;
+    border-left: 0.3em solid var(--color-gray);
     color: var(--color-gray);
-    margin-left: 1em;
     margin-bottom: 0.8em;
-    padding: 0 0 0 1em;
-}
-@media only screen and (min-width: 48em) {
-    .article blockquote {
-        margin-left: 2em;
-    }
+    padding: 0 1em;
 }
 
 .article .big {
@@ -94,7 +88,6 @@
     color: var(--color-gray);
     font-family: var(--font-serif);
     font-style: italic;
-    margin-left: 0;
     padding: 0 1.5em;
 }
 @media only screen and (min-width: 48em) {

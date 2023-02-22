@@ -11,7 +11,7 @@ Most database engines provide a lot of built-in functions. Still, sometimes they
 
 SQLite does not support user-defined functions by default. But you can easily enable them using the `define` extension.
 
-**Note**. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.
+> **Note**. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.
 
 ## Custom Functions
 

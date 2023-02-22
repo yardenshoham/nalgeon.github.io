@@ -143,7 +143,7 @@ select eval(group_concat(part, ''))
 from lines;
 ```
 
-_Note: extensions do not work in the playground, so you'll have to use your local SQLite to reproduce this step._
+> Note: extensions do not work in the playground, so you'll have to use your local SQLite to reproduce this step.
 
 Here, we are building a `v_sales` view which executes the query we've constructed previously. Let's select the data from it:
 

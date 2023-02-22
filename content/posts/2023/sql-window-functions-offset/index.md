@@ -498,7 +498,8 @@ For `last_value()` to work as we expect, we will have to "nail" the frame bounda
 </div>
 </div>
 
-**Why is it so complicated?** _If you have such a reaction, I understand completely. There are certain benefits from using frames, but why the authors of the SQL standard chose this unobvious default behavior, I do not know. We just have to deal with it._
+> **Why is it so complicated?**
+> If you have such a reaction, I understand completely. There are certain benefits from using frames, but why the authors of the SQL standard chose this unobvious default behavior, I do not know. We just have to deal with it.
 
 Let's summarize how `first_value()` and `last_value()` work:
 
@@ -511,7 +512,7 @@ Let's summarize how `first_value()` and `last_value()` work:
 
 Now let's figure out how to nail the frame to the partition — and finish with a department salary range query.
 
-_P.S. If you don't quite understand what a frame is and how it is formed, it's okay. Frames are one of the most challenging topics in SQL windows, and they cannot be fully explained in one go. We will study frames throughout the book and gradually sort everything out._
+> **Note**. If you don't quite understand what a frame is and how it is formed, it's okay. Frames are one of the most challenging topics in SQL windows, and they cannot be fully explained in one go. We will study frames throughout the book and gradually sort everything out.
 
 ## Department salary range revisited
 

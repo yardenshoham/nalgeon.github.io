@@ -11,7 +11,7 @@ Regular expressions are probably the most powerful text processing tool without 
 
 SQLite does not support regular expressions by default. But you can easily enable them using the `regexp` extension.
 
-**Note**. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.
+> **Note**. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.
 
 With `regexp`, matching a string against a pattern becomes as easy as:
 

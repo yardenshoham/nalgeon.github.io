@@ -12,7 +12,7 @@ With each major Python release, all the attention goes to the new language featu
 
 The rest of the standard library modules receive undeservedly little attention. I want to fix this and tell you about the novelties introduced in versions 3.8–3.10.
 
-> This is not an exhaustive list, of course. I write only about those changes that interested me personally. But since I am not too much different from the "average" Python backend developer, it is likely that you will also be interested. Let me know if I missed something.
+> **Note**. This is not an exhaustive list, of course. I write only about those changes that interested me personally. But since I am not too much different from the "average" Python backend developer, it is likely that you will also be interested. Let me know if I missed something.
 
 The modules are in alphabetical order, so if you get bored with the first (little-known) ones, do not be discouraged — it gets more exciting further.
 

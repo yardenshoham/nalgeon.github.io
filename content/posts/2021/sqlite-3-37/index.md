@@ -23,7 +23,7 @@ SQLite supports 5 data types:
 
 But, unlike other DBMSs, SQLite can store any type of data in a given cell — regardless of the column type.
 
-> SQLite stores the type not only on the column itself, but also on each value in that column. That is why a given column can store values of different types without any problems. The type on the column is used as a hint: when inserting, SQLite tries to cast the value to the column type, but when it fails, it will save the value "as is".
+> **Note**. SQLite stores the type not only on the column itself, but also on each value in that column. That is why a given column can store values of different types without any problems. The type on the column is used as a hint: when inserting, SQLite tries to cast the value to the column type, but when it fails, it will save the value "as is".
 
 On the one hand, it is convenient for exploratory data analysis — you can import everything first, and then use SQL to deal with problematic values. Any other DBMS will give an error when importing and force you to crunch the data with scripts or manually.
 

@@ -46,7 +46,7 @@ from people;
 
 Virtual columns are not stored in the database and are calculated on the fly. But you can build an index on them to speed up data retrieval.
 
-> Strictly speaking, SQLite has _virtual_ generated columns and _stored_ ones. The latter are stored on disk, but it is impossible to create them via `alter table`, so people mostly use virtual ones.
+> **Note**. Strictly speaking, SQLite has _virtual_ generated columns and _stored_ ones. The latter are stored on disk, but it is impossible to create them via `alter table`, so people mostly use virtual ones.
 
 In general, the syntax is as follows:
 

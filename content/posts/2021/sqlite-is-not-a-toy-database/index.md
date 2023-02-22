@@ -352,7 +352,7 @@ QUERY PLAN
 `--SEARCH TABLE currency USING INDEX currency_code_idx (code=?)
 ```
 
-> You can also use SQLite as a graph database. A bunch of complex `WITH RECURSIVE` will do the trick, or maybe you'll prefer to add a bit of Python:
+> **Note**. You can also use SQLite as a graph database. A bunch of complex `WITH RECURSIVE` will do the trick, or maybe you'll prefer to add a bit of Python:
 >
 > [simple-graph](https://github.com/dpapathanasiou/simple-graph)
 
