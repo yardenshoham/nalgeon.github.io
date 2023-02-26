@@ -1,0 +1,10 @@
+{"id":11,"name":"Diane","city":"London","department":"hr","salary":70}
+{"id":12,"name":"Bob","city":"London","department":"hr","salary":78}
+{"id":21,"name":"Emma","city":"London","department":"it","salary":84}
+{"id":22,"name":"Grace","city":"Berlin","department":"it","salary":90}
+{"id":23,"name":"Henry","city":"London","department":"it","salary":104}
+{"id":24,"name":"Irene","city":"Berlin","department":"it","salary":104}
+{"id":25,"name":"Frank","city":"Berlin","department":"it","salary":120}
+{"id":31,"name":"Cindy","city":"Berlin","department":"sales","salary":96}
+{"id":32,"name":"Dave","city":"London","department":"sales","salary":96}
+{"id":33,"name":"Alice","city":"Berlin","department":"sales","salary":100}

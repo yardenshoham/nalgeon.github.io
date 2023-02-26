@@ -1,4 +1,162 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 16 Feb 2023 14:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Comparing by Offset with SQL Window Functions</title><link>https://antonz.org/sql-window-functions-offset/</link><pubDate>Thu, 16 Feb 2023 14:00:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-offset/</guid><description>Comparing records with neighbors and boundaries.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 26 Feb 2023 15:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Reading and Writing Files in SQLite</title><link>https://antonz.org/sqlean-fileio/</link><pubDate>Sun, 26 Feb 2023 15:00:00 +0000</pubDate><guid>https://antonz.org/sqlean-fileio/</guid><description>Working with files and traversing directories from SQL.</description><content:encoded><![CDATA[<p>Sometimes it&rsquo;s useful to load a dataset from an external file or export query results to a file.</p>
+<p>SQLite does not support file I/O operations by default. However, you can easily enable them using the <code>sqlean-fileio</code> extension.</p>
+<blockquote>
+<p><strong>Note</strong>. Unlike other DBMS, adding extensions to SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
+</blockquote>
+<p><code>sqlean-fileio</code> solves common import/export tasks such as:</p>
+<ul>
+<li>Loading a JSON document from a file.</li>
+<li>Reading a text file line by line.</li>
+<li>Streaming query results to a file.</li>
+<li>Importing all files in a directory.</li>
+</ul>
+<p>Let&rsquo;s look at some examples.</p>
+<h2 id="loading-a-json-document-from-a-file">Loading a JSON Document From a File</h2>
+<p>Suppose we have a JSON file containing employee data:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+    <span style="color:#000">&#34;employees&#34;</span>: [
+        { <span style="color:#000">&#34;id&#34;</span>: <span style="color:#1c01ce">11</span>, <span style="color:#000">&#34;name&#34;</span>: <span style="color:#c41a16">&#34;Diane&#34;</span>, <span style="color:#000">&#34;salary&#34;</span>: <span style="color:#1c01ce">70</span> },
+        { <span style="color:#000">&#34;id&#34;</span>: <span style="color:#1c01ce">12</span>, <span style="color:#000">&#34;name&#34;</span>: <span style="color:#c41a16">&#34;Bob&#34;</span>, <span style="color:#000">&#34;salary&#34;</span>: <span style="color:#1c01ce">78</span> },
+        { <span style="color:#000">&#34;id&#34;</span>: <span style="color:#1c01ce">21</span>, <span style="color:#000">&#34;name&#34;</span>: <span style="color:#c41a16">&#34;Emma&#34;</span>, <span style="color:#000">&#34;salary&#34;</span>: <span style="color:#1c01ce">84</span> },
+        { <span style="color:#000">&#34;id&#34;</span>: <span style="color:#1c01ce">22</span>, <span style="color:#000">&#34;name&#34;</span>: <span style="color:#c41a16">&#34;Grace&#34;</span>, <span style="color:#000">&#34;salary&#34;</span>: <span style="color:#1c01ce">90</span> },
+        { <span style="color:#000">&#34;id&#34;</span>: <span style="color:#1c01ce">23</span>, <span style="color:#000">&#34;name&#34;</span>: <span style="color:#c41a16">&#34;Henry&#34;</span>, <span style="color:#000">&#34;salary&#34;</span>: <span style="color:#1c01ce">104</span> },
+        { <span style="color:#000">&#34;id&#34;</span>: <span style="color:#1c01ce">24</span>, <span style="color:#000">&#34;name&#34;</span>: <span style="color:#c41a16">&#34;Irene&#34;</span>, <span style="color:#000">&#34;salary&#34;</span>: <span style="color:#1c01ce">104</span> },
+        { <span style="color:#000">&#34;id&#34;</span>: <span style="color:#1c01ce">25</span>, <span style="color:#000">&#34;name&#34;</span>: <span style="color:#c41a16">&#34;Frank&#34;</span>, <span style="color:#000">&#34;salary&#34;</span>: <span style="color:#1c01ce">120</span> },
+        { <span style="color:#000">&#34;id&#34;</span>: <span style="color:#1c01ce">31</span>, <span style="color:#000">&#34;name&#34;</span>: <span style="color:#c41a16">&#34;Cindy&#34;</span>, <span style="color:#000">&#34;salary&#34;</span>: <span style="color:#1c01ce">96</span> },
+        { <span style="color:#000">&#34;id&#34;</span>: <span style="color:#1c01ce">32</span>, <span style="color:#000">&#34;name&#34;</span>: <span style="color:#c41a16">&#34;Dave&#34;</span>, <span style="color:#000">&#34;salary&#34;</span>: <span style="color:#1c01ce">96</span> },
+        { <span style="color:#000">&#34;id&#34;</span>: <span style="color:#1c01ce">33</span>, <span style="color:#000">&#34;name&#34;</span>: <span style="color:#c41a16">&#34;Alice&#34;</span>, <span style="color:#000">&#34;salary&#34;</span>: <span style="color:#1c01ce">100</span> }
+    ]
+}
+</code></pre></div><p>And an <code>employees</code> table:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">create</span> <span style="color:#a90d91">table</span> <span style="color:#000">employees</span> (
+  <span style="color:#000">id</span> <span style="color:#a90d91">integer</span> <span style="color:#a90d91">primary</span> <span style="color:#a90d91">key</span>,
+  <span style="color:#000">name</span> <span style="color:#a90d91">text</span>,
+  <span style="color:#000">salary</span> <span style="color:#a90d91">integer</span>
+);
+</code></pre></div><p>To import the JSON data into the table, we combine <code>fileo_read()</code> with <code>json_tree()</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">insert</span> <span style="color:#a90d91">into</span> <span style="color:#000">employees</span>(<span style="color:#000">id</span>, <span style="color:#000">name</span>, <span style="color:#000">salary</span>)
+<span style="color:#a90d91">select</span>
+  <span style="color:#000">json_extract</span>(<span style="color:#000">value</span>, <span style="color:#c41a16">&#39;$.id&#39;</span>),
+  <span style="color:#000">json_extract</span>(<span style="color:#000">value</span>, <span style="color:#c41a16">&#39;$.name&#39;</span>),
+  <span style="color:#000">json_extract</span>(<span style="color:#000">value</span>, <span style="color:#c41a16">&#39;$.salary&#39;</span>)
+<span style="color:#a90d91">from</span> <span style="color:#000">json_tree</span>(
+  <span style="color:#000">fileio_read</span>(<span style="color:#c41a16">&#39;employees.json&#39;</span>)
+)
+<span style="color:#a90d91">where</span> <span style="color:#a90d91">type</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#39;object&#39;</span> <span style="color:#a90d91">and</span> <span style="color:#000">fullkey</span> <span style="color:#a90d91">like</span> <span style="color:#c41a16">&#39;$.employees%&#39;</span>;
+</code></pre></div><p><code>fileio_read()</code> loads the file as a blob, while <code>json_tree()</code> iterates over it. When the query completes, the data is imported into the <code>employees</code> table:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">*</span> <span style="color:#a90d91">from</span> <span style="color:#000">employees</span>;
+</code></pre></div><pre tabindex="0"><code>┌────┬───────┬────────┐
+│ id │ name  │ salary │
+├────┼───────┼────────┤
+│ 11 │ Diane │ 70     │
+│ 12 │ Bob   │ 78     │
+│ 21 │ Emma  │ 84     │
+│ 22 │ Grace │ 90     │
+│ 23 │ Henry │ 104    │
+│ 24 │ Irene │ 104    │
+│ 25 │ Frank │ 120    │
+│ 31 │ Cindy │ 96     │
+│ 32 │ Dave  │ 96     │
+│ 33 │ Alice │ 100    │
+└────┴───────┴────────┘
+</code></pre><h2 id="reading-a-text-file-line-by-line">Reading a Text File Line by Line</h2>
+<p>Reading the whole file into memory, as we did with <code>employees.json</code>, may not be a good idea for very large files (e.g., logs with millions of lines). In this case, it is better to read the file line by line.</p>
+<p>Suppose we have an <code>app.log</code> file with 1M lines:</p>
+<pre tabindex="0"><code>ts=2023-02-26 13:00:00,level=INFO,message=begin processing
+ts=2023-02-26 13:01:00,level=INFO,message=processed 1000 records
+ts=2023-02-26 13:02:00,level=INFO,message=processed 2000 records
+ts=2023-02-26 13:03:00,level=INFO,message=processed 3000 records
+ts=2023-02-26 13:03:25,level=ERROR,message=invalid record data
+ts=2023-02-26 13:03:25,level=INFO,message=processing failed
+...
+</code></pre><p>And an <code>app_log</code> table:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">create</span> <span style="color:#a90d91">table</span> <span style="color:#000">app_log</span> (
+  <span style="color:#000">line</span> <span style="color:#a90d91">text</span>
+);
+</code></pre></div><p>Let&rsquo;s iterate over the log file with <code>fileio_scan()</code>, loading lines one by one, and inserting them into the table:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">insert</span> <span style="color:#a90d91">into</span> <span style="color:#000">app_log</span>(<span style="color:#000">line</span>)
+<span style="color:#a90d91">select</span> <span style="color:#000">value</span> <span style="color:#a90d91">from</span> <span style="color:#000">fileio_scan</span>(<span style="color:#c41a16">&#39;app.log&#39;</span>);
+</code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#a90d91">from</span> <span style="color:#000">app_log</span>;
+<span style="color:#177500">-- 1000000
+</span></code></pre></div><p>Now we can extract the individual fields using the <code>regexp_substr</code> function from the <code>sqlean-regexp</code> extension:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">alter</span> <span style="color:#a90d91">table</span> <span style="color:#000">app_log</span> <span style="color:#a90d91">add</span> <span style="color:#a90d91">column</span> <span style="color:#000">ts</span> <span style="color:#a90d91">text</span>;
+<span style="color:#a90d91">alter</span> <span style="color:#a90d91">table</span> <span style="color:#000">app_log</span> <span style="color:#a90d91">add</span> <span style="color:#a90d91">column</span> <span style="color:#a90d91">level</span> <span style="color:#a90d91">text</span>;
+<span style="color:#a90d91">alter</span> <span style="color:#a90d91">table</span> <span style="color:#000">app_log</span> <span style="color:#a90d91">add</span> <span style="color:#a90d91">column</span> <span style="color:#000">message</span> <span style="color:#a90d91">text</span>;
+
+<span style="color:#a90d91">update</span> <span style="color:#000">app_log</span> <span style="color:#a90d91">set</span> <span style="color:#000">ts</span> <span style="color:#000">=</span> <span style="color:#000">substr</span>(<span style="color:#000">regexp_substr</span>(<span style="color:#000">line</span>, <span style="color:#c41a16">&#39;ts=[^,]+&#39;</span>), <span style="color:#1c01ce">4</span>);
+<span style="color:#a90d91">update</span> <span style="color:#000">app_log</span> <span style="color:#a90d91">set</span> <span style="color:#a90d91">level</span> <span style="color:#000">=</span> <span style="color:#000">substr</span>(<span style="color:#000">regexp_substr</span>(<span style="color:#000">line</span>, <span style="color:#c41a16">&#39;level=[^,]+&#39;</span>), <span style="color:#1c01ce">7</span>);
+<span style="color:#a90d91">update</span> <span style="color:#000">app_log</span> <span style="color:#a90d91">set</span> <span style="color:#000">message</span> <span style="color:#000">=</span> <span style="color:#000">substr</span>(<span style="color:#000">regexp_substr</span>(<span style="color:#000">line</span>, <span style="color:#c41a16">&#39;message=[^,]+&#39;</span>), <span style="color:#1c01ce">9</span>);
+</code></pre></div><p>Now each log field is stored in a separate column:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">ts</span>, <span style="color:#a90d91">level</span>, <span style="color:#000">message</span> <span style="color:#a90d91">from</span> <span style="color:#000">app_log</span> <span style="color:#a90d91">limit</span> <span style="color:#1c01ce">5</span>;
+</code></pre></div><pre tabindex="0"><code>┌─────────────────────┬───────┬────────────────────────┐
+│         ts          │ level │        message         │
+├─────────────────────┼───────┼────────────────────────┤
+│ 2023-02-26 13:00:00 │ INFO  │ begin processing       │
+│ 2023-02-26 13:01:00 │ INFO  │ processed 1000 records │
+│ 2023-02-26 13:02:00 │ INFO  │ processed 2000 records │
+│ 2023-02-26 13:03:00 │ INFO  │ processed 3000 records │
+│ 2023-02-26 13:03:25 │ ERROR │ invalid record data    │
+└─────────────────────┴───────┴────────────────────────┘
+</code></pre><p>Neat!</p>
+<h2 id="streaming-query-results-to-a-file">Streaming Query Results to a File</h2>
+<p>Suppose we want to export the ERROR log lines into a separate file. Let&rsquo;s use <code>fileio_append</code> for that:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#a90d91">sum</span>(
+  <span style="color:#000">fileio_append</span>(<span style="color:#c41a16">&#39;error.log&#39;</span>, <span style="color:#000">printf</span>(<span style="color:#c41a16">&#39;%s: %s&#39;</span>, <span style="color:#000">ts</span>, <span style="color:#000">message</span>) <span style="color:#000">||</span> <span style="color:#a90d91">char</span>(<span style="color:#1c01ce">10</span>))
+) <span style="color:#a90d91">from</span> <span style="color:#000">app_log</span>
+<span style="color:#a90d91">where</span> <span style="color:#a90d91">level</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#39;ERROR&#39;</span>;
+</code></pre></div><p>This is <code>error.log</code> after the export:</p>
+<pre tabindex="0"><code>2023-02-26 13:03:25: invalid record data
+</code></pre><h2 id="importing-all-files-in-a-directory">Importing All Files in a Directory</h2>
+<p>Suppose we have multiple log files:</p>
+<pre tabindex="0"><code>app.log.1
+app.log.2
+app.log.3
+...
+</code></pre><p>Let&rsquo;s import them all at once using the <code>filio_ls()</code> function.</p>
+<p>First, we&rsquo;ll look at the files to make sure we&rsquo;re loading the correct data:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">*</span> <span style="color:#a90d91">from</span> <span style="color:#000">fileio_ls</span>(<span style="color:#c41a16">&#39;logs&#39;</span>)
+<span style="color:#a90d91">where</span> <span style="color:#000">name</span> <span style="color:#a90d91">like</span> <span style="color:#c41a16">&#39;logs/app.log%&#39;</span>;
+</code></pre></div><pre tabindex="0"><code>┌────────────────┬───────┬────────────┬──────┐
+│      name      │ mode  │   mtime    │ size │
+├────────────────┼───────┼────────────┼──────┤
+│ logs/app.log.2 │ 33188 │ 1677425479 │ 316  │
+│ logs/app.log.3 │ 33188 │ 1677425496 │ 377  │
+│ logs/app.log.1 │ 33188 │ 1677425467 │ 316  │
+└────────────────┴───────┴────────────┴──────┘
+</code></pre><p>Seems fine. Now let&rsquo;s import them into the <code>logs</code> table:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">create</span> <span style="color:#a90d91">table</span> <span style="color:#000">logs</span>(<span style="color:#000">fname</span> <span style="color:#a90d91">text</span>, <span style="color:#000">line</span> <span style="color:#a90d91">text</span>);
+</code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#000">files</span> <span style="color:#a90d91">as</span> (
+  <span style="color:#a90d91">select</span> <span style="color:#000">name</span> <span style="color:#a90d91">from</span> <span style="color:#000">fileio_ls</span>(<span style="color:#c41a16">&#39;logs&#39;</span>)
+  <span style="color:#a90d91">where</span> <span style="color:#000">name</span> <span style="color:#a90d91">like</span> <span style="color:#c41a16">&#39;logs/app.log%&#39;</span>
+)
+<span style="color:#a90d91">insert</span> <span style="color:#a90d91">into</span> <span style="color:#000">logs</span>(<span style="color:#000">fname</span>, <span style="color:#000">line</span>)
+<span style="color:#a90d91">select</span> <span style="color:#000">files</span>.<span style="color:#000">name</span>, <span style="color:#000">value</span> <span style="color:#a90d91">from</span> <span style="color:#000">fileio_scan</span>(<span style="color:#000">files</span>.<span style="color:#000">name</span>), <span style="color:#000">files</span>;
+</code></pre></div><p>Let&rsquo;s double-check that all logs are imported:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">fname</span>, <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>)
+<span style="color:#a90d91">from</span> <span style="color:#000">logs</span>
+<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#000">fname</span>;
+</code></pre></div><pre tabindex="0"><code>┌────────────────┬──────────┐
+│     fname      │ count(*) │
+├────────────────┼──────────┤
+│ logs/app.log.1 │ 5        │
+│ logs/app.log.2 │ 5        │
+│ logs/app.log.3 │ 6        │
+└────────────────┴──────────┘
+</code></pre><p>Looks fine!</p>
+<h2 id="installation-and-usage">Installation and Usage</h2>
+<ol>
+<li>
+<p>Download the <a href="https://github.com/nalgeon/sqlean/releases/latest">latest release</a></p>
+</li>
+<li>
+<p>Use with SQLite command-line interface:</p>
+</li>
+</ol>
+<pre tabindex="0"><code>sqlite&gt; .load ./fileio
+sqlite&gt; select * from fileio_read('data.txt');
+</code></pre><p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/install.md">How to Install an Extension</a> for usage with IDE, Python, etc.</p>
+<p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/fileio.md">Extension Documentation</a> for reference.</p>
+]]></content:encoded></item><item><title>Comparing by Offset with SQL Window Functions</title><link>https://antonz.org/sql-window-functions-offset/</link><pubDate>Thu, 16 Feb 2023 14:00:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-offset/</guid><description>Comparing records with neighbors and boundaries.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
 <p>Comparing by offset means looking at the difference between neighboring values. For example, comparing the countries that occupy the 5th and 6th places in the world GDP rating — how different are they? What about 1st and 6th place?</p>
 <p>Sometimes we compare with boundaries instead of neighbors. For example, there are 50 top tennis players worldwide, and Maria Sakkari is ranked 10th. How do her stats compare to Iga Swiatek, who is ranked 1st? How does she compare to Lin Zhou, who is ranked 50th?</p>
 <p>We will compare records from the <code>employees</code> table:</p>
@@ -1385,11 +1543,11 @@ rank()<br/>
 <span style="color:#177500">// 1
 </span></code></pre></div><p>Overall, a great release! Looking forward to trying everything in production.</p>
 ]]></content:encoded></item><item><title>Regular Expressions in SQLite</title><link>https://antonz.org/sqlean-regexp/</link><pubDate>Sat, 04 Feb 2023 11:20:00 +0000</pubDate><guid>https://antonz.org/sqlean-regexp/</guid><description>Use a robust pattern matching and text replacement tool from SQL.</description><content:encoded><![CDATA[<p>Regular expressions are probably the most powerful text processing tool without programming.</p>
-<p>SQLite does not support regular expressions by default. But you can easily enable them using the <code>regexp</code> extension.</p>
+<p>SQLite does not support regular expressions by default. However, you can easily enable them using the <code>sqlean-regexp</code> extension.</p>
 <blockquote>
-<p><strong>Note</strong>. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
+<p><strong>Note</strong>. Unlike other DBMS, adding extensions to SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
 </blockquote>
-<p>With <code>regexp</code>, matching a string against a pattern becomes as easy as:</p>
+<p>With <code>sqlean-regexp</code>, matching a string against a pattern becomes as easy as:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#177500">-- count messages containing digits
 </span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#a90d91">from</span> <span style="color:#000">messages</span>
 <span style="color:#a90d91">where</span> <span style="color:#000">msg_text</span> <span style="color:#000">regexp</span> <span style="color:#c41a16">&#39;\d+&#39;</span>;
@@ -1401,7 +1559,7 @@ rank()<br/>
 <li>Extract a part of the string that matches the pattern.</li>
 <li>Replace all parts of the string that match the pattern.</li>
 </ol>
-<p><code>regexp</code> provides a separate function for each of these tasks.</p>
+<p><code>sqlean-regexp</code> provides a separate function for each of these tasks.</p>
 <h3 id="regexp_likesource-pattern"><code>regexp_like(source, pattern)</code></h3>
 <p>Checks if the source string matches the pattern.</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">regexp_like</span>(<span style="color:#c41a16">&#39;Meet me at 10:30&#39;</span>, <span style="color:#c41a16">&#39;\d+:\d+&#39;</span>);
@@ -1423,7 +1581,7 @@ rank()<br/>
 <span style="color:#a90d91">select</span> <span style="color:#000">regexp_replace</span>(<span style="color:#c41a16">&#39;1 2 3 4&#39;</span>, <span style="color:#c41a16">&#39;[2468]&#39;</span>, <span style="color:#c41a16">&#39;even&#39;</span>);
 <span style="color:#177500">-- 1 even 3 even
 </span></code></pre></div><h2 id="pattern-syntax">Pattern syntax</h2>
-<p><code>regexp</code> supports pretty advanced syntax, including various groups, lazy quantifiers, and look-arounds:</p>
+<p><code>sqlean-regexp</code> supports pretty advanced syntax, including various groups, lazy quantifiers, and look-arounds:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;the year is 2020&#39;</span>, <span style="color:#c41a16">&#39;(\d{2})\1&#39;</span>);
 <span style="color:#177500">-- 2020
 </span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;the year is 2021&#39;</span>, <span style="color:#c41a16">&#39;(\d{2})\1&#39;</span>);
@@ -1908,141 +2066,4 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
 <p>The mutex ensures that only a single goroutine executes the code between <code>Lock()</code> and <code>Unlock()</code> at any given time.</p>
 <p>Now multiple calls to <code>Close()</code> work correctly in a concurrent environment.</p>
 <p>That&rsquo;s it!</p>
-]]></content:encoded></item><item><title>Speed of algorithms (with cats)</title><link>https://antonz.org/big-o/</link><pubDate>Wed, 21 Dec 2022 16:50:00 +0000</pubDate><guid>https://antonz.org/big-o/</guid><description>Analyzing fast and slow algorithms with silly cat examples.</description><content:encoded><![CDATA[<p>Let&rsquo;s see how programmers evaluate fast and slow algorithms. Since the topic is pretty boring, we&rsquo;ll use silly cat examples.</p>
-<h2 id="constant-time-o1">Constant time: O(1)</h2>
-<p>This is your best option. The algorithm speed does not depend on the number of cats.</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6 flex">
-<div class="boxed">
-    <p><strong>🐾 Example</strong></p>
-    <p>You are the lucky owner of <code>N</code> cats. Every kitten knows their name. If you call "Felix!", only one will come running, and the rest of the <code>N-1</code> fluffs don't care.</p>
-</div>
-</div>
-<div class="col-xs-12 col-sm-6">
-<figure>
-  <img alt="Constant time" src="01-constant.jpg" class="img-bordered-thin">
-</figure>
-</div>
-</div>
-<h2 id="logarithmic-time-ologn">Logarithmic time: O(log n)</h2>
-<p>On <code>N</code> cats the algorithm completes in <code>log(N)</code> steps. It&rsquo;s fast! 1,000,000 kittens → 20 operations total.</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6 flex">
-<div class="boxed">
-    <p><strong>🐾 Example</strong></p>
-    <p>Cat's bowls are arranged alphabetically. When you adopt a new cat, the place for its bowl can be found in <code>log(N)</code> steps.</p>
-</div>
-</div>
-<div class="col-xs-12 col-sm-6">
-<figure>
-  <img alt="Logarithmic time" src="02-log.jpg" class="img-bordered-thin">
-</figure>
-</div>
-</div>
-<h2 id="linear-time-on">Linear time: O(n)</h2>
-<p>On <code>N</code> cats the algorithm completes in <code>N</code> steps. It means that every time you have to traverse all cats. Not great, not terrible.</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6 flex">
-<div class="boxed">
-    <p><strong>🐾 Example</strong></p>
-    <p>Your kittens rebelled and stopped responding to nicknames. Now you have to look through <code>N</code> fluffs to find the right one.</p>
-</div>
-</div>
-<div class="col-xs-12 col-sm-6">
-<figure>
-  <img alt="Linear time" src="03-linear.jpg" class="img-bordered-thin">
-</figure>
-</div>
-</div>
-<h2 id="log-linear-time-onlogn">Log-linear time: O(n log n)</h2>
-<p>On <code>N</code> cats the algorithm completes in <code>N</code> × <code>log(N)</code> steps. This is slower than in linear time, but not by much (the logarithm of <code>N</code> is much smaller than <code>N</code>, remember?).</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6 flex">
-<div class="boxed">
-    <p><strong>🐾 Example</strong></p>
-    <p>Waiting for guests, you decided to seat kittens in the order of their size. The quick sort algorithm will handle this in <code>N</code> × <code>log(N)</code> steps.</p>
-</div>
-</div>
-<div class="col-xs-12 col-sm-6">
-<figure>
-  <img alt="Log-linear time" src="04-log-linear.jpg" class="img-bordered-thin">
-</figure>
-</div>
-</div>
-<p>Next in line, we have lazy polynomial cats and snail-speed superpolynomial ones.</p>
-<h2 id="quadratic-time-on">Quadratic time: O(n²)</h2>
-<p>On <code>N</code> cats the algorithm completes in <code>N²</code> steps. So slow.</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6 flex">
-<div class="boxed">
-    <p><strong>🐾 Example</strong></p>
-    <p>Your competitor claims that his <code>N</code> kittens are smoother and happier than yours. A special commission will compare the cats in pairs and make a fair verdict. You will need ~ <code>N²</code> comparisons.</p>
-</div>
-</div>
-<div class="col-xs-12 col-sm-6">
-<figure>
-  <img alt="Quadratic time" src="05-quadratic.jpg" class="img-bordered-thin">
-</figure>
-</div>
-</div>
-<h2 id="polynomial-time-onᵏ">Polynomial time: O(nᵏ)</h2>
-<p>On <code>N</code> cats the algorithm completes in <code>N³</code> steps, <code>N⁴</code> steps, <code>N⁵</code> steps, or even longer. Ugh. Don&rsquo;t be like that.</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6 flex">
-<div class="boxed">
-    <p><strong>🐾 Example</strong></p>
-    <p>Photoshoot! Each of the <code>N</code> kittens will be photographed in pairs with others, and the photographer takes <code>N</code> pictures for each pair. <code>N</code> × <code>N</code> × <code>N</code> ≃ <code>N³</code> steps.</p>
-</div>
-</div>
-<div class="col-xs-12 col-sm-6">
-<figure>
-  <img alt="Polynomial time" src="06-polinomial.jpg" class="img-bordered-thin">
-</figure>
-</div>
-</div>
-<p>Polynomial algorithms are not famous for their speed. But compared to superpolynomial ones, they are as fast as a Flash. Sadly, the only &ldquo;super&rdquo; part of superpolynomial algorithms is a name. Let me show you.</p>
-<h2 id="exponential-time-o2ⁿ">Exponential time: O(2ⁿ)</h2>
-<p>On <code>N</code> cats the algorithm completes in <code>2ⁿ</code> steps. It&rsquo;s a long time, you&rsquo;re probably not gonna wait.</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6 flex">
-<div class="boxed">
-    <p><strong>🐾 Example</strong></p>
-    <p>Kittens are going to the cat show. Everyone will be weighed and rated in stars. But the cat transport can handle a maximum of X kilograms (or pounds). How to choose the most stellar cast? The answer will require <code>2ⁿ</code> steps.</p>
-</div>
-</div>
-<div class="col-xs-12 col-sm-6">
-<figure>
-  <img alt="Exponential time" src="07-exponential.jpg" class="img-bordered-thin">
-</figure>
-</div>
-</div>
-<h2 id="factorial-time-on">Factorial time: O(n!)</h2>
-<p>On <code>N</code> cats the algorithm completes in <code>N</code> ×<code>(N-1)</code> ×<code>(N-2)</code> ×&hellip; × <code>1</code> steps. This is crazy! With 20 cats it&rsquo;s already a couple of quintillion operations.</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6 flex">
-<div class="boxed">
-    <p><strong>🐾 Example</strong></p>
-    <p>Kittens spread out across the apartment. You want to pet everyone, but you're lazy and don't like walking. What is the shortest route to visit all fluffs? This is ~ <code>N!</code> comparisons.</p>
-</div>
-</div>
-<div class="col-xs-12 col-sm-6">
-<figure>
-  <img alt="Factorial time" src="08-factorial.jpg" class="img-bordered-thin">
-</figure>
-</div>
-</div>
-<h2 id="summary">Summary</h2>
-<p>Here are the algorithms we&rsquo;ve covered:</p>
-<ul>
-<li>Constant <code>O(1)</code></li>
-<li>Logarithmic <code>O(log n)</code></li>
-<li>Linear <code>O(n)</code></li>
-<li>Log-Linear <code>O(n log n)</code></li>
-<li>Quadratic <code>O(n²)</code></li>
-<li>Polynomial <code>O(nᵏ)</code></li>
-<li>Exponential <code>O(2ⁿ)</code></li>
-<li>Factorial <code>O(n!)</code></li>
-</ul>
-<p>A constant algorithm is always the best option, and a logarithmic one is almost always. Linear and polynomial ones are more complex — it all depends on the task with them. Sometimes it&rsquo;s a shame to choose <code>O(n)</code>, and sometimes <code>O(n²)</code> is a huge success.</p>
-<p><code>O(2ⁿ)</code> and <code>O(n!)</code> are insanely slow. So in practice, people often use suboptimal but fast algorithms.</p>
 ]]></content:encoded></item></channel></rss>

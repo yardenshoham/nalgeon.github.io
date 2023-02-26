@@ -1,0 +1,262 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Reading and Writing Files in SQLite</title>
+<meta name=description content="Working with files and traversing directories from SQL.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.185535402157d66ce9dae7094285b45fc8308c13a4680f071ebe89263324fb47.css>
+<link rel=icon href=/assets/favicon/favicon.ico sizes=any>
+<link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=manifest href=/assets/favicon/manifest.json>
+<link rel=canonical href=https://antonz.org/sqlean-fileio/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Reading and Writing Files in SQLite">
+<meta property="og:description" content="Working with files and traversing directories from SQL.">
+<meta property="og:url" content="https://antonz.org/sqlean-fileio/">
+<meta property="og:image" content="https://antonz.org/sqlean-fileio/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Reading and Writing Files in SQLite">
+<meta name=twitter:description content="Working with files and traversing directories from SQL.">
+<meta name=twitter:url content="https://antonz.org/sqlean-fileio/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/sqlean-fileio/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Reading and Writing Files in SQLite</h1>
+</header>
+<p>Sometimes it&rsquo;s useful to load a dataset from an external file or export query results to a file.</p>
+<p>SQLite does not support file I/O operations by default. However, you can easily enable them using the <code>sqlean-fileio</code> extension.</p>
+<blockquote>
+<p><strong>Note</strong>. Unlike other DBMS, adding extensions to SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
+</blockquote>
+<p><code>sqlean-fileio</code> solves common import/export tasks such as:</p>
+<ul>
+<li>Loading a JSON document from a file.</li>
+<li>Reading a text file line by line.</li>
+<li>Streaming query results to a file.</li>
+<li>Importing all files in a directory.</li>
+</ul>
+<p>Let&rsquo;s look at some examples.</p>
+<h2 id=loading-a-json-document-from-a-file>Loading a JSON Document From a File</h2>
+<p>Suppose we have a JSON file containing employee data:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json>{
+    <span style=color:#000>&#34;employees&#34;</span>: [
+        { <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>11</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;Diane&#34;</span>, <span style=color:#000>&#34;salary&#34;</span>: <span style=color:#1c01ce>70</span> },
+        { <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>12</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;Bob&#34;</span>, <span style=color:#000>&#34;salary&#34;</span>: <span style=color:#1c01ce>78</span> },
+        { <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>21</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;Emma&#34;</span>, <span style=color:#000>&#34;salary&#34;</span>: <span style=color:#1c01ce>84</span> },
+        { <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>22</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;Grace&#34;</span>, <span style=color:#000>&#34;salary&#34;</span>: <span style=color:#1c01ce>90</span> },
+        { <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>23</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;Henry&#34;</span>, <span style=color:#000>&#34;salary&#34;</span>: <span style=color:#1c01ce>104</span> },
+        { <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>24</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;Irene&#34;</span>, <span style=color:#000>&#34;salary&#34;</span>: <span style=color:#1c01ce>104</span> },
+        { <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>25</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;Frank&#34;</span>, <span style=color:#000>&#34;salary&#34;</span>: <span style=color:#1c01ce>120</span> },
+        { <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>31</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;Cindy&#34;</span>, <span style=color:#000>&#34;salary&#34;</span>: <span style=color:#1c01ce>96</span> },
+        { <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>32</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;Dave&#34;</span>, <span style=color:#000>&#34;salary&#34;</span>: <span style=color:#1c01ce>96</span> },
+        { <span style=color:#000>&#34;id&#34;</span>: <span style=color:#1c01ce>33</span>, <span style=color:#000>&#34;name&#34;</span>: <span style=color:#c41a16>&#34;Alice&#34;</span>, <span style=color:#000>&#34;salary&#34;</span>: <span style=color:#1c01ce>100</span> }
+    ]
+}
+</code></pre></div><p>And an <code>employees</code> table:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>create</span> <span style=color:#a90d91>table</span> <span style=color:#000>employees</span> (
+  <span style=color:#000>id</span> <span style=color:#a90d91>integer</span> <span style=color:#a90d91>primary</span> <span style=color:#a90d91>key</span>,
+  <span style=color:#000>name</span> <span style=color:#a90d91>text</span>,
+  <span style=color:#000>salary</span> <span style=color:#a90d91>integer</span>
+);
+</code></pre></div><p>To import the JSON data into the table, we combine <code>fileo_read()</code> with <code>json_tree()</code>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>insert</span> <span style=color:#a90d91>into</span> <span style=color:#000>employees</span>(<span style=color:#000>id</span>, <span style=color:#000>name</span>, <span style=color:#000>salary</span>)
+<span style=color:#a90d91>select</span>
+  <span style=color:#000>json_extract</span>(<span style=color:#000>value</span>, <span style=color:#c41a16>&#39;$.id&#39;</span>),
+  <span style=color:#000>json_extract</span>(<span style=color:#000>value</span>, <span style=color:#c41a16>&#39;$.name&#39;</span>),
+  <span style=color:#000>json_extract</span>(<span style=color:#000>value</span>, <span style=color:#c41a16>&#39;$.salary&#39;</span>)
+<span style=color:#a90d91>from</span> <span style=color:#000>json_tree</span>(
+  <span style=color:#000>fileio_read</span>(<span style=color:#c41a16>&#39;employees.json&#39;</span>)
+)
+<span style=color:#a90d91>where</span> <span style=color:#a90d91>type</span> <span style=color:#000>=</span> <span style=color:#c41a16>&#39;object&#39;</span> <span style=color:#a90d91>and</span> <span style=color:#000>fullkey</span> <span style=color:#a90d91>like</span> <span style=color:#c41a16>&#39;$.employees%&#39;</span>;
+</code></pre></div><p><code>fileio_read()</code> loads the file as a blob, while <code>json_tree()</code> iterates over it. When the query completes, the data is imported into the <code>employees</code> table:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>;
+</code></pre></div><pre tabindex=0><code>┌────┬───────┬────────┐
+│ id │ name  │ salary │
+├────┼───────┼────────┤
+│ 11 │ Diane │ 70     │
+│ 12 │ Bob   │ 78     │
+│ 21 │ Emma  │ 84     │
+│ 22 │ Grace │ 90     │
+│ 23 │ Henry │ 104    │
+│ 24 │ Irene │ 104    │
+│ 25 │ Frank │ 120    │
+│ 31 │ Cindy │ 96     │
+│ 32 │ Dave  │ 96     │
+│ 33 │ Alice │ 100    │
+└────┴───────┴────────┘
+</code></pre><h2 id=reading-a-text-file-line-by-line>Reading a Text File Line by Line</h2>
+<p>Reading the whole file into memory, as we did with <code>employees.json</code>, may not be a good idea for very large files (e.g., logs with millions of lines). In this case, it is better to read the file line by line.</p>
+<p>Suppose we have an <code>app.log</code> file with 1M lines:</p>
+<pre tabindex=0><code>ts=2023-02-26 13:00:00,level=INFO,message=begin processing
+ts=2023-02-26 13:01:00,level=INFO,message=processed 1000 records
+ts=2023-02-26 13:02:00,level=INFO,message=processed 2000 records
+ts=2023-02-26 13:03:00,level=INFO,message=processed 3000 records
+ts=2023-02-26 13:03:25,level=ERROR,message=invalid record data
+ts=2023-02-26 13:03:25,level=INFO,message=processing failed
+...
+</code></pre><p>And an <code>app_log</code> table:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>create</span> <span style=color:#a90d91>table</span> <span style=color:#000>app_log</span> (
+  <span style=color:#000>line</span> <span style=color:#a90d91>text</span>
+);
+</code></pre></div><p>Let&rsquo;s iterate over the log file with <code>fileio_scan()</code>, loading lines one by one, and inserting them into the table:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>insert</span> <span style=color:#a90d91>into</span> <span style=color:#000>app_log</span>(<span style=color:#000>line</span>)
+<span style=color:#a90d91>select</span> <span style=color:#000>value</span> <span style=color:#a90d91>from</span> <span style=color:#000>fileio_scan</span>(<span style=color:#c41a16>&#39;app.log&#39;</span>);
+</code></pre></div><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#a90d91>count</span>(<span style=color:#000>*</span>) <span style=color:#a90d91>from</span> <span style=color:#000>app_log</span>;
+<span style=color:#177500>-- 1000000
+</span></code></pre></div><p>Now we can extract the individual fields using the <code>regexp_substr</code> function from the <code>sqlean-regexp</code> extension:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>alter</span> <span style=color:#a90d91>table</span> <span style=color:#000>app_log</span> <span style=color:#a90d91>add</span> <span style=color:#a90d91>column</span> <span style=color:#000>ts</span> <span style=color:#a90d91>text</span>;
+<span style=color:#a90d91>alter</span> <span style=color:#a90d91>table</span> <span style=color:#000>app_log</span> <span style=color:#a90d91>add</span> <span style=color:#a90d91>column</span> <span style=color:#a90d91>level</span> <span style=color:#a90d91>text</span>;
+<span style=color:#a90d91>alter</span> <span style=color:#a90d91>table</span> <span style=color:#000>app_log</span> <span style=color:#a90d91>add</span> <span style=color:#a90d91>column</span> <span style=color:#000>message</span> <span style=color:#a90d91>text</span>;
+
+<span style=color:#a90d91>update</span> <span style=color:#000>app_log</span> <span style=color:#a90d91>set</span> <span style=color:#000>ts</span> <span style=color:#000>=</span> <span style=color:#000>substr</span>(<span style=color:#000>regexp_substr</span>(<span style=color:#000>line</span>, <span style=color:#c41a16>&#39;ts=[^,]+&#39;</span>), <span style=color:#1c01ce>4</span>);
+<span style=color:#a90d91>update</span> <span style=color:#000>app_log</span> <span style=color:#a90d91>set</span> <span style=color:#a90d91>level</span> <span style=color:#000>=</span> <span style=color:#000>substr</span>(<span style=color:#000>regexp_substr</span>(<span style=color:#000>line</span>, <span style=color:#c41a16>&#39;level=[^,]+&#39;</span>), <span style=color:#1c01ce>7</span>);
+<span style=color:#a90d91>update</span> <span style=color:#000>app_log</span> <span style=color:#a90d91>set</span> <span style=color:#000>message</span> <span style=color:#000>=</span> <span style=color:#000>substr</span>(<span style=color:#000>regexp_substr</span>(<span style=color:#000>line</span>, <span style=color:#c41a16>&#39;message=[^,]+&#39;</span>), <span style=color:#1c01ce>9</span>);
+</code></pre></div><p>Now each log field is stored in a separate column:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>ts</span>, <span style=color:#a90d91>level</span>, <span style=color:#000>message</span> <span style=color:#a90d91>from</span> <span style=color:#000>app_log</span> <span style=color:#a90d91>limit</span> <span style=color:#1c01ce>5</span>;
+</code></pre></div><pre tabindex=0><code>┌─────────────────────┬───────┬────────────────────────┐
+│         ts          │ level │        message         │
+├─────────────────────┼───────┼────────────────────────┤
+│ 2023-02-26 13:00:00 │ INFO  │ begin processing       │
+│ 2023-02-26 13:01:00 │ INFO  │ processed 1000 records │
+│ 2023-02-26 13:02:00 │ INFO  │ processed 2000 records │
+│ 2023-02-26 13:03:00 │ INFO  │ processed 3000 records │
+│ 2023-02-26 13:03:25 │ ERROR │ invalid record data    │
+└─────────────────────┴───────┴────────────────────────┘
+</code></pre><p>Neat!</p>
+<h2 id=streaming-query-results-to-a-file>Streaming Query Results to a File</h2>
+<p>Suppose we want to export the ERROR log lines into a separate file. Let&rsquo;s use <code>fileio_append</code> for that:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#a90d91>sum</span>(
+  <span style=color:#000>fileio_append</span>(<span style=color:#c41a16>&#39;error.log&#39;</span>, <span style=color:#000>printf</span>(<span style=color:#c41a16>&#39;%s: %s&#39;</span>, <span style=color:#000>ts</span>, <span style=color:#000>message</span>) <span style=color:#000>||</span> <span style=color:#a90d91>char</span>(<span style=color:#1c01ce>10</span>))
+) <span style=color:#a90d91>from</span> <span style=color:#000>app_log</span>
+<span style=color:#a90d91>where</span> <span style=color:#a90d91>level</span> <span style=color:#000>=</span> <span style=color:#c41a16>&#39;ERROR&#39;</span>;
+</code></pre></div><p>This is <code>error.log</code> after the export:</p>
+<pre tabindex=0><code>2023-02-26 13:03:25: invalid record data
+</code></pre><h2 id=importing-all-files-in-a-directory>Importing All Files in a Directory</h2>
+<p>Suppose we have multiple log files:</p>
+<pre tabindex=0><code>app.log.1
+app.log.2
+app.log.3
+...
+</code></pre><p>Let&rsquo;s import them all at once using the <code>filio_ls()</code> function.</p>
+<p>First, we&rsquo;ll look at the files to make sure we&rsquo;re loading the correct data:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>fileio_ls</span>(<span style=color:#c41a16>&#39;logs&#39;</span>)
+<span style=color:#a90d91>where</span> <span style=color:#000>name</span> <span style=color:#a90d91>like</span> <span style=color:#c41a16>&#39;logs/app.log%&#39;</span>;
+</code></pre></div><pre tabindex=0><code>┌────────────────┬───────┬────────────┬──────┐
+│      name      │ mode  │   mtime    │ size │
+├────────────────┼───────┼────────────┼──────┤
+│ logs/app.log.2 │ 33188 │ 1677425479 │ 316  │
+│ logs/app.log.3 │ 33188 │ 1677425496 │ 377  │
+│ logs/app.log.1 │ 33188 │ 1677425467 │ 316  │
+└────────────────┴───────┴────────────┴──────┘
+</code></pre><p>Seems fine. Now let&rsquo;s import them into the <code>logs</code> table:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>create</span> <span style=color:#a90d91>table</span> <span style=color:#000>logs</span>(<span style=color:#000>fname</span> <span style=color:#a90d91>text</span>, <span style=color:#000>line</span> <span style=color:#a90d91>text</span>);
+</code></pre></div><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>with</span> <span style=color:#000>files</span> <span style=color:#a90d91>as</span> (
+  <span style=color:#a90d91>select</span> <span style=color:#000>name</span> <span style=color:#a90d91>from</span> <span style=color:#000>fileio_ls</span>(<span style=color:#c41a16>&#39;logs&#39;</span>)
+  <span style=color:#a90d91>where</span> <span style=color:#000>name</span> <span style=color:#a90d91>like</span> <span style=color:#c41a16>&#39;logs/app.log%&#39;</span>
+)
+<span style=color:#a90d91>insert</span> <span style=color:#a90d91>into</span> <span style=color:#000>logs</span>(<span style=color:#000>fname</span>, <span style=color:#000>line</span>)
+<span style=color:#a90d91>select</span> <span style=color:#000>files</span>.<span style=color:#000>name</span>, <span style=color:#000>value</span> <span style=color:#a90d91>from</span> <span style=color:#000>fileio_scan</span>(<span style=color:#000>files</span>.<span style=color:#000>name</span>), <span style=color:#000>files</span>;
+</code></pre></div><p>Let&rsquo;s double-check that all logs are imported:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>fname</span>, <span style=color:#a90d91>count</span>(<span style=color:#000>*</span>)
+<span style=color:#a90d91>from</span> <span style=color:#000>logs</span>
+<span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> <span style=color:#000>fname</span>;
+</code></pre></div><pre tabindex=0><code>┌────────────────┬──────────┐
+│     fname      │ count(*) │
+├────────────────┼──────────┤
+│ logs/app.log.1 │ 5        │
+│ logs/app.log.2 │ 5        │
+│ logs/app.log.3 │ 6        │
+└────────────────┴──────────┘
+</code></pre><p>Looks fine!</p>
+<h2 id=installation-and-usage>Installation and Usage</h2>
+<ol>
+<li>
+<p>Download the <a href=https://github.com/nalgeon/sqlean/releases/latest>latest release</a></p>
+</li>
+<li>
+<p>Use with SQLite command-line interface:</p>
+</li>
+</ol>
+<pre tabindex=0><code>sqlite&gt; .load ./fileio
+sqlite&gt; select * from fileio_read('data.txt');
+</code></pre><p>See <a href=https://github.com/nalgeon/sqlean/blob/main/docs/install.md>How to Install an Extension</a> for usage with IDE, Python, etc.</p>
+<p>See <a href=https://github.com/nalgeon/sqlean/blob/main/docs/fileio.md>Extension Documentation</a> for reference.</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2023-02-26 15:00:00 +0000 UTC">26 Feb, 2023</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/sqlite/>sqlite</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/sql-window-functions-offset/>Comparing by Offset with SQL Window Functions</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sqlite-pivot-table/>Building a Pivot Table in SQLite</a></p>
+<p><a href=/sqlean-regexp/>Regular Expressions in SQLite</a></p>
+<p><a href=/sqlean-define/>User-Defined Functions in SQLite</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>

@@ -57,11 +57,11 @@
 <h1>Regular Expressions in SQLite</h1>
 </header>
 <p>Regular expressions are probably the most powerful text processing tool without programming.</p>
-<p>SQLite does not support regular expressions by default. But you can easily enable them using the <code>regexp</code> extension.</p>
+<p>SQLite does not support regular expressions by default. However, you can easily enable them using the <code>sqlean-regexp</code> extension.</p>
 <blockquote>
-<p><strong>Note</strong>. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
+<p><strong>Note</strong>. Unlike other DBMS, adding extensions to SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
 </blockquote>
-<p>With <code>regexp</code>, matching a string against a pattern becomes as easy as:</p>
+<p>With <code>sqlean-regexp</code>, matching a string against a pattern becomes as easy as:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#177500>-- count messages containing digits
 </span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#a90d91>count</span>(<span style=color:#000>*</span>) <span style=color:#a90d91>from</span> <span style=color:#000>messages</span>
 <span style=color:#a90d91>where</span> <span style=color:#000>msg_text</span> <span style=color:#000>regexp</span> <span style=color:#c41a16>&#39;\d+&#39;</span>;
@@ -73,7 +73,7 @@
 <li>Extract a part of the string that matches the pattern.</li>
 <li>Replace all parts of the string that match the pattern.</li>
 </ol>
-<p><code>regexp</code> provides a separate function for each of these tasks.</p>
+<p><code>sqlean-regexp</code> provides a separate function for each of these tasks.</p>
 <h3 id=regexp_likesource-pattern><code>regexp_like(source, pattern)</code></h3>
 <p>Checks if the source string matches the pattern.</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>regexp_like</span>(<span style=color:#c41a16>&#39;Meet me at 10:30&#39;</span>, <span style=color:#c41a16>&#39;\d+:\d+&#39;</span>);
@@ -95,7 +95,7 @@
 <span style=color:#a90d91>select</span> <span style=color:#000>regexp_replace</span>(<span style=color:#c41a16>&#39;1 2 3 4&#39;</span>, <span style=color:#c41a16>&#39;[2468]&#39;</span>, <span style=color:#c41a16>&#39;even&#39;</span>);
 <span style=color:#177500>-- 1 even 3 even
 </span></code></pre></div><h2 id=pattern-syntax>Pattern syntax</h2>
-<p><code>regexp</code> supports pretty advanced syntax, including various groups, lazy quantifiers, and look-arounds:</p>
+<p><code>sqlean-regexp</code> supports pretty advanced syntax, including various groups, lazy quantifiers, and look-arounds:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>regexp_substr</span>(<span style=color:#c41a16>&#39;the year is 2020&#39;</span>, <span style=color:#c41a16>&#39;(\d{2})\1&#39;</span>);
 <span style=color:#177500>-- 2020
 </span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#000>regexp_substr</span>(<span style=color:#c41a16>&#39;the year is 2021&#39;</span>, <span style=color:#c41a16>&#39;(\d{2})\1&#39;</span>);
