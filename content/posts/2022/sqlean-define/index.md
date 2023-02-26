@@ -9,13 +9,13 @@ tags = ["sqlite"]
 
 Most database engines provide a lot of built-in functions. Still, sometimes they are not enough, and people turn to writing their own — _user-defined_ — functions in plain SQL or some SQL-based language (like pl/sql in Oracle or pl/pgsql in Postgres).
 
-SQLite does not support user-defined functions by default. But you can easily enable them using the `define` extension.
+SQLite does not support user-defined functions by default. However, you can easily enable them using the `sqlean-define` extension.
 
-> **Note**. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.
+> **Note**. Unlike other DBMS, adding extensions to SQLite is a breeze. Download a file, run one database command — and you are good to go.
 
 ## Custom Functions
 
-With `define` writing a custom function becomes as easy as:
+With `sqlean-define` writing a custom function becomes as easy as:
 
 ```sql
 select define('sumn', ':n * (:n + 1) / 2');

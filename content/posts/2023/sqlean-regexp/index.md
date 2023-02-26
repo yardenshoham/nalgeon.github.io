@@ -9,11 +9,11 @@ tags = ["sqlite"]
 
 Regular expressions are probably the most powerful text processing tool without programming.
 
-SQLite does not support regular expressions by default. But you can easily enable them using the `regexp` extension.
+SQLite does not support regular expressions by default. However, you can easily enable them using the `sqlean-regexp` extension.
 
-> **Note**. Unlike other DBMS, adding extensions in SQLite is a breeze. Download a file, run one database command — and you are good to go.
+> **Note**. Unlike other DBMS, adding extensions to SQLite is a breeze. Download a file, run one database command — and you are good to go.
 
-With `regexp`, matching a string against a pattern becomes as easy as:
+With `sqlean-regexp`, matching a string against a pattern becomes as easy as:
 
 ```sql
 -- count messages containing digits
@@ -30,7 +30,7 @@ There are three main tasks people usually solve using regular expressions:
 2. Extract a part of the string that matches the pattern.
 3. Replace all parts of the string that match the pattern.
 
-`regexp` provides a separate function for each of these tasks.
+`sqlean-regexp` provides a separate function for each of these tasks.
 
 ### `regexp_like(source, pattern)`
 
@@ -69,7 +69,7 @@ select regexp_replace('1 2 3 4', '[2468]', 'even');
 
 ## Pattern syntax
 
-`regexp` supports pretty advanced syntax, including various groups, lazy quantifiers, and look-arounds:
+`sqlean-regexp` supports pretty advanced syntax, including various groups, lazy quantifiers, and look-arounds:
 
 ```sql
 select regexp_substr('the year is 2020', '(\d{2})\1');
