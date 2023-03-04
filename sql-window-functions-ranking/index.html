@@ -4,7 +4,7 @@
 <title>Ranking Data with SQL Window Functions</title>
 <meta name=description content="Making ratings and dividing data into partitions.">
 <meta name=robots content="index, follow">
-<link rel=stylesheet type=text/css href=/assets/css/style.185535402157d66ce9dae7094285b45fc8308c13a4680f071ebe89263324fb47.css>
+<link rel=stylesheet type=text/css href=/assets/css/style.7d56395be0aff259a969d2f462b790a6013305c4529081baa7da9e04775a50fd.css>
 <link rel=icon href=/assets/favicon/favicon.ico sizes=any>
 <link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
 <link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
@@ -116,21 +116,7 @@ after<br>
   <span style=color:#000>name</span>, <span style=color:#000>department</span>, <span style=color:#000>salary</span>
 <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>, <span style=color:#000>id</span>;
-</code></pre></div><pre tabindex=0><code>┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│      │ Frank │ it         │ 120    │
-│      │ Henry │ it         │ 104    │
-│      │ Irene │ it         │ 104    │
-│      │ Alice │ sales      │ 100    │
-│      │ Cindy │ sales      │ 96     │
-│      │ Dave  │ sales      │ 96     │
-│      │ Grace │ it         │ 90     │
-│      │ Emma  │ it         │ 84     │
-│      │ Bob   │ hr         │ 78     │
-│      │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
-</code></pre><p>Now let&rsquo;s go from the first row to the last and calculate the rank of each record. We will start with one and increase the rank every time the salary value is less than the previous one:</p>
+</code></pre></div><p>Now let&rsquo;s go from the first row to the last and calculate the rank of each record. We will start with one and increase the rank every time the salary value is less than the previous one:</p>
 <div class=row>
 <div class="col-xs-12 col-sm-5">
 ➀<br>
@@ -182,21 +168,7 @@ after<br>
 <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
 <span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>)
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#c41a16>&#34;rank&#34;</span>, <span style=color:#000>id</span>;
-</code></pre></div><pre tabindex=0><code>┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Frank │ it         │ 120    │
-│ 2    │ Henry │ it         │ 104    │
-│ 2    │ Irene │ it         │ 104    │
-│ 3    │ Alice │ sales      │ 100    │
-│ 4    │ Cindy │ sales      │ 96     │
-│ 4    │ Dave  │ sales      │ 96     │
-│ 5    │ Grace │ it         │ 90     │
-│ 6    │ Emma  │ it         │ 84     │
-│ 7    │ Bob   │ hr         │ 78     │
-│ 8    │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
-</code></pre><p>Here&rsquo;s how the engine executes this query:</p>
+</code></pre></div><p>Here&rsquo;s how the engine executes this query:</p>
 <ol>
 <li>Take the table specified in <code>from</code>.</li>
 <li>Select all records from it.</li>
@@ -218,21 +190,7 @@ after<br>
 <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
 <span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>)
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>, <span style=color:#000>id</span>;
-</code></pre></div><pre tabindex=0><code>┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│      │ Frank │ it         │ 120    │
-│      │ Henry │ it         │ 104    │
-│      │ Irene │ it         │ 104    │
-│      │ Alice │ sales      │ 100    │
-│      │ Cindy │ sales      │ 96     │
-│      │ Dave  │ sales      │ 96     │
-│      │ Grace │ it         │ 90     │
-│      │ Emma  │ it         │ 84     │
-│      │ Bob   │ hr         │ 78     │
-│      │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
-</code></pre><p>The window starts working only when a window function in <code>select</code> uses it.</p>
+</code></pre></div><p>The window starts working only when a window function in <code>select</code> uses it.</p>
 <hr>
 <p><strong>Window queries in Oracle and MS SQL Server databases</strong></p>
 <p>Neither Oracle nor SQL Server support the <code>window</code> clause. To make a window query work in these databases, move the window definition inside the <code>over</code> clause.</p>
@@ -261,42 +219,13 @@ after<br>
 <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
 <span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>)
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#c41a16>&#34;rank&#34;</span>, <span style=color:#000>id</span>;
-</code></pre></div><pre tabindex=0><code>┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Frank │ it         │ 120    │
-│ 2    │ Henry │ it         │ 104    │
-│ 2    │ Irene │ it         │ 104    │
-│ 3    │ Alice │ sales      │ 100    │
-│ 4    │ Cindy │ sales      │ 96     │
-│ 4    │ Dave  │ sales      │ 96     │
-│ 5    │ Grace │ it         │ 90     │
-│ 6    │ Emma  │ it         │ 84     │
-│ 7    │ Bob   │ hr         │ 78     │
-│ 8    │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
-</code></pre><p>Let&rsquo;s leave the <code>order by</code> in the window but remove it from the main query:</p>
+</code></pre></div><p>Let&rsquo;s leave the <code>order by</code> in the window but remove it from the main query:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
   <span style=color:#000>dense_rank</span>() <span style=color:#000>over</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> <span style=color:#c41a16>&#34;rank&#34;</span>,
   <span style=color:#000>name</span>, <span style=color:#000>department</span>, <span style=color:#000>salary</span>
 <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
 <span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>);
-</code></pre></div><p>Nothing has changed:</p>
-<pre tabindex=0><code>┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Frank │ it         │ 120    │
-│ 2    │ Henry │ it         │ 104    │
-│ 2    │ Irene │ it         │ 104    │
-│ 3    │ Alice │ sales      │ 100    │
-│ 4    │ Cindy │ sales      │ 96     │
-│ 4    │ Dave  │ sales      │ 96     │
-│ 5    │ Grace │ it         │ 90     │
-│ 6    │ Emma  │ it         │ 84     │
-│ 7    │ Bob   │ hr         │ 78     │
-│ 8    │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
-</code></pre><p>So why use <code>order by</code> in the main query?</p>
+</code></pre></div><p>Nothing has changed. So why use <code>order by</code> in the main query?</p>
 <p>The window&rsquo;s <code>order by</code> defines the window sorting, while the main query&rsquo;s <code>order by</code> defines the final result sorting after the rest of the query is complete.</p>
 <p>Let&rsquo;s say we want to assign a rank in descending order of salary but sort in the opposite, ascending order:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
@@ -305,21 +234,7 @@ after<br>
 <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
 <span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>)
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>asc</span>;
-</code></pre></div><pre tabindex=0><code>┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│ 8    │ Diane │ hr         │ 70     │
-│ 7    │ Bob   │ hr         │ 78     │
-│ 6    │ Emma  │ it         │ 84     │
-│ 5    │ Grace │ it         │ 90     │
-│ 4    │ Cindy │ sales      │ 96     │
-│ 4    │ Dave  │ sales      │ 96     │
-│ 3    │ Alice │ sales      │ 100    │
-│ 2    │ Henry │ it         │ 104    │
-│ 2    │ Irene │ it         │ 104    │
-│ 1    │ Frank │ it         │ 120    │
-└──────┴───────┴────────────┴────────┘
-</code></pre><p>As you can see, the rank is assigned according to the window sorting (<code>salary desc</code>), and the results are ordered according to the main query sorting (<code>salary asc</code>).</p>
+</code></pre></div><p>As you can see, the rank is assigned according to the window sorting (<code>salary desc</code>), and the results are ordered according to the main query sorting (<code>salary asc</code>).</p>
 <p>If the query&rsquo;s <code>order by</code> clause is not specified, the result order is undefined. Sometimes it might work out (as in the example with the ascending salary ranking), and sometimes it might not. It&rsquo;s not worth relying on luck, so always specify the order of results explicitly.</p>
 <h2 id=sorting-uniqueness>Sorting uniqueness</h2>
 <p>Another popular question is why to include the <code>id</code> column in the result ordering:</p>
@@ -329,21 +244,7 @@ after<br>
 <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
 <span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>)
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#c41a16>&#34;rank&#34;</span>, <span style=color:#000>id</span>;
-</code></pre></div><pre tabindex=0><code>┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Frank │ it         │ 120    │
-│ 2    │ Henry │ it         │ 104    │
-│ 2    │ Irene │ it         │ 104    │
-│ 3    │ Alice │ sales      │ 100    │
-│ 4    │ Cindy │ sales      │ 96     │
-│ 4    │ Dave  │ sales      │ 96     │
-│ 5    │ Grace │ it         │ 90     │
-│ 6    │ Emma  │ it         │ 84     │
-│ 7    │ Bob   │ hr         │ 78     │
-│ 8    │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
-</code></pre><p>Why use <code>order by rank, id</code> instead of <code>order by rank</code>? To know how to sort employees with the same rank. Without the <code>id</code>, the order of records &ldquo;Henry-Irene&rdquo; and &ldquo;Cindy-Dave&rdquo; is undefined, and the DB engine can arrange them in any order. But with the <code>id</code>, everything is clear: &ldquo;Henry, then Irene&rdquo; and &ldquo;Cindy, then Dave&rdquo;.</p>
+</code></pre></div><p>Why use <code>order by rank, id</code> instead of <code>order by rank</code>? To know how to sort employees with the same rank. Without the <code>id</code>, the order of records &ldquo;Henry-Irene&rdquo; and &ldquo;Cindy-Dave&rdquo; is undefined, and the DB engine can arrange them in any order. But with the <code>id</code>, everything is clear: &ldquo;Henry, then Irene&rdquo; and &ldquo;Cindy, then Dave&rdquo;.</p>
 <div class=boxed>
 <h3>✎ Exercise: Ranking by name</h3>
 <p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises; that's why I recommend <a href=https://antonz.gumroad.com/l/sql-windows>getting it</a>.</p>
@@ -368,21 +269,7 @@ after<br>
   <span style=color:#000>name</span>, <span style=color:#000>department</span>, <span style=color:#000>salary</span>
 <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>department</span>, <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>, <span style=color:#000>id</span>;
-</code></pre></div><pre tabindex=0><code>┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│      │ Bob   │ hr         │ 78     │
-│      │ Diane │ hr         │ 70     │
-│      │ Frank │ it         │ 120    │
-│      │ Henry │ it         │ 104    │
-│      │ Irene │ it         │ 104    │
-│      │ Grace │ it         │ 90     │
-│      │ Emma  │ it         │ 84     │
-│      │ Alice │ sales      │ 100    │
-│      │ Cindy │ sales      │ 96     │
-│      │ Dave  │ sales      │ 96     │
-└──────┴───────┴────────────┴────────┘
-</code></pre><p>Now let&rsquo;s go from the first row to the last and calculate the rank of each record. We will start with one and increase the rank every time the <code>salary</code> value is less than the previous one. When switching between departments, we will reset the rank back to 1:</p>
+</code></pre></div><p>Now let&rsquo;s go from the first row to the last and calculate the rank of each record. We will start with one and increase the rank every time the <code>salary</code> value is less than the previous one. When switching between departments, we will reset the rank back to 1:</p>
 <div class=row>
 <div class="col-xs-12 col-sm-5">
 ➀<br>
@@ -419,11 +306,11 @@ after<br>
 <li>Inside each partition, records are ordered by decreasing salary.</li>
 </ol>
 <p>Let&rsquo;s express it in SQL:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (
-  <span style=color:#000>partition</span> <span style=color:#a90d91>by</span> <span style=color:#000>department</span>
-  <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>
+<pre tabindex=0><code>window w as (
+  partition by department
+  order by salary desc
 )
-</code></pre></div><ul>
+</code></pre><ul>
 <li><code>partition by department</code> specifies how to split the window into partitions;</li>
 <li><code>order by salary desc</code> sets the sorting within the partition.</li>
 </ul>
@@ -438,24 +325,7 @@ after<br>
   <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>
 )
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>department</span>, <span style=color:#c41a16>&#34;rank&#34;</span>, <span style=color:#000>id</span>;
-</code></pre></div><pre tabindex=0><code>┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Bob   │ hr         │ 78     │
-│ 2    │ Diane │ hr         │ 70     │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Frank │ it         │ 120    │
-│ 2    │ Henry │ it         │ 104    │
-│ 2    │ Irene │ it         │ 104    │
-│ 3    │ Grace │ it         │ 90     │
-│ 4    │ Emma  │ it         │ 84     │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Alice │ sales      │ 100    │
-│ 2    │ Cindy │ sales      │ 96     │
-│ 2    │ Dave  │ sales      │ 96     │
-└──────┴───────┴────────────┴────────┘
-</code></pre><p><em>I&rsquo;ve manually added the separators between departments for clarity</em></p>
-<p>Here&rsquo;s an animation showing how the engine calculates the rank for each record:</p>
+</code></pre></div><p>Here&rsquo;s an animation showing how the engine calculates the rank for each record:</p>
 <div class=row>
 <div class="col-xs-12 col-sm-5">
 <figure>
@@ -492,21 +362,7 @@ after<br>
   <span style=color:#000>name</span>, <span style=color:#000>department</span>, <span style=color:#000>salary</span>
 <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>, <span style=color:#000>id</span>;
-</code></pre></div><pre tabindex=0><code>┌──────┬───────┬────────────┬────────┐
-│ tile │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│      │ Frank │ it         │ 120    │
-│      │ Henry │ it         │ 104    │
-│      │ Irene │ it         │ 104    │
-│      │ Alice │ sales      │ 100    │
-│      │ Cindy │ sales      │ 96     │
-│      │ Dave  │ sales      │ 96     │
-│      │ Grace │ it         │ 90     │
-│      │ Emma  │ it         │ 84     │
-│      │ Bob   │ hr         │ 78     │
-│      │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
-</code></pre><p>There are 10 records and 3 groups — which means two groups of 3 records and one of 4 records. For example:</p>
+</code></pre></div><p>There are 10 records and 3 groups — which means two groups of 3 records and one of 4 records. For example:</p>
 <pre tabindex=0><code>┌──────┬───────┬────────────┬────────┐
 │ tile │ name  │ department │ salary │
 ├──────┼───────┼────────────┼────────┤
@@ -532,24 +388,7 @@ after<br>
 <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
 <span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>)
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>, <span style=color:#000>id</span>;
-</code></pre></div><pre tabindex=0><code>┌──────┬───────┬────────────┬────────┐
-│ tile │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Frank │ it         │ 120    │
-│ 1    │ Henry │ it         │ 104    │
-│ 1    │ Irene │ it         │ 104    │
-│ 1    │ Alice │ sales      │ 100    │
-├──────┼───────┼────────────┼────────┤
-│ 2    │ Cindy │ sales      │ 96     │
-│ 2    │ Dave  │ sales      │ 96     │
-│ 2    │ Grace │ it         │ 90     │
-├──────┼───────┼────────────┼────────┤
-│ 3    │ Emma  │ it         │ 84     │
-│ 3    │ Bob   │ hr         │ 78     │
-│ 3    │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
-</code></pre><p><em>I&rsquo;ve manually added the separators between groups for clarity</em></p>
-<p><code>ntile(n)</code> splits all records into <code>n</code> groups and returns the group number for each record. If the total number of records (10 in our case) is not divisible by the group size (3), then the former groups will be larger than the latter.</p>
+</code></pre></div><p><code>ntile(n)</code> splits all records into <code>n</code> groups and returns the group number for each record. If the total number of records (10 in our case) is not divisible by the group size (3), then the former groups will be larger than the latter.</p>
 <p><code>ntile()</code> always tries to split the data so that the groups are of the same size. So records with the same salary value may end up in different (adjacent) groups:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
   <span style=color:#000>ntile</span>(<span style=color:#1c01ce>2</span>) <span style=color:#000>over</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> <span style=color:#000>tile</span>,
@@ -613,7 +452,7 @@ after<br>
 </code></pre></div><p>Let&rsquo;s try substituting <code>•••</code> with <code>dense_rank()</code> and <code>rank()</code>:</p>
 <div class=row>
 <div class="col-xs-12 col-sm-6">
-dense_rank()<br>
+dense_rank<br>
 <pre><code>┌──────┬───────┬────────┐
 │ rank │ name  │ salary │
 ├──────┼───────┼────────┤
@@ -630,7 +469,7 @@ dense_rank()<br>
 └──────┴───────┴────────┘</code></pre>
 </div>
 <div class="col-xs-12 col-sm-6">
-rank()<br>
+rank<br>
 <pre><code>┌──────┬───────┬────────┐
 │ rank │ name  │ salary │
 ├──────┼───────┼────────┤
@@ -655,6 +494,11 @@ rank()<br>
 Get the book
 </a>
 </p>
+<p><sqlime-db name=employees path=/sql-window-functions-book/employees.sql></sqlime-db>
+<sqlime-examples db=employees selector=div.highlight editable></sqlime-examples></p>
+<script src=/assets/sqlime/sqlite3.js></script>
+<script src=/assets/sqlime/sqlime-db.js></script>
+<script src=/assets/sqlime/sqlime-examples.js></script>
 <p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
 </div>
 </div><footer class=post__footer>

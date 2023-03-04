@@ -4,7 +4,7 @@
 <title>Comparing by Offset with SQL Window Functions</title>
 <meta name=description content="Comparing records with neighbors and boundaries.">
 <meta name=robots content="index, follow">
-<link rel=stylesheet type=text/css href=/assets/css/style.185535402157d66ce9dae7094285b45fc8308c13a4680f071ebe89263324fb47.css>
+<link rel=stylesheet type=text/css href=/assets/css/style.7d56395be0aff259a969d2f462b790a6013305c4529081baa7da9e04775a50fd.css>
 <link rel=icon href=/assets/favicon/favicon.ico sizes=any>
 <link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
 <link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
@@ -104,21 +104,7 @@ after<br>
   <span style=color:#a90d91>null</span> <span style=color:#a90d91>as</span> <span style=color:#000>prev</span>
 <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span>, <span style=color:#000>id</span>;
-</code></pre></div><pre tabindex=0><code>┌───────┬────────────┬────────┬──────┐
-│ name  │ department │ salary │ prev │
-├───────┼────────────┼────────┼──────┤
-│ Diane │ hr         │ 70     │      │
-│ Bob   │ hr         │ 78     │      │
-│ Emma  │ it         │ 84     │      │
-│ Grace │ it         │ 90     │      │
-│ Cindy │ sales      │ 96     │      │
-│ Dave  │ sales      │ 96     │      │
-│ Alice │ sales      │ 100    │      │
-│ Henry │ it         │ 104    │      │
-│ Irene │ it         │ 104    │      │
-│ Frank │ it         │ 120    │      │
-└───────┴────────────┴────────┴──────┘
-</code></pre><p>Now let&rsquo;s traverse from the first record to the last, peeking at the salary of the previous employee at each step:</p>
+</code></pre></div><p>Now let&rsquo;s traverse from the first record to the last, peeking at the salary of the previous employee at each step:</p>
 <div class=row>
 <div class="col-xs-12 col-sm-5">
 ➀<br>
@@ -175,21 +161,7 @@ after<br>
 <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
 <span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span>, <span style=color:#000>id</span>)
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span>, <span style=color:#000>id</span>;
-</code></pre></div><pre tabindex=0><code>┌────┬───────┬────────────┬────────┬──────┐
-│ id │ name  │ department │ salary │ prev │
-├────┼───────┼────────────┼────────┼──────┤
-│ 11 │ Diane │ hr         │ 70     │      │
-│ 12 │ Bob   │ hr         │ 78     │ 70   │
-│ 21 │ Emma  │ it         │ 84     │ 78   │
-│ 22 │ Grace │ it         │ 90     │ 84   │
-│ 31 │ Cindy │ sales      │ 96     │ 90   │
-│ 32 │ Dave  │ sales      │ 96     │ 96   │
-│ 33 │ Alice │ sales      │ 100    │ 96   │
-│ 23 │ Henry │ it         │ 104    │ 100  │
-│ 24 │ Irene │ it         │ 104    │ 104  │
-│ 25 │ Frank │ it         │ 120    │ 104  │
-└────┴───────┴────────────┴────────┴──────┘
-</code></pre><p>The <code>prev</code> column shows the salary of the previous employee. Now all that remains is to calculate the difference between <code>prev</code> and <code>salary</code> as a percentage:</p>
+</code></pre></div><p>The <code>prev</code> column shows the salary of the previous employee. Now all that remains is to calculate the difference between <code>prev</code> and <code>salary</code> as a percentage:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>with</span> <span style=color:#000>emp</span> <span style=color:#a90d91>as</span> (
   <span style=color:#a90d91>select</span>
     <span style=color:#000>id</span>, <span style=color:#000>name</span>, <span style=color:#000>department</span>, <span style=color:#000>salary</span>,
@@ -202,21 +174,7 @@ after<br>
   <span style=color:#000>round</span>((<span style=color:#000>salary</span> <span style=color:#000>-</span> <span style=color:#000>prev</span>)<span style=color:#000>*</span><span style=color:#1c01ce>100</span>.<span style=color:#1c01ce>0</span> <span style=color:#000>/</span> <span style=color:#000>prev</span>) <span style=color:#a90d91>as</span> <span style=color:#000>diff</span>
 <span style=color:#a90d91>from</span> <span style=color:#000>emp</span>
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span>, <span style=color:#000>id</span>;
-</code></pre></div><pre tabindex=0><code>┌───────┬────────────┬────────┬──────┐
-│ name  │ department │ salary │ diff │
-├───────┼────────────┼────────┼──────┤
-│ Diane │ hr         │ 70     │      │
-│ Bob   │ hr         │ 78     │ 11   │
-│ Emma  │ it         │ 84     │ 8    │
-│ Grace │ it         │ 90     │ 7    │
-│ Cindy │ sales      │ 96     │ 7    │
-│ Dave  │ sales      │ 96     │ 0    │
-│ Alice │ sales      │ 100    │ 4    │
-│ Henry │ it         │ 104    │ 4    │
-│ Irene │ it         │ 104    │ 0    │
-│ Frank │ it         │ 120    │ 15   │
-└───────┴────────────┴────────┴──────┘
-</code></pre><p>We can get rid of the intermediate <code>emp</code> table expression by substituting a window function call instead of <code>prev</code>:</p>
+</code></pre></div><p>We can get rid of the intermediate <code>emp</code> table expression by substituting a window function call instead of <code>prev</code>:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
   <span style=color:#000>name</span>, <span style=color:#000>department</span>, <span style=color:#000>salary</span>,
   <span style=color:#000>round</span>(
@@ -252,21 +210,7 @@ after<br>
   <span style=color:#a90d91>null</span> <span style=color:#a90d91>as</span> <span style=color:#000>high</span>
 <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>department</span>, <span style=color:#000>salary</span>, <span style=color:#000>id</span>;
-</code></pre></div><pre tabindex=0><code>┌───────┬────────────┬────────┬─────┬──────┐
-│ name  │ department │ salary │ low │ high │
-├───────┼────────────┼────────┼─────┼──────┤
-│ Diane │ hr         │ 70     │     │      │
-│ Bob   │ hr         │ 78     │     │      │
-│ Emma  │ it         │ 84     │     │      │
-│ Grace │ it         │ 90     │     │      │
-│ Henry │ it         │ 104    │     │      │
-│ Irene │ it         │ 104    │     │      │
-│ Frank │ it         │ 120    │     │      │
-│ Cindy │ sales      │ 96     │     │      │
-│ Dave  │ sales      │ 96     │     │      │
-│ Alice │ sales      │ 100    │     │      │
-└───────┴────────────┴────────┴─────┴──────┘
-</code></pre><p>Now let&rsquo;s traverse from the first record to the last, peeking at the smallest and largest salaries in the department at each step:</p>
+</code></pre></div><p>Now let&rsquo;s traverse from the first record to the last, peeking at the smallest and largest salaries in the department at each step:</p>
 <div class=row>
 <div class="col-xs-12 col-sm-5">
 ➀<br>
@@ -305,19 +249,19 @@ after<br>
 </div>
 </div>
 <p>The window consists of three partitions. At each step, the partition covers the entire department of the employee. The records within the partition are ordered by salary. So the minimum and maximum salaries are always on the boundaries of the partition:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (
-  <span style=color:#000>partition</span> <span style=color:#a90d91>by</span> <span style=color:#000>department</span>
-  <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span>
+<pre tabindex=0><code>window w as (
+  partition by department
+  order by salary
 )
-</code></pre></div><p>It would be convenient to use the <code>lag()</code> and <code>lead()</code> functions to get the salary range in the department. But they look at a fixed number of rows backward or forward. We need something else:</p>
+</code></pre><p>It would be convenient to use the <code>lag()</code> and <code>lead()</code> functions to get the salary range in the department. But they look at a fixed number of rows backward or forward. We need something else:</p>
 <ul>
 <li><code>low</code> — salary of the first employee in the window partition;</li>
 <li><code>high</code> — salary of the last employee in the partition.</li>
 </ul>
 <p>Fortunately, there are window functions precisely for this:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#000>first_value</span>(<span style=color:#000>salary</span>) <span style=color:#000>over</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> <span style=color:#000>low</span>,
-<span style=color:#000>last_value</span>(<span style=color:#000>salary</span>) <span style=color:#000>over</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> <span style=color:#000>high</span>
-</code></pre></div><p>Let&rsquo;s add a window and a window function to the original query:</p>
+<pre tabindex=0><code>first_value(salary) over w as low,
+last_value(salary) over w as high
+</code></pre><p>Let&rsquo;s add a window and a window function to the original query:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
   <span style=color:#000>name</span>, <span style=color:#000>department</span>, <span style=color:#000>salary</span>,
   <span style=color:#000>first_value</span>(<span style=color:#000>salary</span>) <span style=color:#000>over</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> <span style=color:#000>low</span>,
@@ -328,23 +272,7 @@ after<br>
   <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span>
 )
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>department</span>, <span style=color:#000>salary</span>, <span style=color:#000>id</span>;
-</code></pre></div><pre tabindex=0><code>┌───────┬────────────┬────────┬─────┬──────┐
-│ name  │ department │ salary │ low │ high │
-├───────┼────────────┼────────┼─────┼──────┤
-│ Diane │ hr         │ 70     │ 70  │ 70   │
-│ Bob   │ hr         │ 78     │ 70  │ 78   │
-├───────┼────────────┼────────┼─────┼──────┤
-│ Emma  │ it         │ 84     │ 84  │ 84   │
-│ Grace │ it         │ 90     │ 84  │ 90   │
-│ Henry │ it         │ 104    │ 84  │ 104  │
-│ Irene │ it         │ 104    │ 84  │ 104  │
-│ Frank │ it         │ 120    │ 84  │ 120  │
-├───────┼────────────┼────────┼─────┼──────┤
-│ Cindy │ sales      │ 96     │ 96  │ 96   │
-│ Dave  │ sales      │ 96     │ 96  │ 96   │
-│ Alice │ sales      │ 100    │ 96  │ 100  │
-└───────┴────────────┴────────┴─────┴──────┘
-</code></pre><p><code>low</code> is calculated correctly, while <code>high</code> is obviously wrong. Instead of being equal to the department&rsquo;s maximum salary, it varies from employee to employee. We&rsquo;ll deal with it in a moment.</p>
+</code></pre></div><p><code>low</code> is calculated correctly, while <code>high</code> is obviously wrong. Instead of being equal to the department&rsquo;s maximum salary, it varies from employee to employee. We&rsquo;ll deal with it in a moment.</p>
 <h2 id=window-partition-frame>Window, partition, frame</h2>
 <p>So far, everything sounded reasonable:</p>
 <ul>
@@ -352,11 +280,11 @@ after<br>
 <li>records inside the partition are ordered by a specific column.</li>
 </ul>
 <p>In the previous step, we divided the window into three partitions by departments and ordered the records within the partitions by salary:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (
-  <span style=color:#000>partition</span> <span style=color:#a90d91>by</span> <span style=color:#000>department</span>
-  <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span>
+<pre tabindex=0><code>window w as (
+  partition by department
+  order by salary
 )
-</code></pre></div><p>Let&rsquo;s say the engine executes our query, and the current record is Henry from the IT department. We expect <code>first_value()</code> to return the first record of the IT partition (<code>salary = 84</code>) and <code>last_value()</code> to return the last one (<code>salary = 120</code>). Instead, <code>last_value()</code> returns <code>salary = 104</code>:</p>
+</code></pre><p>Let&rsquo;s say the engine executes our query, and the current record is Henry from the IT department. We expect <code>first_value()</code> to return the first record of the IT partition (<code>salary = 84</code>) and <code>last_value()</code> to return the last one (<code>salary = 120</code>). Instead, <code>last_value()</code> returns <code>salary = 104</code>:</p>
 <div class=row>
 <div class="col-xs-12 col-sm-5">
 expectation<br>
@@ -446,17 +374,17 @@ If you have such a reaction, I understand completely. There are certain benefits
 </blockquote>
 <h2 id=department-salary-range-revisited>Department salary range revisited</h2>
 <p>Let&rsquo;s take our window:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (
-  <span style=color:#000>partition</span> <span style=color:#a90d91>by</span> <span style=color:#000>department</span>
-  <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span>
+<pre tabindex=0><code>window w as (
+  partition by department
+  order by salary
 )
-</code></pre></div><p>And configure it so that the frame exactly matches the partition (department):</p>
-<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (
-  <span style=color:#000>partition</span> <span style=color:#a90d91>by</span> <span style=color:#000>department</span>
-  <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span>
-  <span style=color:#a90d91>rows</span> <span style=color:#a90d91>between</span> <span style=color:#000>unbounded</span> <span style=color:#000>preceding</span> <span style=color:#a90d91>and</span> <span style=color:#000>unbounded</span> <span style=color:#000>following</span>
+</code></pre><p>And configure it so that the frame exactly matches the partition (department):</p>
+<pre tabindex=0><code>window w as (
+  partition by department
+  order by salary
+  rows between unbounded preceding and unbounded following
 )
-</code></pre></div><p>Let&rsquo;s not explore the <code>rows between</code> statement now — its time will come in a later chapter. Thanks to it, the frame matches the partition, which means <code>last_value()</code> will return the maximum salary for the department:</p>
+</code></pre><p>Let&rsquo;s not explore the <code>rows between</code> statement now — its time will come in a later chapter. Thanks to it, the frame matches the partition, which means <code>last_value()</code> will return the maximum salary for the department:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
   <span style=color:#000>name</span>, <span style=color:#000>department</span>, <span style=color:#000>salary</span>,
   <span style=color:#000>first_value</span>(<span style=color:#000>salary</span>) <span style=color:#000>over</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> <span style=color:#000>low</span>,
@@ -468,23 +396,7 @@ If you have such a reaction, I understand completely. There are certain benefits
   <span style=color:#a90d91>rows</span> <span style=color:#a90d91>between</span> <span style=color:#000>unbounded</span> <span style=color:#000>preceding</span> <span style=color:#a90d91>and</span> <span style=color:#000>unbounded</span> <span style=color:#000>following</span>
 )
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>department</span>, <span style=color:#000>salary</span>, <span style=color:#000>id</span>;
-</code></pre></div><pre tabindex=0><code>┌───────┬────────────┬────────┬─────┬──────┐
-│ name  │ department │ salary │ low │ high │
-├───────┼────────────┼────────┼─────┼──────┤
-│ Diane │ hr         │ 70     │ 70  │ 78   │
-│ Bob   │ hr         │ 78     │ 70  │ 78   │
-├───────┼────────────┼────────┼─────┼──────┤
-│ Emma  │ it         │ 84     │ 84  │ 120  │
-│ Grace │ it         │ 90     │ 84  │ 120  │
-│ Henry │ it         │ 104    │ 84  │ 120  │
-│ Irene │ it         │ 104    │ 84  │ 120  │
-│ Frank │ it         │ 120    │ 84  │ 120  │
-├───────┼────────────┼────────┼─────┼──────┤
-│ Cindy │ sales      │ 96     │ 96  │ 100  │
-│ Dave  │ sales      │ 96     │ 96  │ 100  │
-│ Alice │ sales      │ 100    │ 96  │ 100  │
-└───────┴────────────┴────────┴─────┴──────┘
-</code></pre><p>Now the engine calculates <code>low</code> and <code>high</code> as we did it manually:</p>
+</code></pre></div><p>Now the engine calculates <code>low</code> and <code>high</code> as we did it manually:</p>
 <div class=row>
 <div class="col-xs-12 col-sm-5">
 <figure>
@@ -559,6 +471,11 @@ If you have such a reaction, I understand completely. There are certain benefits
 Get the book
 </a>
 </p>
+<p><sqlime-db name=employees path=/sql-window-functions-book/employees.sql></sqlime-db>
+<sqlime-examples db=employees selector=div.highlight editable></sqlime-examples></p>
+<script src=/assets/sqlime/sqlite3.js></script>
+<script src=/assets/sqlime/sqlime-db.js></script>
+<script src=/assets/sqlime/sqlime-examples.js></script>
 <p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
 </div>
 </div><footer class=post__footer>
