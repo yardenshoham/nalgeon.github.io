@@ -73,23 +73,6 @@ from employees
 order by salary, id;
 ```
 
-```
-┌───────┬────────────┬────────┬──────┐
-│ name  │ department │ salary │ prev │
-├───────┼────────────┼────────┼──────┤
-│ Diane │ hr         │ 70     │      │
-│ Bob   │ hr         │ 78     │      │
-│ Emma  │ it         │ 84     │      │
-│ Grace │ it         │ 90     │      │
-│ Cindy │ sales      │ 96     │      │
-│ Dave  │ sales      │ 96     │      │
-│ Alice │ sales      │ 100    │      │
-│ Henry │ it         │ 104    │      │
-│ Irene │ it         │ 104    │      │
-│ Frank │ it         │ 120    │      │
-└───────┴────────────┴────────┴──────┘
-```
-
 Now let's traverse from the first record to the last, peeking at the salary of the previous employee at each step:
 
 <div class="row">
@@ -165,23 +148,6 @@ window w as (order by salary, id)
 order by salary, id;
 ```
 
-```
-┌────┬───────┬────────────┬────────┬──────┐
-│ id │ name  │ department │ salary │ prev │
-├────┼───────┼────────────┼────────┼──────┤
-│ 11 │ Diane │ hr         │ 70     │      │
-│ 12 │ Bob   │ hr         │ 78     │ 70   │
-│ 21 │ Emma  │ it         │ 84     │ 78   │
-│ 22 │ Grace │ it         │ 90     │ 84   │
-│ 31 │ Cindy │ sales      │ 96     │ 90   │
-│ 32 │ Dave  │ sales      │ 96     │ 96   │
-│ 33 │ Alice │ sales      │ 100    │ 96   │
-│ 23 │ Henry │ it         │ 104    │ 100  │
-│ 24 │ Irene │ it         │ 104    │ 104  │
-│ 25 │ Frank │ it         │ 120    │ 104  │
-└────┴───────┴────────────┴────────┴──────┘
-```
-
 The `prev` column shows the salary of the previous employee. Now all that remains is to calculate the difference between `prev` and `salary` as a percentage:
 
 ```sql
@@ -197,23 +163,6 @@ select
   round((salary - prev)*100.0 / prev) as diff
 from emp
 order by salary, id;
-```
-
-```
-┌───────┬────────────┬────────┬──────┐
-│ name  │ department │ salary │ diff │
-├───────┼────────────┼────────┼──────┤
-│ Diane │ hr         │ 70     │      │
-│ Bob   │ hr         │ 78     │ 11   │
-│ Emma  │ it         │ 84     │ 8    │
-│ Grace │ it         │ 90     │ 7    │
-│ Cindy │ sales      │ 96     │ 7    │
-│ Dave  │ sales      │ 96     │ 0    │
-│ Alice │ sales      │ 100    │ 4    │
-│ Henry │ it         │ 104    │ 4    │
-│ Irene │ it         │ 104    │ 0    │
-│ Frank │ it         │ 120    │ 15   │
-└───────┴────────────┴────────┴──────┘
 ```
 
 We can get rid of the intermediate `emp` table expression by substituting a window function call instead of `prev`:
@@ -267,23 +216,6 @@ from employees
 order by department, salary, id;
 ```
 
-```
-┌───────┬────────────┬────────┬─────┬──────┐
-│ name  │ department │ salary │ low │ high │
-├───────┼────────────┼────────┼─────┼──────┤
-│ Diane │ hr         │ 70     │     │      │
-│ Bob   │ hr         │ 78     │     │      │
-│ Emma  │ it         │ 84     │     │      │
-│ Grace │ it         │ 90     │     │      │
-│ Henry │ it         │ 104    │     │      │
-│ Irene │ it         │ 104    │     │      │
-│ Frank │ it         │ 120    │     │      │
-│ Cindy │ sales      │ 96     │     │      │
-│ Dave  │ sales      │ 96     │     │      │
-│ Alice │ sales      │ 100    │     │      │
-└───────┴────────────┴────────┴─────┴──────┘
-```
-
 Now let's traverse from the first record to the last, peeking at the smallest and largest salaries in the department at each step:
 
 <div class="row">
@@ -330,7 +262,7 @@ In a single gif:
 
 The window consists of three partitions. At each step, the partition covers the entire department of the employee. The records within the partition are ordered by salary. So the minimum and maximum salaries are always on the boundaries of the partition:
 
-```sql
+```
 window w as (
   partition by department
   order by salary
@@ -344,7 +276,7 @@ It would be convenient to use the `lag()` and `lead()` functions to get the sala
 
 Fortunately, there are window functions precisely for this:
 
-```sql
+```
 first_value(salary) over w as low,
 last_value(salary) over w as high
 ```
@@ -364,25 +296,6 @@ window w as (
 order by department, salary, id;
 ```
 
-```
-┌───────┬────────────┬────────┬─────┬──────┐
-│ name  │ department │ salary │ low │ high │
-├───────┼────────────┼────────┼─────┼──────┤
-│ Diane │ hr         │ 70     │ 70  │ 70   │
-│ Bob   │ hr         │ 78     │ 70  │ 78   │
-├───────┼────────────┼────────┼─────┼──────┤
-│ Emma  │ it         │ 84     │ 84  │ 84   │
-│ Grace │ it         │ 90     │ 84  │ 90   │
-│ Henry │ it         │ 104    │ 84  │ 104  │
-│ Irene │ it         │ 104    │ 84  │ 104  │
-│ Frank │ it         │ 120    │ 84  │ 120  │
-├───────┼────────────┼────────┼─────┼──────┤
-│ Cindy │ sales      │ 96     │ 96  │ 96   │
-│ Dave  │ sales      │ 96     │ 96  │ 96   │
-│ Alice │ sales      │ 100    │ 96  │ 100  │
-└───────┴────────────┴────────┴─────┴──────┘
-```
-
 `low` is calculated correctly, while `high` is obviously wrong. Instead of being equal to the department's maximum salary, it varies from employee to employee. We'll deal with it in a moment.
 
 ## Window, partition, frame
@@ -394,7 +307,7 @@ So far, everything sounded reasonable:
 
 In the previous step, we divided the window into three partitions by departments and ordered the records within the partitions by salary:
 
-```sql
+```
 window w as (
   partition by department
   order by salary
@@ -518,7 +431,7 @@ Now let's figure out how to nail the frame to the partition — and finish with 
 
 Let's take our window:
 
-```sql
+```
 window w as (
   partition by department
   order by salary
@@ -527,7 +440,7 @@ window w as (
 
 And configure it so that the frame exactly matches the partition (department):
 
-```sql
+```
 window w as (
   partition by department
   order by salary
@@ -549,25 +462,6 @@ window w as (
   rows between unbounded preceding and unbounded following
 )
 order by department, salary, id;
-```
-
-```
-┌───────┬────────────┬────────┬─────┬──────┐
-│ name  │ department │ salary │ low │ high │
-├───────┼────────────┼────────┼─────┼──────┤
-│ Diane │ hr         │ 70     │ 70  │ 78   │
-│ Bob   │ hr         │ 78     │ 70  │ 78   │
-├───────┼────────────┼────────┼─────┼──────┤
-│ Emma  │ it         │ 84     │ 84  │ 120  │
-│ Grace │ it         │ 90     │ 84  │ 120  │
-│ Henry │ it         │ 104    │ 84  │ 120  │
-│ Irene │ it         │ 104    │ 84  │ 120  │
-│ Frank │ it         │ 120    │ 84  │ 120  │
-├───────┼────────────┼────────┼─────┼──────┤
-│ Cindy │ sales      │ 96     │ 96  │ 100  │
-│ Dave  │ sales      │ 96     │ 96  │ 100  │
-│ Alice │ sales      │ 100    │ 96  │ 100  │
-└───────┴────────────┴────────┴─────┴──────┘
 ```
 
 Now the engine calculates `low` and `high` as we did it manually:
@@ -638,3 +532,10 @@ You have learned how to compare rows with neighbors and window boundaries. In th
         Get the book
     </a>
 </p>
+
+<sqlime-db name="employees" path="/sql-window-functions-book/employees.sql"></sqlime-db>
+<sqlime-examples db="employees" selector="div.highlight" editable></sqlime-examples>
+
+<script src="/assets/sqlime/sqlite3.js"></script>
+<script src="/assets/sqlime/sqlime-db.js"></script>
+<script src="/assets/sqlime/sqlime-examples.js"></script>

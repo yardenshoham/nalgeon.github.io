@@ -85,23 +85,6 @@ from employees
 order by salary desc, id;
 ```
 
-```
-┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│      │ Frank │ it         │ 120    │
-│      │ Henry │ it         │ 104    │
-│      │ Irene │ it         │ 104    │
-│      │ Alice │ sales      │ 100    │
-│      │ Cindy │ sales      │ 96     │
-│      │ Dave  │ sales      │ 96     │
-│      │ Grace │ it         │ 90     │
-│      │ Emma  │ it         │ 84     │
-│      │ Bob   │ hr         │ 78     │
-│      │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
-```
-
 Now let's go from the first row to the last and calculate the rank of each record. We will start with one and increase the rank every time the salary value is less than the previous one:
 
 <div class="row">
@@ -168,23 +151,6 @@ window w as (order by salary desc)
 order by "rank", id;
 ```
 
-```
-┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Frank │ it         │ 120    │
-│ 2    │ Henry │ it         │ 104    │
-│ 2    │ Irene │ it         │ 104    │
-│ 3    │ Alice │ sales      │ 100    │
-│ 4    │ Cindy │ sales      │ 96     │
-│ 4    │ Dave  │ sales      │ 96     │
-│ 5    │ Grace │ it         │ 90     │
-│ 6    │ Emma  │ it         │ 84     │
-│ 7    │ Bob   │ hr         │ 78     │
-│ 8    │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
-```
-
 Here's how the engine executes this query:
 
 1. Take the table specified in `from`.
@@ -211,23 +177,6 @@ select
 from employees
 window w as (order by salary desc)
 order by salary desc, id;
-```
-
-```
-┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│      │ Frank │ it         │ 120    │
-│      │ Henry │ it         │ 104    │
-│      │ Irene │ it         │ 104    │
-│      │ Alice │ sales      │ 100    │
-│      │ Cindy │ sales      │ 96     │
-│      │ Dave  │ sales      │ 96     │
-│      │ Grace │ it         │ 90     │
-│      │ Emma  │ it         │ 84     │
-│      │ Bob   │ hr         │ 78     │
-│      │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
 ```
 
 The window starts working only when a window function in `select` uses it.
@@ -278,23 +227,6 @@ window w as (order by salary desc)
 order by "rank", id;
 ```
 
-```
-┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Frank │ it         │ 120    │
-│ 2    │ Henry │ it         │ 104    │
-│ 2    │ Irene │ it         │ 104    │
-│ 3    │ Alice │ sales      │ 100    │
-│ 4    │ Cindy │ sales      │ 96     │
-│ 4    │ Dave  │ sales      │ 96     │
-│ 5    │ Grace │ it         │ 90     │
-│ 6    │ Emma  │ it         │ 84     │
-│ 7    │ Bob   │ hr         │ 78     │
-│ 8    │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
-```
-
 Let's leave the `order by` in the window but remove it from the main query:
 
 ```sql
@@ -305,26 +237,7 @@ from employees
 window w as (order by salary desc);
 ```
 
-Nothing has changed:
-
-```
-┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Frank │ it         │ 120    │
-│ 2    │ Henry │ it         │ 104    │
-│ 2    │ Irene │ it         │ 104    │
-│ 3    │ Alice │ sales      │ 100    │
-│ 4    │ Cindy │ sales      │ 96     │
-│ 4    │ Dave  │ sales      │ 96     │
-│ 5    │ Grace │ it         │ 90     │
-│ 6    │ Emma  │ it         │ 84     │
-│ 7    │ Bob   │ hr         │ 78     │
-│ 8    │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
-```
-
-So why use `order by` in the main query?
+Nothing has changed. So why use `order by` in the main query?
 
 The window's `order by` defines the window sorting, while the main query's `order by` defines the final result sorting after the rest of the query is complete.
 
@@ -337,23 +250,6 @@ select
 from employees
 window w as (order by salary desc)
 order by salary asc;
-```
-
-```
-┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│ 8    │ Diane │ hr         │ 70     │
-│ 7    │ Bob   │ hr         │ 78     │
-│ 6    │ Emma  │ it         │ 84     │
-│ 5    │ Grace │ it         │ 90     │
-│ 4    │ Cindy │ sales      │ 96     │
-│ 4    │ Dave  │ sales      │ 96     │
-│ 3    │ Alice │ sales      │ 100    │
-│ 2    │ Henry │ it         │ 104    │
-│ 2    │ Irene │ it         │ 104    │
-│ 1    │ Frank │ it         │ 120    │
-└──────┴───────┴────────────┴────────┘
 ```
 
 As you can see, the rank is assigned according to the window sorting (`salary desc`), and the results are ordered according to the main query sorting (`salary asc`).
@@ -371,23 +267,6 @@ select
 from employees
 window w as (order by salary desc)
 order by "rank", id;
-```
-
-```
-┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Frank │ it         │ 120    │
-│ 2    │ Henry │ it         │ 104    │
-│ 2    │ Irene │ it         │ 104    │
-│ 3    │ Alice │ sales      │ 100    │
-│ 4    │ Cindy │ sales      │ 96     │
-│ 4    │ Dave  │ sales      │ 96     │
-│ 5    │ Grace │ it         │ 90     │
-│ 6    │ Emma  │ it         │ 84     │
-│ 7    │ Bob   │ hr         │ 78     │
-│ 8    │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
 ```
 
 Why use `order by rank, id` instead of `order by rank`? To know how to sort employees with the same rank. Without the `id`, the order of records "Henry-Irene" and "Cindy-Dave" is undefined, and the DB engine can arrange them in any order. But with the `id`, everything is clear: "Henry, then Irene" and "Cindy, then Dave".
@@ -423,23 +302,6 @@ select
   name, department, salary
 from employees
 order by department, salary desc, id;
-```
-
-```
-┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│      │ Bob   │ hr         │ 78     │
-│      │ Diane │ hr         │ 70     │
-│      │ Frank │ it         │ 120    │
-│      │ Henry │ it         │ 104    │
-│      │ Irene │ it         │ 104    │
-│      │ Grace │ it         │ 90     │
-│      │ Emma  │ it         │ 84     │
-│      │ Alice │ sales      │ 100    │
-│      │ Cindy │ sales      │ 96     │
-│      │ Dave  │ sales      │ 96     │
-└──────┴───────┴────────────┴────────┘
 ```
 
 Now let's go from the first row to the last and calculate the rank of each record. We will start with one and increase the rank every time the `salary` value is less than the previous one. When switching between departments, we will reset the rank back to 1:
@@ -485,7 +347,7 @@ The window changes depending on which department the current record belongs to. 
 
 Let's express it in SQL:
 
-```sql
+```
 window w as (
   partition by department
   order by salary desc
@@ -510,27 +372,6 @@ window w as (
 )
 order by department, "rank", id;
 ```
-
-```
-┌──────┬───────┬────────────┬────────┐
-│ rank │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Bob   │ hr         │ 78     │
-│ 2    │ Diane │ hr         │ 70     │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Frank │ it         │ 120    │
-│ 2    │ Henry │ it         │ 104    │
-│ 2    │ Irene │ it         │ 104    │
-│ 3    │ Grace │ it         │ 90     │
-│ 4    │ Emma  │ it         │ 84     │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Alice │ sales      │ 100    │
-│ 2    │ Cindy │ sales      │ 96     │
-│ 2    │ Dave  │ sales      │ 96     │
-└──────┴───────┴────────────┴────────┘
-```
-
-_I've manually added the separators between departments for clarity_
 
 Here's an animation showing how the engine calculates the rank for each record:
 
@@ -579,23 +420,6 @@ from employees
 order by salary desc, id;
 ```
 
-```
-┌──────┬───────┬────────────┬────────┐
-│ tile │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│      │ Frank │ it         │ 120    │
-│      │ Henry │ it         │ 104    │
-│      │ Irene │ it         │ 104    │
-│      │ Alice │ sales      │ 100    │
-│      │ Cindy │ sales      │ 96     │
-│      │ Dave  │ sales      │ 96     │
-│      │ Grace │ it         │ 90     │
-│      │ Emma  │ it         │ 84     │
-│      │ Bob   │ hr         │ 78     │
-│      │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
-```
-
 There are 10 records and 3 groups — which means two groups of 3 records and one of 4 records. For example:
 
 ```
@@ -633,27 +457,6 @@ from employees
 window w as (order by salary desc)
 order by salary desc, id;
 ```
-
-```
-┌──────┬───────┬────────────┬────────┐
-│ tile │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Frank │ it         │ 120    │
-│ 1    │ Henry │ it         │ 104    │
-│ 1    │ Irene │ it         │ 104    │
-│ 1    │ Alice │ sales      │ 100    │
-├──────┼───────┼────────────┼────────┤
-│ 2    │ Cindy │ sales      │ 96     │
-│ 2    │ Dave  │ sales      │ 96     │
-│ 2    │ Grace │ it         │ 90     │
-├──────┼───────┼────────────┼────────┤
-│ 3    │ Emma  │ it         │ 84     │
-│ 3    │ Bob   │ hr         │ 78     │
-│ 3    │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
-```
-
-_I've manually added the separators between groups for clarity_
 
 `ntile(n)` splits all records into `n` groups and returns the group number for each record. If the total number of records (10 in our case) is not divisible by the group size (3), then the former groups will be larger than the latter.
 
@@ -718,7 +521,7 @@ Let's try substituting `•••` with `dense_rank()` and `rank()`:
 
 <div class="row">
 <div class="col-xs-12 col-sm-6">
-dense_rank()<br/>
+dense_rank<br/>
 <pre><code>┌──────┬───────┬────────┐
 │ rank │ name  │ salary │
 ├──────┼───────┼────────┤
@@ -735,7 +538,7 @@ dense_rank()<br/>
 └──────┴───────┴────────┘</code></pre>
 </div>
 <div class="col-xs-12 col-sm-6">
-rank()<br/>
+rank<br/>
 <pre><code>┌──────┬───────┬────────┐
 │ rank │ name  │ salary │
 ├──────┼───────┼────────┤
@@ -764,3 +567,10 @@ You have learned what "window" and "window functions" are and how to use them to
         Get the book
     </a>
 </p>
+
+<sqlime-db name="employees" path="/sql-window-functions-book/employees.sql"></sqlime-db>
+<sqlime-examples db="employees" selector="div.highlight" editable></sqlime-examples>
+
+<script src="/assets/sqlime/sqlite3.js"></script>
+<script src="/assets/sqlime/sqlime-db.js"></script>
+<script src="/assets/sqlime/sqlime-examples.js"></script>
