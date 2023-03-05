@@ -7,11 +7,7 @@ slug = "interactive-sql-examples"
 tags = ["data", "sqlite"]
 +++
 
-Reading about SQL is fun, but trying out live examples is even better! With Sqlime JavaScript widgets, you can turn static SQL code in your articles into interactive examples.
-
-> **Note**. [Sqlime](https://sqlime.org/) is an online SQL playground. Thanks to the SQLite JavaScript engine, it doesn't need a server and works completely in the browser.
->
-> Widgets are an independent part of the Sqlime project — they have zero dependencies on the Sqlime itself.
+Reading about SQL is fun, but trying out live examples is even better! So I created JavaScript widgets that turn static SQL code in your articles into interactive examples.
 
 Here is a working example. Give it a try:
 
@@ -20,7 +16,7 @@ limit 5;</code></pre>
 
 And here are the four steps to creating executable SQL examples in your own articles or documentation:
 
-## 1. Include Sqlime JS widgets
+## 1. Include the widgets
 
 You'll need three JavaScript files:
 
@@ -61,7 +57,7 @@ Suppose you are writing a short post about ranking data in SQL:
 
 ```
 <p>To rank data in SQL, we use the
-`rank()` window function:</p>
+<code>rank()</code> window function:</p>
 
 <pre class="example">select
   rank() over w as "rank",
