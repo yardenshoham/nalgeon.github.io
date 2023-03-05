@@ -1,4 +1,100 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 26 Feb 2023 15:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Reading and Writing Files in SQLite</title><link>https://antonz.org/sqlean-fileio/</link><pubDate>Sun, 26 Feb 2023 15:00:00 +0000</pubDate><guid>https://antonz.org/sqlean-fileio/</guid><description>Working with files and traversing directories from SQL.</description><content:encoded><![CDATA[<p>Sometimes it&rsquo;s useful to load a dataset from an external file or export query results to a file.</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 05 Mar 2023 12:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Interactive SQL Examples in JavaScript</title><link>https://antonz.org/interactive-sql-examples/</link><pubDate>Sun, 05 Mar 2023 12:00:00 +0000</pubDate><guid>https://antonz.org/interactive-sql-examples/</guid><description>Turn static SQL code in your articles into executable examples.</description><content:encoded><![CDATA[<p>Reading about SQL is fun, but trying out live examples is even better! With Sqlime JavaScript widgets, you can turn static SQL code in your articles into interactive examples.</p>
+<blockquote>
+<p><strong>Note</strong>. <a href="https://sqlime.org/">Sqlime</a> is an online SQL playground. Thanks to the SQLite JavaScript engine, it doesn&rsquo;t need a server and works completely in the browser.</p>
+<p>Widgets are an independent part of the Sqlime project — they have zero dependencies on the Sqlime itself.</p>
+</blockquote>
+<p>Here is a working example. Give it a try:</p>
+<pre class="example"><code>select * from employees
+limit 5;</code></pre>
+<p>And here are the four steps to creating executable SQL examples in your own articles or documentation:</p>
+<h2 id="1-include-sqlime-js-widgets">1. Include Sqlime JS widgets</h2>
+<p>You&rsquo;ll need three JavaScript files:</p>
+<ul>
+<li><code>sqlite3.js</code> — SQLite compiled for the browser.</li>
+<li><code>sqlime-db.js</code> — the database web component.</li>
+<li><code>sqlime-examples.js</code> — the interactive example web component.</li>
+</ul>
+<p>Include them from CDN or (better) download and host locally:</p>
+<pre tabindex="0"><code>&lt;script src=&quot;https://unpkg.com/@antonz/sqlite@3.40.0/dist/sqlite3.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://unpkg.com/sqlime@0.1.2/dist/sqlime-db.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://unpkg.com/sqlime@0.1.2/dist/sqlime-examples.js&quot;&gt;&lt;/script&gt;
+</code></pre><p>You&rsquo;ll also need to download and serve the SQLite WebAssembly file if you&rsquo;re hosting locally:</p>
+<pre tabindex="0"><code>https://unpkg.com/@antonz/sqlite@3.40.0/dist/sqlite3.wasm
+</code></pre><p><code>sqlite3.wasm</code> is used internally by the <code>sqlite3.js</code> script, so place them in the same folder.</p>
+<p>I suggest you host SQLite locally because it weighs ≈1Mb, and CDNs tend to be quite slow with such large files.</p>
+<p>You can install all of these using <code>npm</code>:</p>
+<pre tabindex="0"><code>npm install @antonz/sqlite
+npm install sqlime
+</code></pre><blockquote>
+<p><strong>Note</strong>. <code>@antonz/sqlite</code> is a copy of the official <a href="https://sqlite.org/wasm">SQLite Wasm</a> build, provided as an NPM package for convenience. You can download and use the build from the SQLite website if you prefer.</p>
+</blockquote>
+<h2 id="2-write-an-article-as-usual">2. Write an article as usual</h2>
+<p>Suppose you are writing a short post about ranking data in SQL:</p>
+<pre tabindex="0"><code>&lt;p&gt;To rank data in SQL, we use the
+`rank()` window function:&lt;/p&gt;
+
+&lt;pre class=&quot;example&quot;&gt;select
+  rank() over w as &quot;rank&quot;,
+  name, department, salary
+from employees
+window w as (order by salary desc)
+order by &quot;rank&quot;, id;&lt;/pre&gt;
+
+&lt;p&gt;the article goes on...&lt;/p&gt;
+</code></pre><p>Which renders as ordinary HTML:</p>
+<div class="boxed">
+    <p>To rank data in SQL, we use the <code>rank()</code> window function:</p>
+    <pre><code>select
+  rank() over w as "rank",
+  name, department, salary
+from employees
+window w as (order by salary desc)
+order by "rank", id;</code></pre>
+    <p>the article goes on...</p>
+</div>
+<h2 id="3-load-the-database">3. Load the database</h2>
+<p>You can create a database from a binary SQLite file or SQL script. I&rsquo;ll go with the latter and use <a href="/sql-window-functions-book/employees.sql">employees.sql</a>, which creates the <code>employees</code> table and populates it with data.</p>
+<p>Load the database using the <code>sqlime-db</code> web component:</p>
+<pre tabindex="0"><code>&lt;sqlime-db name=&quot;employees&quot; path=&quot;./employees.sql&quot;&gt;&lt;/sqlime-db&gt;
+</code></pre><ul>
+<li><code>name</code> is the name we&rsquo;ll use later to refer to the database.</li>
+<li><code>path</code> is the URL path to the SQL (or binary) database file.</li>
+</ul>
+<h2 id="4-init-the-examples">4. Init the examples</h2>
+<p>The only thing left is to convert your HTML <code>pre</code> code snippets into interactive examples. Use the <code>sqlime-examples</code> web component to do this:</p>
+<pre tabindex="0"><code>&lt;sqlime-examples db=&quot;employees&quot; selector=&quot;pre.example&quot; editable&gt;&lt;/sqlime-examples&gt;
+</code></pre><ul>
+<li><code>db</code> is the name of the database we defined earlier.</li>
+<li><code>selector</code> is the CSS selector for your SQL code snippets.</li>
+<li><code>editable</code> makes the examples editable (remove for read-only).</li>
+</ul>
+<p>And that&rsquo;s it!</p>
+<div class="boxed">
+    <p>To rank data in SQL, we use the <code>rank()</code> window function:</p>
+    <pre class="example"><code>select
+  rank() over w as "rank",
+  name, department, salary
+from employees
+window w as (order by salary desc)
+order by "rank", id;</code></pre>
+    <p>the article goes on...</p>
+</div>
+<p><code>sqlime-examples</code> converts all the snippets with the specified selector, so you only need to include it once (unless you have multiple databases to run your examples on).</p>
+<h2 id="summary">Summary</h2>
+<p>Executable SQL examples are an excellent fit for any kind of documentation:</p>
+<ul>
+<li>They are more informative than static snippets.</li>
+<li>They increase engagement and encourage experimentation,</li>
+<li>They are lightweight, easy to set up, and do not require a server.</li>
+</ul>
+<p>Try adding interactive SQL to your articles, or ask a question <a href="https://github.com/nalgeon/sqlime">on GitHub</a> if you have one.</p>
+<p>P.S. Want to see SQL examples in action? Check out my book — <a href="/sql-window-functions-book/">SQL Window Functions Explained</a></p>
+<p><sqlime-db name="employees" path="/sql-window-functions-book/employees.sql"></sqlime-db>
+<sqlime-examples db="employees" selector="pre.example" editable></sqlime-examples></p>
+<script src="/assets/sqlime/sqlite3.js"></script>
+<script src="/assets/sqlime/sqlime-db.js"></script>
+<script src="/assets/sqlime/sqlime-examples.js"></script>
+]]></content:encoded></item><item><title>Reading and Writing Files in SQLite</title><link>https://antonz.org/sqlean-fileio/</link><pubDate>Sun, 26 Feb 2023 15:00:00 +0000</pubDate><guid>https://antonz.org/sqlean-fileio/</guid><description>Working with files and traversing directories from SQL.</description><content:encoded><![CDATA[<p>Sometimes it&rsquo;s useful to load a dataset from an external file or export query results to a file.</p>
 <p>SQLite does not support file I/O operations by default. However, you can easily enable them using the <code>sqlean-fileio</code> extension.</p>
 <blockquote>
 <p><strong>Note</strong>. Unlike other DBMS, adding extensions to SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
@@ -1735,96 +1831,4 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
 <p>The reason is that <code>Add()</code> is a sequence-independent operation. The runtime can perform such operations in any order, and the result will not change.</p>
 <p>The second and third examples use sequence-dependent operations. When we run 100 goroutines, the order of operations is different each time. Therefore, the result is also different.</p>
 <p>In general, despite the apparent simplicity of atomics, use them cautiously. Mutex is less shiny but more error-proof.</p>
-]]></content:encoded></item><item><title>Idempotent Close in Go</title><link>https://antonz.org/idempotent-close/</link><pubDate>Wed, 11 Jan 2023 11:00:00 +0000</pubDate><guid>https://antonz.org/idempotent-close/</guid><description>How to free the resources safely.</description><content:encoded><![CDATA[<p><em>Idempotence</em> is when a repeated call to an operation on an object does not result in changes or errors. Idempotence is a handy development tool.</p>
-<p>Let&rsquo;s see how idempotence helps to free the occupied resources safely.</p>
-<h2 id="idempotent-close">Idempotent Close</h2>
-<p>Suppose we have a gate:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a90d91">type</span> <span style="color:#000">Gate</span> <span style="color:#a90d91">struct</span>{
-    <span style="color:#177500">// internal state
-</span><span style="color:#177500"></span>    <span style="color:#177500">// ...
-</span><span style="color:#177500"></span>}
-</code></pre></div><p>The <code>NewGate()</code> constructor opens the gate, acquires some system resources, and returns an instance of the <code>Gate</code>.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">g</span> <span style="color:#000">:=</span> <span style="color:#000">NewGate</span>()
-</code></pre></div><p>In the end, we must release the occupied resources:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a90d91">func</span> (<span style="color:#000">g</span> <span style="color:#000">*</span><span style="color:#000">Gate</span>) <span style="color:#000">Close</span>() <span style="color:#a90d91">error</span> {
-    <span style="color:#177500">// free acquired resources
-</span><span style="color:#177500"></span>    <span style="color:#177500">// ...
-</span><span style="color:#177500"></span>    <span style="color:#a90d91">return</span> <span style="color:#a90d91">nil</span>
-}
-
-<span style="color:#000">g</span> <span style="color:#000">:=</span> <span style="color:#000">NewGate</span>()
-<span style="color:#a90d91">defer</span> <span style="color:#000">g</span>.<span style="color:#000">Close</span>()
-<span style="color:#177500">// do stuff
-</span><span style="color:#177500">// ...
-</span></code></pre></div><p>Problems arise when in some branch of the code, we want to close the gate explicitly:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#000">g</span> <span style="color:#000">:=</span> <span style="color:#000">NewGate</span>()
-<span style="color:#a90d91">defer</span> <span style="color:#000">g</span>.<span style="color:#000">Close</span>()
-
-<span style="color:#000">err</span> <span style="color:#000">:=</span> <span style="color:#000">checkSomething</span>()
-<span style="color:#a90d91">if</span> <span style="color:#000">err</span> <span style="color:#000">!=</span> <span style="color:#a90d91">nil</span> {
-    <span style="color:#000">g</span>.<span style="color:#000">Close</span>()
-    <span style="color:#177500">// do something else
-</span><span style="color:#177500"></span>    <span style="color:#177500">// ...
-</span><span style="color:#177500"></span>    <span style="color:#a90d91">return</span>
-}
-
-<span style="color:#177500">// do more stuff
-</span><span style="color:#177500">// ...
-</span></code></pre></div><p>The first <code>Close()</code> will work, but the second (via <code>defer</code>) will break because the resources have already been released.</p>
-<p>The solution is to make <code>Close()</code> idempotent so that repeated calls do nothing if the gate is already closed:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a90d91">type</span> <span style="color:#000">Gate</span> <span style="color:#a90d91">struct</span>{
-    <span style="color:#000">closed</span> <span style="color:#a90d91">bool</span>
-    <span style="color:#177500">// internal state
-</span><span style="color:#177500"></span>    <span style="color:#177500">// ...
-</span><span style="color:#177500"></span>}
-
-<span style="color:#a90d91">func</span> (<span style="color:#000">g</span> <span style="color:#000">*</span><span style="color:#000">Gate</span>) <span style="color:#000">Close</span>() <span style="color:#a90d91">error</span> {
-    <span style="color:#a90d91">if</span> <span style="color:#000">g</span>.<span style="color:#000">closed</span> {
-        <span style="color:#a90d91">return</span> <span style="color:#a90d91">nil</span>
-    }
-    <span style="color:#177500">// free acquired resources
-</span><span style="color:#177500"></span>    <span style="color:#177500">// ...
-</span><span style="color:#177500"></span>    <span style="color:#000">g</span>.<span style="color:#000">closed</span> = <span style="color:#a90d91">true</span>
-    <span style="color:#a90d91">return</span> <span style="color:#a90d91">nil</span>
-}
-</code></pre></div><p><a href="https://go.dev/play/p/LFEThpm1nTs">playground</a></p>
-<p>Now we can call <code>Close()</code> repeatedly without any problems. Until we try to close the gate from different goroutines — then everything will fall apart.</p>
-<h2 id="idempotency-in-a-concurrent-environment">Idempotency in a concurrent environment</h2>
-<p>We have made the gate closing idempotent — safe for repeated calls:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a90d91">func</span> (<span style="color:#000">g</span> <span style="color:#000">*</span><span style="color:#000">Gate</span>) <span style="color:#000">Close</span>() <span style="color:#a90d91">error</span> {
-    <span style="color:#a90d91">if</span> <span style="color:#000">g</span>.<span style="color:#000">closed</span> {
-        <span style="color:#a90d91">return</span> <span style="color:#a90d91">nil</span>
-    }
-    <span style="color:#177500">// free acquired resources
-</span><span style="color:#177500"></span>    <span style="color:#177500">// ...
-</span><span style="color:#177500"></span>    <span style="color:#000">g</span>.<span style="color:#000">closed</span> = <span style="color:#a90d91">true</span>
-    <span style="color:#a90d91">return</span> <span style="color:#a90d91">nil</span>
-}
-</code></pre></div><p>But if several goroutines use the same <code>Gate</code> instance, a simultaneous call to <code>Close()</code> will lead to races — a concurrent modification of the <code>closed</code> field. We don&rsquo;t want this.</p>
-<p>We have to protect the <code>closed</code> field access with a mutex:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a90d91">type</span> <span style="color:#000">Gate</span> <span style="color:#a90d91">struct</span> {
-    <span style="color:#000">mu</span>     <span style="color:#000">sync</span>.<span style="color:#000">Mutex</span>
-    <span style="color:#000">closed</span> <span style="color:#a90d91">bool</span>
-    <span style="color:#177500">// internal state
-</span><span style="color:#177500"></span>    <span style="color:#177500">// ...
-</span><span style="color:#177500"></span>}
-
-<span style="color:#a90d91">func</span> (<span style="color:#000">g</span> <span style="color:#000">*</span><span style="color:#000">Gate</span>) <span style="color:#000">Close</span>() <span style="color:#a90d91">error</span> {
-    <span style="color:#000">g</span>.<span style="color:#000">mu</span>.<span style="color:#000">Lock</span>()
-
-    <span style="color:#a90d91">if</span> <span style="color:#000">g</span>.<span style="color:#000">closed</span> {
-        <span style="color:#000">g</span>.<span style="color:#000">mu</span>.<span style="color:#000">Unlock</span>()
-        <span style="color:#a90d91">return</span> <span style="color:#a90d91">nil</span>
-    }
-    <span style="color:#177500">// free acquired resources
-</span><span style="color:#177500"></span>    <span style="color:#177500">// ...
-</span><span style="color:#177500"></span>
-    <span style="color:#000">g</span>.<span style="color:#000">closed</span> = <span style="color:#a90d91">true</span>
-    <span style="color:#000">g</span>.<span style="color:#000">mu</span>.<span style="color:#000">Unlock</span>()
-    <span style="color:#a90d91">return</span> <span style="color:#a90d91">nil</span>
-}
-</code></pre></div><p><a href="https://go.dev/play/p/i3pFy362YEi">playground</a></p>
-<p>The mutex ensures that only a single goroutine executes the code between <code>Lock()</code> and <code>Unlock()</code> at any given time.</p>
-<p>Now multiple calls to <code>Close()</code> work correctly in a concurrent environment.</p>
-<p>That&rsquo;s it!</p>
 ]]></content:encoded></item></channel></rss>
