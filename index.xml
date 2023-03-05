@@ -1,13 +1,9 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 05 Mar 2023 12:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Interactive SQL Examples in JavaScript</title><link>https://antonz.org/interactive-sql-examples/</link><pubDate>Sun, 05 Mar 2023 12:00:00 +0000</pubDate><guid>https://antonz.org/interactive-sql-examples/</guid><description>Turn static SQL code in your articles into executable examples.</description><content:encoded><![CDATA[<p>Reading about SQL is fun, but trying out live examples is even better! With Sqlime JavaScript widgets, you can turn static SQL code in your articles into interactive examples.</p>
-<blockquote>
-<p><strong>Note</strong>. <a href="https://sqlime.org/">Sqlime</a> is an online SQL playground. Thanks to the SQLite JavaScript engine, it doesn&rsquo;t need a server and works completely in the browser.</p>
-<p>Widgets are an independent part of the Sqlime project — they have zero dependencies on the Sqlime itself.</p>
-</blockquote>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 05 Mar 2023 12:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Interactive SQL Examples in JavaScript</title><link>https://antonz.org/interactive-sql-examples/</link><pubDate>Sun, 05 Mar 2023 12:00:00 +0000</pubDate><guid>https://antonz.org/interactive-sql-examples/</guid><description>Turn static SQL code in your articles into executable examples.</description><content:encoded><![CDATA[<p>Reading about SQL is fun, but trying out live examples is even better! So I created JavaScript widgets that turn static SQL code in your articles into interactive examples.</p>
 <p>Here is a working example. Give it a try:</p>
 <pre class="example"><code>select * from employees
 limit 5;</code></pre>
 <p>And here are the four steps to creating executable SQL examples in your own articles or documentation:</p>
-<h2 id="1-include-sqlime-js-widgets">1. Include Sqlime JS widgets</h2>
+<h2 id="1-include-the-widgets">1. Include the widgets</h2>
 <p>You&rsquo;ll need three JavaScript files:</p>
 <ul>
 <li><code>sqlite3.js</code> — SQLite compiled for the browser.</li>
@@ -31,7 +27,7 @@ npm install sqlime
 <h2 id="2-write-an-article-as-usual">2. Write an article as usual</h2>
 <p>Suppose you are writing a short post about ranking data in SQL:</p>
 <pre tabindex="0"><code>&lt;p&gt;To rank data in SQL, we use the
-`rank()` window function:&lt;/p&gt;
+&lt;code&gt;rank()&lt;/code&gt; window function:&lt;/p&gt;
 
 &lt;pre class=&quot;example&quot;&gt;select
   rank() over w as &quot;rank&quot;,
