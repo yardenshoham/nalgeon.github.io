@@ -126,16 +126,16 @@ select count(*) from app_log;
 -- 1000000
 ```
 
-Now we can extract the individual fields using the `regexp_substr` function from the `sqlean-regexp` extension:
+Now we can extract the individual fields using the `regexp_capture` function from the [`sqlean-regexp`](/sqlean-regexp/) extension:
 
 ```sql
 alter table app_log add column ts text;
 alter table app_log add column level text;
 alter table app_log add column message text;
 
-update app_log set ts = substr(regexp_substr(line, 'ts=[^,]+'), 4);
-update app_log set level = substr(regexp_substr(line, 'level=[^,]+'), 7);
-update app_log set message = substr(regexp_substr(line, 'message=[^,]+'), 9);
+update app_log set ts = regexp_capture(line, 'ts=([^,]+)', 1);
+update app_log set level = regexp_capture(line, 'level=([^,]+)', 1);
+update app_log set message = regexp_capture(line, 'message=([^,]+)', 1);
 ```
 
 Now each log field is stored in a separate column:
