@@ -1,0 +1,150 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>ChatGPT Bot in Python</title>
+<meta name=description content="A Telegram chatbot that works via the official OpenAI API.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.7d56395be0aff259a969d2f462b790a6013305c4529081baa7da9e04775a50fd.css>
+<link rel=icon href=/assets/favicon/favicon.ico sizes=any>
+<link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=manifest href=/assets/favicon/manifest.json>
+<link rel=canonical href=https://antonz.org/pokitoki/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ChatGPT Bot in Python">
+<meta property="og:description" content="A Telegram chatbot that works via the official OpenAI API.">
+<meta property="og:url" content="https://antonz.org/pokitoki/">
+<meta property="og:image" content="https://antonz.org/pokitoki/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="ChatGPT Bot in Python">
+<meta name=twitter:description content="A Telegram chatbot that works via the official OpenAI API.">
+<meta name=twitter:url content="https://antonz.org/pokitoki/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/pokitoki/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>ChatGPT Bot in Python</h1>
+</header>
+<p>In the last few months, people have been releasing a record number of OpenAI-powered software. Of course I could not stay out of it.</p>
+<p>And so the <a href=https://github.com/nalgeon/pokitoki><strong>pokitoki</strong></a> project was born. It&rsquo;s a Telegram chatbot that works via the official OpenAI API.</p>
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<figure>
+<img src=./chat-1.png width=400 class=img-bordered-thin>
+</figure>
+</div>
+</div>
+<p>This is how it can be useful to you (in my deeply subjective view):</p>
+<ul>
+<li>Learn how to write basic Telegram bots in Python.</li>
+<li>Learn how to integrate with OpenAI.</li>
+<li>Learn how to run Python applications in Docker.</li>
+</ul>
+<p>I&rsquo;ve intentionally kept the bot as simple as possible so you can quickly understand the code.</p>
+<p>And of course, you can connect it to your Telegram (if you manage to sign up with OpenAI).</p>
+<p>The bot has a terrible memory, so don&rsquo;t expect it to remember any chat context by default. But you can ask follow-up questions using a plus sign:</p>
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<figure>
+<img src=./chat-2.png width=400 class=img-bordered-thin>
+<figcaption>the question...<figcaption>
+</figure>
+</div>
+<div class="col-xs-12 col-sm-6">
+<figure>
+<img src=./chat-3.png width=400 class=img-bordered-thin>
+<figcaption>and the follow-up<figcaption>
+</figure>
+</div>
+</div>
+<p>Available commands:</p>
+<ul>
+<li><code>/retry</code> - retry answering the last question</li>
+<li><code>/help</code> - show help</li>
+</ul>
+<h2 id=setup>Setup</h2>
+<ol>
+<li>Get your <a href=https://openai.com/api/>OpenAI API</a> key</li>
+<li>Get your Telegram bot token from <a href=https://t.me/BotFather>@BotFather</a></li>
+<li>Copy <code>config.example.yml</code> to <code>config.yml</code> and specify your tokens there.</li>
+<li>Start the bot:</li>
+</ol>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>docker compose up --build
+</code></pre></div><p><a href=https://github.com/nalgeon/pokitoki>Source code on GitHub</a></p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2023-03-11 12:30:00 +0000 UTC">11 Mar, 2023</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/python/>python</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/interactive-sql-examples/>Interactive SQL Examples in JavaScript</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/json-lines/>JSON Lines</a></p>
+<p><a href=/ellipsis/>Expressive Ellipsis in Python</a></p>
+<p><a href=/protocol/>Flying Pig, or Protocols in Python</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
