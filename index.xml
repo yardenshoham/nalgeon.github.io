@@ -3,7 +3,7 @@
 <div class="row">
 <div class="col-xs-12 col-sm-6">
 <figure>
-    <img src="./chat-1.png" width="400" class="img-bordered-thin">
+    <img src="./chat-1.png" alt="Sample chat" width="400" class="img-bordered-thin">
 </figure>
 </div>
 </div>
@@ -13,19 +13,21 @@
 <li>Learn how to integrate with OpenAI.</li>
 <li>Learn how to run Python applications in Docker.</li>
 </ul>
-<p>I&rsquo;ve intentionally kept the bot as simple as possible so you can quickly understand the code.</p>
 <p>And of course, you can connect it to your Telegram (if you manage to sign up with OpenAI).</p>
+<p>I&rsquo;ve intentionally kept the bot as simple as possible so you can quickly understand the code.</p>
+<h2 id="private-chats">Private chats</h2>
+<p>You can use the bot as a personal assistant. You can also allow other users to use the bot; list them in the <code>telegram_usernames</code> config property.</p>
 <p>The bot has a terrible memory, so don&rsquo;t expect it to remember any chat context by default. But you can ask follow-up questions using a plus sign:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-6">
 <figure>
-    <img src="./chat-2.png" width="400" class="img-bordered-thin">
+    <img src="./chat-2.png" alt="Question" width="400" class="img-bordered-thin">
     <figcaption>the question...<figcaption>
 </figure>
 </div>
 <div class="col-xs-12 col-sm-6">
 <figure>
-    <img src="./chat-3.png" width="400" class="img-bordered-thin">
+    <img src="./chat-3.png" alt="Follow-up question" width="400" class="img-bordered-thin">
     <figcaption>and the follow-up<figcaption>
 </figure>
 </div>
@@ -35,6 +37,23 @@
 <li><code>/retry</code> - retry answering the last question</li>
 <li><code>/help</code> - show help</li>
 </ul>
+<h2 id="groups">Groups</h2>
+<p>To get an answer from the bot in a group, mention it in a reply to a question, or ask a question directly:</p>
+<div class="row">
+<div class="col-xs-12 col-sm-6">
+<figure>
+    <img src="./chat-4.png" alt="Reply with mention" width="400" class="img-bordered-thin">
+    <figcaption>reply with mention<figcaption>
+</figure>
+</div>
+<div class="col-xs-12 col-sm-6">
+<figure>
+    <img src="./chat-5.png" alt="Direct question" width="400" class="img-bordered-thin">
+    <figcaption>direct question<figcaption>
+</figure>
+</div>
+</div>
+<p>The bot will ignore questions from group members unless they are listed in the <code>telegram_usernames</code> config property.</p>
 <h2 id="setup">Setup</h2>
 <ol>
 <li>Get your <a href="https://openai.com/api/">OpenAI API</a> key</li>
