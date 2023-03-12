@@ -29,9 +29,9 @@ And of course, you can connect it to your Telegram (if you manage to sign up wit
 
 I've intentionally kept the bot as simple as possible so you can quickly understand the code.
 
-## Private chats
+## Personal chats
 
-You can use the bot as a personal assistant. You can also allow other users to use the bot; list them in the `telegram_usernames` config property.
+The bot acts as your personal assistant in a personal chat. To allow other users to use the bot, list them in the `telegram_usernames` config property.
 
 The bot has a terrible memory, so don't expect it to remember any chat context by default. But you can ask follow-up questions using a plus sign:
 
