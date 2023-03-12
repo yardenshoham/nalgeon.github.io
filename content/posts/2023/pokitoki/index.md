@@ -14,7 +14,7 @@ And so the [**pokitoki**](https://github.com/nalgeon/pokitoki) project was born.
 <div class="row">
 <div class="col-xs-12 col-sm-6">
 <figure>
-    <img src="./chat-1.png" width="400" class="img-bordered-thin">
+    <img src="./chat-1.png" alt="Sample chat" width="400" class="img-bordered-thin">
 </figure>
 </div>
 </div>
@@ -25,22 +25,26 @@ This is how it can be useful to you (in my deeply subjective view):
 -   Learn how to integrate with OpenAI.
 -   Learn how to run Python applications in Docker.
 
+And of course, you can connect it to your Telegram (if you manage to sign up with OpenAI).
+
 I've intentionally kept the bot as simple as possible so you can quickly understand the code.
 
-And of course, you can connect it to your Telegram (if you manage to sign up with OpenAI).
+## Private chats
+
+You can use the bot as a personal assistant. You can also allow other users to use the bot; list them in the `telegram_usernames` config property.
 
 The bot has a terrible memory, so don't expect it to remember any chat context by default. But you can ask follow-up questions using a plus sign:
 
 <div class="row">
 <div class="col-xs-12 col-sm-6">
 <figure>
-    <img src="./chat-2.png" width="400" class="img-bordered-thin">
+    <img src="./chat-2.png" alt="Question" width="400" class="img-bordered-thin">
     <figcaption>the question...<figcaption>
 </figure>
 </div>
 <div class="col-xs-12 col-sm-6">
 <figure>
-    <img src="./chat-3.png" width="400" class="img-bordered-thin">
+    <img src="./chat-3.png" alt="Follow-up question" width="400" class="img-bordered-thin">
     <figcaption>and the follow-up<figcaption>
 </figure>
 </div>
@@ -50,6 +54,27 @@ Available commands:
 
 -   `/retry` - retry answering the last question
 -   `/help` - show help
+
+## Groups
+
+To get an answer from the bot in a group, mention it in a reply to a question, or ask a question directly:
+
+<div class="row">
+<div class="col-xs-12 col-sm-6">
+<figure>
+    <img src="./chat-4.png" alt="Reply with mention" width="400" class="img-bordered-thin">
+    <figcaption>reply with mention<figcaption>
+</figure>
+</div>
+<div class="col-xs-12 col-sm-6">
+<figure>
+    <img src="./chat-5.png" alt="Direct question" width="400" class="img-bordered-thin">
+    <figcaption>direct question<figcaption>
+</figure>
+</div>
+</div>
+
+The bot will ignore questions from group members unless they are listed in the `telegram_usernames` config property.
 
 ## Setup
 
