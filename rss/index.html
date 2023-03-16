@@ -1,5 +1,40 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 11 Mar 2023 12:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>ChatGPT Bot in Python</title><link>https://antonz.org/pokitoki/</link><pubDate>Sat, 11 Mar 2023 12:30:00 +0000</pubDate><guid>https://antonz.org/pokitoki/</guid><description>A Telegram chatbot that works via the official OpenAI API.</description><content:encoded><![CDATA[<p>In the last few months, people have been releasing a record number of OpenAI-powered software. Of course I could not stay out of it.</p>
-<p>And so the <a href="https://github.com/nalgeon/pokitoki"><strong>pokitoki</strong></a> project was born. It&rsquo;s a Telegram chatbot that works via the official OpenAI API.</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 16 Mar 2023 12:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>AI SQLite Assistant</title><link>https://antonz.org/sqlime-ai/</link><pubDate>Thu, 16 Mar 2023 12:00:00 +0000</pubDate><guid>https://antonz.org/sqlime-ai/</guid><description>Ask AI to explain or troubleshoot your SQL query in a playground.</description><content:encoded><![CDATA[<p>While trying to trick AI into saying ethically questionable things may be fun for some of us, I prefer more practical and useful scenarios.</p>
+<p>So, as of today, <a href="https://sqlime.org/">Sqlime</a> — an online SQLite playground — includes the &ldquo;Ask AI&rdquo; feature.</p>
+<p>AI can explain, teach, and troubleshoot your SQL without leaving the playground:</p>
+<ol>
+<li>Write a question as a comment above the query.</li>
+<li>Click &ldquo;Ask AI&rdquo;.</li>
+<li>Receive a not-so-fast, but often useful answer from AI.</li>
+</ol>
+<div class="row">
+<div class="col-xs-12 col-sm-6">
+<figure>
+    <img src="./ask-ai-1.png" alt="Write a question" width="400" class="img-bordered-thin">
+    <figcaption>ask a question<figcaption>
+</figure>
+</div>
+<div class="col-xs-12 col-sm-6">
+<figure>
+    <img src="./ask-ai-2.png" alt="Get an answer" width="400" class="img-bordered-thin">
+    <figcaption>and receive an answer from AI<figcaption>
+</figure>
+</div>
+</div>
+<p>Try it out! All you need is an OpenAI API key.</p>
+<p class="big">
+<a href="https://sqlime.org/">Ask AI in Sqlime</a>
+</p>
+]]></content:encoded></item><item><title>ChatGPT Bot in Python</title><link>https://antonz.org/pokitoki/</link><pubDate>Sat, 11 Mar 2023 12:30:00 +0000</pubDate><guid>https://antonz.org/pokitoki/</guid><description>A Telegram chatbot that works via the official OpenAI API.</description><content:encoded><![CDATA[<p>In the last few months, people have been releasing a record number of AI-powered software. Of course I could not stay out of it.</p>
+<p>And so the <a href="https://github.com/nalgeon/pokitoki"><strong>pokitoki</strong></a> project was born. It&rsquo;s a a Telegram chat bot built using the ChatGPT (aka GPT-3.5) language model from OpenAI.</p>
+<p>Notable features:</p>
+<ul>
+<li>Both one-on-one and group chats.</li>
+<li>Direct questions or mentions.</li>
+<li>Ask again by retrying or editing the last message.</li>
+<li>Follow-up questions.</li>
+</ul>
+<h2 id="personal-chats">Personal chats</h2>
+<p>The bot acts as your personal assistant:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-6">
 <figure>
@@ -7,28 +42,19 @@
 </figure>
 </div>
 </div>
-<p>This is how it can be useful to you (in my deeply subjective view):</p>
-<ul>
-<li>Learn how to write basic Telegram bots in Python.</li>
-<li>Learn how to integrate with OpenAI.</li>
-<li>Learn how to run Python applications in Docker.</li>
-</ul>
-<p>And of course, you can connect it to your Telegram (if you manage to sign up with OpenAI).</p>
-<p>I&rsquo;ve intentionally kept the bot as simple as possible so you can quickly understand the code.</p>
-<h2 id="personal-chats">Personal chats</h2>
-<p>The bot acts as your personal assistant in a personal chat. To allow other users to use the bot, list them in the <code>telegram_usernames</code> config property.</p>
+<p>To allow other users to use the bot, list them in the <code>telegram_usernames</code> config property.</p>
 <p>The bot has a terrible memory, so don&rsquo;t expect it to remember any chat context by default. But you can ask follow-up questions using a plus sign:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-6">
 <figure>
-    <img src="./chat-2.png" alt="Question" width="400" class="img-bordered-thin">
-    <figcaption>the question...<figcaption>
+    <img src="./chat-2.png" alt="Follow-up by reply" width="400" class="img-bordered-thin">
+    <figcaption>follow up by replying<figcaption>
 </figure>
 </div>
 <div class="col-xs-12 col-sm-6">
 <figure>
-    <img src="./chat-3.png" alt="Follow-up question" width="400" class="img-bordered-thin">
-    <figcaption>and the follow-up<figcaption>
+    <img src="./chat-3.png" alt="Follow-up by plus sign" width="400" class="img-bordered-thin">
+    <figcaption>or by writing a `+` sign<figcaption>
 </figure>
 </div>
 </div>
@@ -37,6 +63,7 @@
 <li><code>/retry</code> - retry answering the last question</li>
 <li><code>/help</code> - show help</li>
 </ul>
+<p>To rephrase or add to the last question, simply edit it. The bot will then answer the updated question.</p>
 <h2 id="groups">Groups</h2>
 <p>To get an answer from the bot in a group, mention it in a reply to a question, or ask a question directly:</p>
 <div class="row">
@@ -53,8 +80,21 @@
 </figure>
 </div>
 </div>
-<p>The bot will ignore questions from group members unless they are listed in the <code>telegram_usernames</code> config property.</p>
-<h2 id="setup">Setup</h2>
+<p>To make the bot reply to group members, list the group id in the <code>telegram_chat_ids</code> config property. Otherwise, the bot will ignore questions from group members unless they are listed in the <code>telegram_usernames</code> config property.</p>
+<p>If you don&rsquo;t know the group id, run the <code>/version</code> bot command in a group to find it:</p>
+<pre tabindex="0"><code>Chat information:
+- id: -1001405001234
+- title: My Favorite Group
+- type: supergroup
+
+Bot information:
+- id: 5930739038
+- name: @pokitokibot
+- version: 56
+- usernames: 6 users
+- chat IDs: []
+- access to messages: True
+</code></pre><h2 id="setup">Setup</h2>
 <ol>
 <li>Get your <a href="https://openai.com/api/">OpenAI API</a> key</li>
 <li>Get your Telegram bot token from <a href="https://t.me/BotFather">@BotFather</a></li>
@@ -62,7 +102,8 @@
 <li>Start the bot:</li>
 </ol>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker compose up --build
-</code></pre></div><p><a href="https://github.com/nalgeon/pokitoki">Source code on GitHub</a></p>
+</code></pre></div><p>I&rsquo;ve intentionally kept the bot as simple as possible so you can quickly understand the code.</p>
+<p><a href="https://github.com/nalgeon/pokitoki">Source code on GitHub</a></p>
 ]]></content:encoded></item><item><title>Interactive SQL Examples in JavaScript</title><link>https://antonz.org/interactive-sql-examples/</link><pubDate>Sun, 05 Mar 2023 12:00:00 +0000</pubDate><guid>https://antonz.org/interactive-sql-examples/</guid><description>Turn static SQL code in your articles into executable examples.</description><content:encoded><![CDATA[<p>Reading about SQL is fun, but trying out live examples is even better! So I created JavaScript widgets that turn static SQL code in your articles into interactive examples.</p>
 <p>Here is a working example. Give it a try:</p>
 <pre class="example"><code>select * from employees
@@ -1702,73 +1743,6 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
 <li>Rolling aggregates (sum and average in dynamics).</li>
 </ul>
 <p>Of course, this is not an exhaustive list. But I hope now it is clear why window functions are beneficial for data analysis. In the <a href="/sql-window-functions-ranking">next chapter</a>, we will examine what windows are and how to use them.</p>
-<p>
-    <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
-        Get the book
-    </a>
-</p>
-]]></content:encoded></item><item><title>SQL Window Functions Explained</title><link>https://antonz.org/sql-window-functions-book/</link><pubDate>Sun, 22 Jan 2023 18:00:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-book/</guid><description>A clear and visual introduction to window functions in SQL.</description><content:encoded><![CDATA[<p>Window functions are probably the most confusing section of SQL. You might think, &ldquo;So what? They just came up with some additional functions&rdquo;. Not really. &ldquo;Window functions&rdquo; is a separate language built into regular SQL. And it&rsquo;s more complicated than everything you know about SELECTs.</p>
-<p>In short, window functions assist in making great analytical reports without Excel. Maybe you want to calculate monthly sales percentages over the year? Window functions. Split marketing channels into effective and ineffective ones? Window functions. Choose the top 10 clients for each segment? Same.</p>
-<div class="row">
-<div class="col-xs-12 col-sm-8">
-    <p>I've read several dozen articles explaining SQL window functions. They all suffered from one of two problems:</p>
-    <ol>
-        <li>Easy read without much practical value, describing 10% of features.</li>
-        <li>Difficult to comprehend. If I did not know the subject — I would not understand a thing.</li>
-    </ol>
-</div>
-<div class="col-xs-12 col-sm-4">
-    <figure>
-        <img src="queries.png" alt="How I see complex queries" class="img-bordered-thin"/>
-        <figcaption>
-            <small>SQL window queries can look like this for an unfamiliar reader.</small>
-        </figcaption>
-    </figure>
-</div>
-</div>
-<p>I want people to understand SQL windows better. So I wrote a book — <em>SQL Window Functions Explained</em>.</p>
-<h2 id="about-the-book">About the book</h2>
-<p>It is a clear and visual introduction to window functions. Clear — because I can describe complex topics in a readable way. Visual — because I have prepared a hundred pictures and GIFs to help you understand SQL windows.</p>
-<p>Window functions are a complex topic. So the book only teaches a little at a time. It gives just enough theory and a lot of practice — because it&rsquo;s the only way to turn abstract knowledge into skills.</p>
-<p>Here is what you will learn:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6">
-<ol>
-    <li><a href="/why-use-sql-window-functions">Why use window functions</a></li>
-    <li>Windows and functions
-        <ul>
-            <li><a href="/sql-window-functions-ranking">Ranking</a></li>
-            <li><a href="/sql-window-functions-offset">Offset</a></li>
-            <li>Aggregation</li>
-            <li>Rolling aggregates</li>
-            <li>Statistics</li>
-        </ul>
-    </li>
-    <li>Frames
-        <ul>
-            <li>ROWS and GROUPS</li>
-            <li>RANGE</li>
-            <li>EXCLUDE</li>
-            <li>FILTER</li>
-        </ul>
-    </li>
-    <li>Practice
-        <ul>
-            <li>Product analytics</li>
-            <li>Clustering</li>
-        </ul>
-    </li>
-</ol>
-</div>
-<div class="col-xs-12 col-sm-6">
-    <figure>
-        <img src="poster.png" alt="Book poster" class="img-bordered-thin"/>
-        <figcaption>Every chapter covers a single topic in depth</figcaption>
-    </figure>
-</div>
-</div>
-<p>To preview the first few chapters, visit the links in the table of contents above.</p>
-<p>10 of the 13 chapters are ready, and I&rsquo;ll publish the rest by May 2023. You can buy an early access release for $10.</p>
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
         Get the book
