@@ -1361,6 +1361,13 @@ img {
 details {
     margin-bottom: 0.8em;
 }
+details summary {
+    color: var(--color-blue);
+    cursor: pointer;
+}
+details summary.summary-ai::marker {
+    content: "🤖 ";
+}
 
 form input[type="email"],
 form input[type="password"],
