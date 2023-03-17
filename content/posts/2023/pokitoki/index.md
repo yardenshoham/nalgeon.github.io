@@ -5,6 +5,7 @@ description = "A Telegram chatbot that works via the official OpenAI API."
 image = "/pokitoki/cover.png"
 slug = "pokitoki"
 tags = ["python"]
+featured = true
 +++
 
 In the last few months, people have been releasing a record number of AI-powered software. Of course I could not stay out of it.
