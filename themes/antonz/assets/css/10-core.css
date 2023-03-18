@@ -132,6 +132,15 @@ img {
     width: auto;
 }
 
+abbr::after {
+    display: inline-block;
+    margin-left: 0.25em;
+    margin-right: 0.25em;
+    vertical-align: text-bottom;
+    font-size: 80%;
+    content: "ⓘ";
+}
+
 details {
     margin-bottom: 0.8em;
 }
