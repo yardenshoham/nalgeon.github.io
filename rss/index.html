@@ -1683,8 +1683,8 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
 </code></pre><p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/install.md">How to Install an Extension</a> for usage with IDE, Python, etc.</p>
 <p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/regexp.md">Extension Documentation</a> for reference.</p>
 ]]></content:encoded></item><item><title>Why Use SQL Window Functions</title><link>https://antonz.org/why-use-sql-window-functions/</link><pubDate>Tue, 31 Jan 2023 08:30:00 +0000</pubDate><guid>https://antonz.org/why-use-sql-window-functions/</guid><description>To build great analytical reports without Excel.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
-<p>​In short, window functions assist in building great analytical reports without Excel.</p>
-<p>The easiest way to explain it is through concrete examples. We will work with a toy employee table:</p>
+<p>​In short, window functions help you create great analytical reports without Excel.</p>
+<p>The easiest way to explain this is through concrete examples. We will work with a toy employee table:</p>
 <pre tabindex="0"><code>┌────┬──────────┬────────┬────────────┬────────┐
 │ id │   name   │  city  │ department │ salary │
 ├────┼──────────┼────────┼────────────┼────────┤
@@ -1699,12 +1699,12 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
 │ 32 │ Dave     │ London │ sales      │ 96     │
 │ 33 │ Alice    │ Berlin │ sales      │ 100    │
 └────┴──────────┴────────┴────────────┴────────┘
-</code></pre><p>Let&rsquo;s look at some tasks that are convenient to solve with the help of SQL window functions. We&rsquo;ll save the technical details for the following chapters. For now, let&rsquo;s review the use cases.</p>
+</code></pre><p>Let&rsquo;s look at some tasks that are convenient to solve using SQL window functions. We&rsquo;ll save the technical details for later chapters. For now, let&rsquo;s review the use cases.</p>
 <h2 id="ranking">Ranking</h2>
-<p>Ranking means coming up with all kinds of ratings, starting from the winners of the World Swimming Championships and ending with the Forbes 500.</p>
+<p>Ranking means coming up with all kinds of ratings, from the winners of the World Swimming Championships to the Forbes 500.</p>
 <p>We will rank employees.</p>
 <h3 id="overall-salary-rating">Overall salary rating</h3>
-<p>Let&rsquo;s make a rating of employees by salary:</p>
+<p>Let&rsquo;s rank employees by salary:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-6">
     <figure>
@@ -1715,7 +1715,7 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
 <p>The <code>rank</code> column shows each employee&rsquo;s position in the overall rating.</p>
 <p>Some colleagues have the same salary (Henry and Irene, Cindy and Dave) — so they receive the same rank.</p>
 <h3 id="salary-rating-by-department">Salary rating by department</h3>
-<p>Similar rating, but created for each department separately instead of the whole company:</p>
+<p>Similar rating, but created for each department separately instead of the entire company:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-6">
     <figure>
@@ -1725,7 +1725,7 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
 </div>
 <p>The <code>rank</code> column shows each employee&rsquo;s position in the department&rsquo;s rating.</p>
 <h3 id="salary-groups">Salary groups</h3>
-<p>Let&rsquo;s split the employees into three groups according to their salary:</p>
+<p>Let&rsquo;s divide the employees into three groups according to their salary:</p>
 <ul>
 <li>highly-paid,</li>
 <li>medium-paid,</li>
@@ -1748,13 +1748,13 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
     </figure>
 </div>
 </div>
-<p>No more salary raise for them, I guess.</p>
+<p>No more salary raises for them, I guess.</p>
 <h2 id="comparison-with-offset">Comparison with offset</h2>
-<p>Comparing by offset means looking at the difference between neighboring values. For example, comparing the countries that occupy the 5th and 6th places in the world GDP rating — how different are they? What about 1st and 6th place?</p>
-<p>Sometimes we compare with boundaries instead of neighbors. For example, there are 50 top tennis players worldwide, and Maria Sakkari is ranked 10th. How do her stats compare to Iga Swiatek, who is ranked 1st? How does she compare to Lin Zhou, who is ranked 50th?</p>
+<p>Comparing by offset means looking at the difference between neighboring values. For example, if you compare the countries ranked 5th and 6th in the world in terms of GDP, how different are they? What about 1st and 6th?</p>
+<p>Sometimes we compare with boundaries instead of neighbors. For example, there are 50 top tennis players in the world, and Maria Sakkari is ranked 10th. How do her stats compare to Iga Swiatek, who is ranked 1st? How does she compare to Lin Zhou, who is ranked 50th?</p>
 <p>We will compare employees.</p>
 <h3 id="salary-difference-with-the-neighbor">Salary difference with the neighbor</h3>
-<p>Let&rsquo;s arrange employees by salary and check whether the gap between neighbors is large:</p>
+<p>Let&rsquo;s arrange employees by salary and see if the gap between neighbors is large:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-6">
     <figure>
@@ -1762,9 +1762,9 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
     </figure>
 </div>
 </div>
-<p>The <code>diff</code> column shows how much an employee&rsquo;s salary differs from the previous colleague&rsquo;s. As you can see, there are no significant gaps. The largest ones are Diane and Bob (11%) and Irene and Frank (15%).</p>
-<h3 id="salary-range-in-the-department">Salary range in the department</h3>
-<p>Let&rsquo;s see how an employee&rsquo;s salary compares to the minimum and maximum wages in his department:</p>
+<p>The <code>diff</code> column shows how much the employee&rsquo;s salary differs from the previous colleague&rsquo;s salary. As you can see, there are no significant gaps. The largest ones are Diane and Bob (11%) and Irene and Frank (15%).</p>
+<h3 id="department-salary-range">Department salary range</h3>
+<p>Let&rsquo;s see how an employee&rsquo;s salary compares to the minimum and maximum wages in their department:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-6">
     <figure>
@@ -1772,12 +1772,12 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
     </figure>
 </div>
 </div>
-<p>For each employee, the <code>low</code> column shows the minimum salary in the department, and the <code>high</code> column shows the maximum. As you can see, the HR and Sales salary ranges are narrow, but the IT range is much broader.</p>
+<p>For each employee, the <code>low</code> column shows the minimum salary in the department, and the <code>high</code> column shows the maximum. As you can see, the salary ranges for HR and Sales are narrow, but the range for IT is much wider.</p>
 <h2 id="aggregation">Aggregation</h2>
-<p>Aggregation means counting totals or averages. For example, the average salary per city. Or the total number of gold medals for each country in the Olympic Games standings.</p>
+<p>Aggregation means counting totals or averages. For example, the average salary per city. Or the total number of gold medals for each country in the Olympic rankings.</p>
 <p>We will aggregate employee salaries.</p>
 <h3 id="comparing-with-the-salary-fund">Comparing with the salary fund</h3>
-<p>Each department has a salary fund — money spent monthly on paying employees' salaries. Let&rsquo;s see what percentage of this fund amounts to the salary of each employee:</p>
+<p>Each department has a salary fund — money spent monthly on paying employees' salaries. Let&rsquo;s see what percentage of this fund represents each employee&rsquo;s salary:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-6">
     <figure>
@@ -1785,7 +1785,7 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
     </figure>
 </div>
 </div>
-<p>The <code>fund</code> column shows the department&rsquo;s salary fund, and the <code>perc</code> column shows the employee&rsquo;s salary share of this fund. As you can see, everything is more or less even in HR and Sales, but IT has a noticeable spread of salaries.</p>
+<p>The <code>fund</code> column shows the department&rsquo;s salary fund, and the <code>perc</code> column shows the employee&rsquo;s salary share of that fund. As you can see, everything is more or less even in HR and Sales, but IT has a noticeable spread of salaries.</p>
 <h3 id="comparing-to-the-average-salary">Comparing to the average salary</h3>
 <p>I wonder how large is the spread of salaries inside departments. Let&rsquo;s calculate the deviation of each employee&rsquo;s salary from the average department salary:</p>
 <div class="row">
@@ -1797,7 +1797,7 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
 </div>
 <p>The result confirms the previous observation: IT salaries range from -16% to +20% of the average, while other departments are within 5%.</p>
 <h2 id="rolling-aggregates">Rolling aggregates</h2>
-<p>​Rolling aggregates (aka sliding or moving aggregates) are just totals — sum or average. But instead of calculating them across all elements, we use a different approach.</p>
+<p>​Rolling aggregates (also known as sliding or moving aggregates) are just totals — sums or averages. But instead of calculating them across all elements, we take a different approach.</p>
 <p>Consider the company our employees work for. Here is a table with its income and expenses for nine months of the year:</p>
 <pre tabindex="0"><code>┌──────┬───────┬────────┬─────────┐
 │ year │ month │ income │ expense │
@@ -1813,7 +1813,7 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
 │ 2020 │ 9     │ 104    │ 104     │
 └──────┴───────┴────────┴─────────┘
 </code></pre><h3 id="expenses-moving-average">Expenses moving average</h3>
-<p>Judging by the data, the income is growing: 94 in January → 104 in September. But are the expenses growing as well? It&rsquo;s hard to say right away: expenses differ month by month. To smooth out these spikes, we&rsquo;ll use the &ldquo;3-month average&rdquo; — the average between the previous, current, and next month&rsquo;s expenses for each month:</p>
+<p>Judging by the data, the income is growing: 94 in January → 104 in September. But are the expenses growing as well? It&rsquo;s hard to tell right away: expenses vary from month to month. To smooth out these spikes, we&rsquo;ll use the &ldquo;3-month average&rdquo; — the average between the previous, current, and next month&rsquo;s expenses for each month:</p>
 <ul>
 <li>moving average for February = (January + February + March) / 3;</li>
 <li>for March = (February + March + April) / 3;</li>
@@ -1831,7 +1831,7 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
 <p>Now it is clear that expenses are steadily growing.</p>
 <h3 id="cumulative-income">Cumulative income</h3>
 <p>Thanks to the moving average, we know that income and expenses are growing. But how do they relate to each other? We want to understand whether the company is &ldquo;in the black&rdquo; or &ldquo;in the red&rdquo;, considering all the money earned and spent.</p>
-<p>It is essential to see the values for each month, not only for the end of the year. If at the end of the year everything is OK, but in June the company went into negative — this is a potential problem (companies call this situation a &ldquo;cash gap&rdquo;).</p>
+<p>It is essential to see the values for each month, not only for the end of the year. If everything is OK at the end of the year, but the company went negative in June — this is a potential problem (companies call this situation a &ldquo;cash gap&rdquo;).</p>
 <p>Let&rsquo;s calculate income and expenses by month as a cumulative total:</p>
 <ul>
 <li>cumulative income for January = January;</li>
@@ -1847,7 +1847,7 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
     </figure>
 </div>
 </div>
-<p>Now it is clear the company is doing well. In some months, expenses exceed income, but thanks to the accumulated cash reserve, there is no gap.</p>
+<p>Now it is clear that the company is doing well. In some months, expenses exceed income, but there is no gap due to the accumulated cash reserve.</p>
 <h2 id="summary">Summary</h2>
 <p>SQL window functions help to solve the following tasks:</p>
 <ul>
@@ -1856,7 +1856,7 @@ sqlite&gt; select regexp_like('abcdef', 'b.d');
 <li>Aggregation (sum and average).</li>
 <li>Rolling aggregates (sum and average in dynamics).</li>
 </ul>
-<p>Of course, this is not an exhaustive list. But I hope now it is clear why window functions are beneficial for data analysis. In the <a href="/sql-window-functions-ranking">next chapter</a>, we will examine what windows are and how to use them.</p>
+<p>Of course, this is not an exhaustive list. But I hope it is now clear why window functions are useful for data analysis. In the <a href="/sql-window-functions-ranking">next chapter</a>, we will examine what windows are and how to use them.</p>
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
         Get the book
