@@ -182,8 +182,8 @@ Here we replaced `prev` → `lag(salary, 1) over w`. The database engine replace
 
 <div class="boxed">
 <h3>✎ Exercise: Sibling employee salary</h3>
-<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises; that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
-<p>If you are okay with just theory for now, though — let's continue.</p>
+<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises — that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
+<p>If you are okay with just theory for now, let's continue.</p>
 </div>
 
 ## Department salary range
@@ -458,8 +458,8 @@ Now the engine calculates `low` and `high` as we did it manually:
 
 <div class="boxed">
 <h3>✎ Exercise: City salary ratio</h3>
-<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises; that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
-<p>If you are okay with just theory for now, though — let's continue.</p>
+<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises — that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
+<p>If you are okay with just theory for now, let's continue.</p>
 </div>
 
 ## Offset functions
@@ -507,7 +507,7 @@ rows between unbounded preceding and unbounded following
 
 ## Keep it up
 
-You have learned how to compare rows with neighbors and window boundaries. In the <span class="color-gray">next chapter</span> (coming soon) we will aggregate data!
+You have learned how to compare rows with neighbors and window boundaries. In the [next chapter](/sql-window-functions-aggregation) we will aggregate data!
 
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">

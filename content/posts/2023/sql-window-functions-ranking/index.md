@@ -264,8 +264,8 @@ Why use `order by rank, id` instead of `order by rank`? To know how to sort empl
 
 <div class="boxed">
 <h3>✎ Exercise: Ranking by name</h3>
-<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises; that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
-<p>If you are okay with just theory for now, though — let's continue.</p>
+<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises — that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
+<p>If you are okay with just theory for now, let's continue.</p>
 </div>
 
 ## Multiple windows
@@ -407,8 +407,8 @@ Here's an animation showing how the engine calculates the rank for each record:
 
 <div class="boxed">
 <h3>✎ Exercise: Salary rating by city</h3>
-<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises; that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
-<p>If you are okay with just theory for now, though — let's continue.</p>
+<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises — that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
+<p>If you are okay with just theory for now, let's continue.</p>
 </div>
 
 ## Salary groups
