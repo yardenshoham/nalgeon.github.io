@@ -430,8 +430,8 @@ sqlite&gt; select * from fileio_read('data.txt');
 </code></pre><p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/install.md">How to Install an Extension</a> for usage with IDE, Python, etc.</p>
 <p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/fileio.md">Extension Documentation</a> for reference.</p>
 ]]></content:encoded></item><item><title>Comparing by Offset with SQL Window Functions</title><link>https://antonz.org/sql-window-functions-offset/</link><pubDate>Thu, 16 Feb 2023 14:00:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-offset/</guid><description>Comparing records with neighbors and boundaries.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
-<p>Comparing by offset means looking at the difference between neighboring values. For example, comparing the countries that occupy the 5th and 6th places in the world GDP rating — how different are they? What about 1st and 6th place?</p>
-<p>Sometimes we compare with boundaries instead of neighbors. For example, there are 50 top tennis players worldwide, and Maria Sakkari is ranked 10th. How do her stats compare to Iga Swiatek, who is ranked 1st? How does she compare to Lin Zhou, who is ranked 50th?</p>
+<p>Comparing by offset means looking at the difference between neighboring values. For example, if you compare the countries ranked 5th and 6th in the world in terms of GDP, how different are they? What about 1st and 6th?</p>
+<p>Sometimes we compare with boundaries instead of neighbors. For example, there are 50 top tennis players in the world, and Maria Sakkari is ranked 10th. How do her stats compare to Iga Swiatek, who is ranked 1st? How does she compare to Lin Zhou, who is ranked 50th?</p>
 <p>We will compare records from the <code>employees</code> table:</p>
 <pre tabindex="0"><code>┌────┬───────┬────────┬────────────┬────────┐
 │ id │ name  │  city  │ department │ salary │
@@ -450,15 +450,15 @@ sqlite&gt; select * from fileio_read('data.txt');
 </code></pre><p><a href="https://sqlime.org/#employees.db">playground</a> • <a href="/sql-window-functions-book/employees.sql">download</a></p>
 <p>Table of contents:</p>
 <ul>
-<li><a href="#salary-difference-with-the-previous-employee">Salary difference with the previous employee</a></li>
+<li><a href="#salary-difference-with-neighbor">Salary difference with neighbor</a></li>
 <li><a href="#department-salary-range">Department salary range</a></li>
 <li><a href="#window-partition-frame">Window, partition, frame</a></li>
 <li><a href="#department-salary-range-revisited">Department salary range revisited</a></li>
 <li><a href="#offset-functions">Offset functions</a></li>
 <li><a href="#keep-it-up">Keep it up</a></li>
 </ul>
-<h2 id="salary-difference-with-the-previous-employee">Salary difference with the previous employee</h2>
-<p>Let&rsquo;s arrange employees in ascending salary order and check whether the gap between neighbors is large:</p>
+<h2 id="salary-difference-with-neighbor">Salary difference with neighbor</h2>
+<p>Let&rsquo;s arrange employees by salary and see if the gap between neighbors is large:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-5">
     before<br/>
@@ -469,7 +469,7 @@ sqlite&gt; select * from fileio_read('data.txt');
     <figure><img src="lag-after-perc.png" width="300" alt="After comparing with previous"/></figure>
 </div>
 </div>
-<p>The <code>diff</code> column shows how much the employee&rsquo;s salary differs from the previous colleague&rsquo;s. As you can see, there are no significant gaps. The largest are Diane and Bob (11%) and Irene and Frank (15%).</p>
+<p>The <code>diff</code> column shows how much the employee&rsquo;s salary differs from the previous colleague&rsquo;s salary. As you can see, there are no significant gaps. The largest ones are Diane and Bob (11%) and Irene and Frank (15%).</p>
 <p>How do we go from &ldquo;before&rdquo; to &ldquo;after&rdquo;?</p>
 <p>First, let&rsquo;s sort the table in ascending order of salary:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
@@ -558,12 +558,12 @@ sqlite&gt; select * from fileio_read('data.txt');
 <span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span>, <span style="color:#000">id</span>;
 </code></pre></div><p>Here we replaced <code>prev</code> → <code>lag(salary, 1) over w</code>. The database engine replaces the <code>function_name(...) over window_name</code> statement with the specific value that the function returned. So the window function can be called right inside the calculations, and you will often find such queries in the documentation and examples.</p>
 <div class="boxed">
-<h3>✎ Exercise: Previous/next employee salary</h3>
+<h3>✎ Exercise: Sibling employee salary</h3>
 <p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises; that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
 <p>If you are okay with just theory for now, though — let's continue.</p>
 </div>
 <h2 id="department-salary-range">Department salary range</h2>
-<p>Let&rsquo;s see how an employee&rsquo;s salary correlates with the minimum/maximum department salary:</p>
+<p>Let&rsquo;s see how an employee&rsquo;s salary compares to the minimum and maximum wages in their department:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-5">
     before<br/>
@@ -681,28 +681,28 @@ last_value(salary) over w as high
 <li>beginning of the frame = beginning of the partition (Emma);</li>
 <li>end of the frame = last record with a <code>salary</code> value equal to the current record (Irene).</li>
 </ul>
-<hr>
-<p><strong>Where the frame ends</strong></p>
-<p>People often have questions about the frame end. Let&rsquo;s consider some examples to make it clearer.</p>
-<pre tabindex="0"><code>Emma    84  ← frame start
+<div class="boxed">
+<h3>Where the frame ends</h3>
+<p>People often have questions about the frame end. Let's consider some examples to make it clearer. The current record in each example is Henry.</p>
+<pre><code>Emma    84  ← frame start
 Grace   90
 Henry  104  ← current row
 Irene  104  ← frame end
-Frank  120
-</code></pre><p>The end of the frame is the last record with a salary value equal to the current record. The current record is Henry, with a salary of 104. The last record with a salary of 104 is Irene. Therefore, the end of the frame is Irene.</p>
-<pre tabindex="0"><code>Emma    84  ← frame start
+Frank  120</code></pre>
+<p>The end of the frame is the last record with a salary value equal to the current record. The current record is Henry, with a salary of 104. The last record with a salary of 104 is Irene. Therefore, the end of the frame is Irene.</p>
+<pre><code>Emma    84  ← frame start
 Grace   90
 Henry  104  ← current row and frame end
 Irene  110
-Frank  120
-</code></pre><p>Let&rsquo;s say Irene&rsquo;s salary increased to 110. The current record is Henry, with a salary of 104. The last record with a salary of 104 is also Henry. Therefore, the end of the frame is Henry.</p>
-<pre tabindex="0"><code>Emma    84  ← frame start
+Frank  120</code></pre>
+<p>Let's say Irene's salary increased to 110. The current record is Henry, with a salary of 104. The last record with a salary of 104 is also Henry. Therefore, the end of the frame is Henry.</p>
+<pre><code>Emma    84  ← frame start
 Grace   90
 Henry  104  ← current row
 Irene  104
-Frank  104  ← frame end
-</code></pre><p>Let&rsquo;s say Franks&rsquo;s salary decreased to 104. The current record is Henry, with a salary of 104. The last record with a salary of 104 is Frank. Therefore, the end of the frame is Frank.</p>
-<hr>
+Frank  104  ← frame end</code></pre>
+<p>Let's say Franks's salary decreased to 104. The current record is Henry, with a salary of 104. The last record with a salary of 104 is Frank. Therefore, the end of the frame is Frank.</p>
+</div>
 <p>The partition is fixed, but the frame depends on the current record and is constantly changing:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-5">
@@ -728,10 +728,6 @@ Frank  104  ← frame end
 </figure>
 </div>
 </div>
-<blockquote>
-<p><strong>Why is it so complicated?</strong>
-If you have such a reaction, I understand completely. There are certain benefits from using frames, but why the authors of the SQL standard chose this unobvious default behavior, I do not know. We just have to deal with it.</p>
-</blockquote>
 <p>Let&rsquo;s summarize how <code>first_value()</code> and <code>last_value()</code> work:</p>
 <ol>
 <li>A window consists of one or more partitions (<code>partition by department</code>).</li>
@@ -1038,7 +1034,7 @@ If you have such a reaction, I understand completely. There are certain benefits
 </ol>
 <p>P.S. Interested in using SQL for data analytics? Check out my book — <a href="/sql-window-functions-book">SQL Window Functions Explained</a></p>
 ]]></content:encoded></item><item><title>Ranking Data with SQL Window Functions</title><link>https://antonz.org/sql-window-functions-ranking/</link><pubDate>Wed, 08 Feb 2023 13:30:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-ranking/</guid><description>Making ratings and dividing data into partitions.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
-<p>Ranking means coming up with all kinds of ratings, starting from the winners of the World Swimming Championships and ending with the Forbes 500.</p>
+<p>Ranking means coming up with all kinds of ratings, from the winners of the World Swimming Championships to the Forbes 500.</p>
 <p>We will rank records from the toy <code>employees</code> table:</p>
 <pre tabindex="0"><code>┌────┬───────┬────────┬────────────┬────────┐
 │ id │ name  │  city  │ department │ salary │
@@ -1060,6 +1056,7 @@ If you have such a reaction, I understand completely. There are certain benefits
 <li><a href="#salary-rating">Salary rating</a></li>
 <li><a href="#window-ordering-vs-result-ordering">Window ordering vs. result ordering</a></li>
 <li><a href="#sorting-uniqueness">Sorting uniqueness</a></li>
+<li><a href="#multiple-windows">Multiple windows</a></li>
 <li><a href="#salary-rating-by-department">​​Salary rating by department</a></li>
 <li><a href="#salary-groups">Salary groups</a></li>
 <li><a href="#ranking-functions">Ranking functions</a></li>
@@ -1078,7 +1075,7 @@ If you have such a reaction, I understand completely. There are certain benefits
 <p>You can use any of the mentioned DBMS if you have one available. Or an <a href="https://sqlime.org/#employees.db">online playground</a>.</p>
 </div>
 <h2 id="salary-rating">Salary rating</h2>
-<p>Let&rsquo;s make an employee rating by salary:</p>
+<p>Let&rsquo;s rank employees by salary:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-5">
     before<br/>
@@ -1141,7 +1138,7 @@ If you have such a reaction, I understand completely. There are certain benefits
 <li><code>(order by salary desc)</code> — the window definition (&ldquo;values of the salary column in descending order&rdquo;).</li>
 </ul>
 <p>Our goal is to calculate the rank over the window <code>w</code>. In SQL, this is written as <code>dense_rank() over w</code>.</p>
-<p><code>dense_rank()</code> is a <em>window function</em> that counts the rank over the specified <em>window</em>. The logic of <code>dense_rank()</code> is the same as when we counted manually — start with one and increase the rank every time the next window value differs from the previous one.</p>
+<p><code>dense_rank()</code> is a <em>window function</em> that counts the rank over the specified window. The logic of <code>dense_rank()</code> is the same as when we counted manually — start with one and increase the rank every time the next window value differs from the previous one.</p>
 <p>Let&rsquo;s add the window definition and the window function to the original query:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
   <span style="color:#000">dense_rank</span>() <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
@@ -1172,25 +1169,26 @@ If you have such a reaction, I understand completely. There are certain benefits
 <span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>)
 <span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>, <span style="color:#000">id</span>;
 </code></pre></div><p>The window starts working only when a window function in <code>select</code> uses it.</p>
-<hr>
-<p><strong>Window queries in Oracle and MS SQL Server databases</strong></p>
+<div class="boxed">
+<h3>Window queries in Oracle and MS SQL Server databases</h3>
 <p>Neither Oracle nor SQL Server support the <code>window</code> clause. To make a window query work in these databases, move the window definition inside the <code>over</code> clause.</p>
 <p>Instead of this:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">dense_rank</span>() <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#c41a16">&#34;rank&#34;</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>Do this:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">dense_rank</span>() <span style="color:#000">over</span> (
-    <span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>
-  ) <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#c41a16">&#34;rank&#34;</span>, <span style="color:#000">id</span>;
-</code></pre></div><hr>
+<pre><code>select
+  dense_rank() over w as "rank",
+  name, department, salary
+from employees
+window w as (order by salary desc)
+order by "rank", id;
+</code></pre>
+<p>Do this:</p>
+<pre><code>select
+  dense_rank() over (
+    order by salary desc
+  ) as "rank",
+  name, department, salary
+from employees
+order by "rank", id;</code></pre>
+</div>
 <h2 id="window-ordering-vs-result-ordering">Window ordering vs. result ordering</h2>
 <p>People often have questions about window sorting. Let&rsquo;s break them down.</p>
 <p>Here is a query that calculates a salary rating:</p>
@@ -1218,7 +1216,7 @@ If you have such a reaction, I understand completely. There are certain benefits
 </code></pre></div><p>As you can see, the rank is assigned according to the window sorting (<code>salary desc</code>), and the results are ordered according to the main query sorting (<code>salary asc</code>).</p>
 <p>If the query&rsquo;s <code>order by</code> clause is not specified, the result order is undefined. Sometimes it might work out (as in the example with the ascending salary ranking), and sometimes it might not. It&rsquo;s not worth relying on luck, so always specify the order of results explicitly.</p>
 <h2 id="sorting-uniqueness">Sorting uniqueness</h2>
-<p>Another popular question is why to include the <code>id</code> column in the result ordering:</p>
+<p>Another common question is why to include the <code>id</code> column in the result ordering:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
   <span style="color:#000">dense_rank</span>() <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
   <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
@@ -1231,8 +1229,29 @@ If you have such a reaction, I understand completely. There are certain benefits
 <p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises; that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
 <p>If you are okay with just theory for now, though — let's continue.</p>
 </div>
-<h2 id="salary-rating-by-department">​​Salary rating by department</h2>
-<p>Let&rsquo;s make an employee salary rating independently for each department:</p>
+<h2 id="multiple-windows">Multiple windows</h2>
+<p>Another common question (not related to sorting) is how to define multiple windows in a query.</p>
+<p>The answer is to write them in a comma-separated fashion in the <code>window</code> clause:</p>
+<pre tabindex="0"><code>select ...
+from ...
+where ...
+window
+  w1 as (...),
+  w2 as (...),
+  w3 as (...)
+;
+</code></pre><p>For example, let&rsquo;s rank employees by salary both in ascending and descending order:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#000">dense_rank</span>() <span style="color:#000">over</span> <span style="color:#000">w1</span> <span style="color:#a90d91">as</span> <span style="color:#000">r_asc</span>,
+  <span style="color:#000">dense_rank</span>() <span style="color:#000">over</span> <span style="color:#000">w2</span> <span style="color:#a90d91">as</span> <span style="color:#000">r_desc</span>,
+  <span style="color:#000">name</span>, <span style="color:#000">salary</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
+<span style="color:#000">window</span>
+  <span style="color:#000">w1</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">asc</span>),
+  <span style="color:#000">w2</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>)
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span>, <span style="color:#000">id</span>;
+</code></pre></div><h2 id="salary-rating-by-department">​​Salary rating by department</h2>
+<p>Let&rsquo;s rank employees by salary for each department independently:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-5">
     before<br/>
@@ -1320,7 +1339,7 @@ If you have such a reaction, I understand completely. There are certain benefits
 <p>If you are okay with just theory for now, though — let's continue.</p>
 </div>
 <h2 id="salary-groups">Salary groups</h2>
-<p>Let&rsquo;s divide the employees into three groups depending on the size of the salary:</p>
+<p>Let&rsquo;s divide the employees into three groups according to their salary:</p>
 <ul>
 <li>high-paid,</li>
 <li>medium-paid,</li>
@@ -1389,7 +1408,7 @@ If you have such a reaction, I understand completely. There are certain benefits
 │ 2    │ Diane │ hr         │ 70     │
 └──────┴───────┴────────────┴────────┘
 </code></pre><div class="boxed">
-<h3>✎ Exercises: Salary groups in each of the cities (+1 more)</h3>
+<h3>✎ Exercises: Salary groups in cities (+1 more)</h3>
 <p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises; that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
 <p>If you are okay with just theory for now, though — let's continue.</p>
 </div>

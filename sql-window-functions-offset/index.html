@@ -57,8 +57,8 @@
 <h1>Comparing by Offset with SQL Window Functions</h1>
 </header>
 <p><em>This is an excerpt from my book <a href=/sql-window-functions-book>SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
-<p>Comparing by offset means looking at the difference between neighboring values. For example, comparing the countries that occupy the 5th and 6th places in the world GDP rating — how different are they? What about 1st and 6th place?</p>
-<p>Sometimes we compare with boundaries instead of neighbors. For example, there are 50 top tennis players worldwide, and Maria Sakkari is ranked 10th. How do her stats compare to Iga Swiatek, who is ranked 1st? How does she compare to Lin Zhou, who is ranked 50th?</p>
+<p>Comparing by offset means looking at the difference between neighboring values. For example, if you compare the countries ranked 5th and 6th in the world in terms of GDP, how different are they? What about 1st and 6th?</p>
+<p>Sometimes we compare with boundaries instead of neighbors. For example, there are 50 top tennis players in the world, and Maria Sakkari is ranked 10th. How do her stats compare to Iga Swiatek, who is ranked 1st? How does she compare to Lin Zhou, who is ranked 50th?</p>
 <p>We will compare records from the <code>employees</code> table:</p>
 <pre tabindex=0><code>┌────┬───────┬────────┬────────────┬────────┐
 │ id │ name  │  city  │ department │ salary │
@@ -77,15 +77,15 @@
 </code></pre><p><a href=https://sqlime.org/#employees.db>playground</a> • <a href=/sql-window-functions-book/employees.sql>download</a></p>
 <p>Table of contents:</p>
 <ul>
-<li><a href=#salary-difference-with-the-previous-employee>Salary difference with the previous employee</a></li>
+<li><a href=#salary-difference-with-neighbor>Salary difference with neighbor</a></li>
 <li><a href=#department-salary-range>Department salary range</a></li>
 <li><a href=#window-partition-frame>Window, partition, frame</a></li>
 <li><a href=#department-salary-range-revisited>Department salary range revisited</a></li>
 <li><a href=#offset-functions>Offset functions</a></li>
 <li><a href=#keep-it-up>Keep it up</a></li>
 </ul>
-<h2 id=salary-difference-with-the-previous-employee>Salary difference with the previous employee</h2>
-<p>Let&rsquo;s arrange employees in ascending salary order and check whether the gap between neighbors is large:</p>
+<h2 id=salary-difference-with-neighbor>Salary difference with neighbor</h2>
+<p>Let&rsquo;s arrange employees by salary and see if the gap between neighbors is large:</p>
 <div class=row>
 <div class="col-xs-12 col-sm-5">
 before<br>
@@ -96,7 +96,7 @@ after<br>
 <figure><img src=lag-after-perc.png width=300 alt="After comparing with previous"></figure>
 </div>
 </div>
-<p>The <code>diff</code> column shows how much the employee&rsquo;s salary differs from the previous colleague&rsquo;s. As you can see, there are no significant gaps. The largest are Diane and Bob (11%) and Irene and Frank (15%).</p>
+<p>The <code>diff</code> column shows how much the employee&rsquo;s salary differs from the previous colleague&rsquo;s salary. As you can see, there are no significant gaps. The largest ones are Diane and Bob (11%) and Irene and Frank (15%).</p>
 <p>How do we go from &ldquo;before&rdquo; to &ldquo;after&rdquo;?</p>
 <p>First, let&rsquo;s sort the table in ascending order of salary:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
@@ -185,12 +185,12 @@ after<br>
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span>, <span style=color:#000>id</span>;
 </code></pre></div><p>Here we replaced <code>prev</code> → <code>lag(salary, 1) over w</code>. The database engine replaces the <code>function_name(...) over window_name</code> statement with the specific value that the function returned. So the window function can be called right inside the calculations, and you will often find such queries in the documentation and examples.</p>
 <div class=boxed>
-<h3>✎ Exercise: Previous/next employee salary</h3>
+<h3>✎ Exercise: Sibling employee salary</h3>
 <p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises; that's why I recommend <a href=https://antonz.gumroad.com/l/sql-windows>getting it</a>.</p>
 <p>If you are okay with just theory for now, though — let's continue.</p>
 </div>
 <h2 id=department-salary-range>Department salary range</h2>
-<p>Let&rsquo;s see how an employee&rsquo;s salary correlates with the minimum/maximum department salary:</p>
+<p>Let&rsquo;s see how an employee&rsquo;s salary compares to the minimum and maximum wages in their department:</p>
 <div class=row>
 <div class="col-xs-12 col-sm-5">
 before<br>
@@ -308,28 +308,28 @@ reality<br>
 <li>beginning of the frame = beginning of the partition (Emma);</li>
 <li>end of the frame = last record with a <code>salary</code> value equal to the current record (Irene).</li>
 </ul>
-<hr>
-<p><strong>Where the frame ends</strong></p>
-<p>People often have questions about the frame end. Let&rsquo;s consider some examples to make it clearer.</p>
-<pre tabindex=0><code>Emma    84  ← frame start
+<div class=boxed>
+<h3>Where the frame ends</h3>
+<p>People often have questions about the frame end. Let's consider some examples to make it clearer. The current record in each example is Henry.</p>
+<pre><code>Emma    84  ← frame start
 Grace   90
 Henry  104  ← current row
 Irene  104  ← frame end
-Frank  120
-</code></pre><p>The end of the frame is the last record with a salary value equal to the current record. The current record is Henry, with a salary of 104. The last record with a salary of 104 is Irene. Therefore, the end of the frame is Irene.</p>
-<pre tabindex=0><code>Emma    84  ← frame start
+Frank  120</code></pre>
+<p>The end of the frame is the last record with a salary value equal to the current record. The current record is Henry, with a salary of 104. The last record with a salary of 104 is Irene. Therefore, the end of the frame is Irene.</p>
+<pre><code>Emma    84  ← frame start
 Grace   90
 Henry  104  ← current row and frame end
 Irene  110
-Frank  120
-</code></pre><p>Let&rsquo;s say Irene&rsquo;s salary increased to 110. The current record is Henry, with a salary of 104. The last record with a salary of 104 is also Henry. Therefore, the end of the frame is Henry.</p>
-<pre tabindex=0><code>Emma    84  ← frame start
+Frank  120</code></pre>
+<p>Let's say Irene's salary increased to 110. The current record is Henry, with a salary of 104. The last record with a salary of 104 is also Henry. Therefore, the end of the frame is Henry.</p>
+<pre><code>Emma    84  ← frame start
 Grace   90
 Henry  104  ← current row
 Irene  104
-Frank  104  ← frame end
-</code></pre><p>Let&rsquo;s say Franks&rsquo;s salary decreased to 104. The current record is Henry, with a salary of 104. The last record with a salary of 104 is Frank. Therefore, the end of the frame is Frank.</p>
-<hr>
+Frank  104  ← frame end</code></pre>
+<p>Let's say Franks's salary decreased to 104. The current record is Henry, with a salary of 104. The last record with a salary of 104 is Frank. Therefore, the end of the frame is Frank.</p>
+</div>
 <p>The partition is fixed, but the frame depends on the current record and is constantly changing:</p>
 <div class=row>
 <div class="col-xs-12 col-sm-5">
@@ -355,10 +355,6 @@ Frank  104  ← frame end
 </figure>
 </div>
 </div>
-<blockquote>
-<p><strong>Why is it so complicated?</strong>
-If you have such a reaction, I understand completely. There are certain benefits from using frames, but why the authors of the SQL standard chose this unobvious default behavior, I do not know. We just have to deal with it.</p>
-</blockquote>
 <p>Let&rsquo;s summarize how <code>first_value()</code> and <code>last_value()</code> work:</p>
 <ol>
 <li>A window consists of one or more partitions (<code>partition by department</code>).</li>
