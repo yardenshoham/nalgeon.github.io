@@ -10,9 +10,9 @@ featured = true
 
 _This is an excerpt from my book [SQL Window Functions Explained](/sql-window-functions-book). The book is a clear and visual introduction to the topic with lots of practical exercises._
 
-Comparing by offset means looking at the difference between neighboring values. For example, comparing the countries that occupy the 5th and 6th places in the world GDP rating — how different are they? What about 1st and 6th place?
+Comparing by offset means looking at the difference between neighboring values. For example, if you compare the countries ranked 5th and 6th in the world in terms of GDP, how different are they? What about 1st and 6th?
 
-Sometimes we compare with boundaries instead of neighbors. For example, there are 50 top tennis players worldwide, and Maria Sakkari is ranked 10th. How do her stats compare to Iga Swiatek, who is ranked 1st? How does she compare to Lin Zhou, who is ranked 50th?
+Sometimes we compare with boundaries instead of neighbors. For example, there are 50 top tennis players in the world, and Maria Sakkari is ranked 10th. How do her stats compare to Iga Swiatek, who is ranked 1st? How does she compare to Lin Zhou, who is ranked 50th?
 
 We will compare records from the `employees` table:
 
@@ -37,16 +37,16 @@ We will compare records from the `employees` table:
 
 Table of contents:
 
-- [Salary difference with the previous employee](#salary-difference-with-the-previous-employee)
-- [Department salary range](#department-salary-range)
-- [Window, partition, frame](#window-partition-frame)
-- [Department salary range revisited](#department-salary-range-revisited)
-- [Offset functions](#offset-functions)
-- [Keep it up](#keep-it-up)
+-   [Salary difference with neighbor](#salary-difference-with-neighbor)
+-   [Department salary range](#department-salary-range)
+-   [Window, partition, frame](#window-partition-frame)
+-   [Department salary range revisited](#department-salary-range-revisited)
+-   [Offset functions](#offset-functions)
+-   [Keep it up](#keep-it-up)
 
-## Salary difference with the previous employee
+## Salary difference with neighbor
 
-Let's arrange employees in ascending salary order and check whether the gap between neighbors is large:
+Let's arrange employees by salary and see if the gap between neighbors is large:
 
 <div class="row">
 <div class="col-xs-12 col-sm-5">
@@ -59,7 +59,7 @@ Let's arrange employees in ascending salary order and check whether the gap betw
 </div>
 </div>
 
-The `diff` column shows how much the employee's salary differs from the previous colleague's. As you can see, there are no significant gaps. The largest are Diane and Bob (11%) and Irene and Frank (15%).
+The `diff` column shows how much the employee's salary differs from the previous colleague's salary. As you can see, there are no significant gaps. The largest ones are Diane and Bob (11%) and Irene and Frank (15%).
 
 How do we go from "before" to "after"?
 
@@ -181,14 +181,14 @@ order by salary, id;
 Here we replaced `prev` → `lag(salary, 1) over w`. The database engine replaces the `function_name(...) over window_name` statement with the specific value that the function returned. So the window function can be called right inside the calculations, and you will often find such queries in the documentation and examples.
 
 <div class="boxed">
-<h3>✎ Exercise: Previous/next employee salary</h3>
+<h3>✎ Exercise: Sibling employee salary</h3>
 <p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises; that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
 <p>If you are okay with just theory for now, though — let's continue.</p>
 </div>
 
 ## Department salary range
 
-Let's see how an employee's salary correlates with the minimum/maximum department salary:
+Let's see how an employee's salary compares to the minimum and maximum wages in their department:
 
 <div class="row">
 <div class="col-xs-12 col-sm-5">
@@ -342,43 +342,28 @@ The frame is in the same partition as the current record (Henry):
 -   beginning of the frame = beginning of the partition (Emma);
 -   end of the frame = last record with a `salary` value equal to the current record (Irene).
 
----
-
-**Where the frame ends**
-
-People often have questions about the frame end. Let's consider some examples to make it clearer.
-
-```
-Emma    84  ← frame start
+<div class="boxed">
+<h3>Where the frame ends</h3>
+<p>People often have questions about the frame end. Let's consider some examples to make it clearer. The current record in each example is Henry.</p>
+<pre><code>Emma    84  ← frame start
 Grace   90
 Henry  104  ← current row
 Irene  104  ← frame end
-Frank  120
-```
-
-The end of the frame is the last record with a salary value equal to the current record. The current record is Henry, with a salary of 104. The last record with a salary of 104 is Irene. Therefore, the end of the frame is Irene.
-
-```
-Emma    84  ← frame start
+Frank  120</code></pre>
+<p>The end of the frame is the last record with a salary value equal to the current record. The current record is Henry, with a salary of 104. The last record with a salary of 104 is Irene. Therefore, the end of the frame is Irene.</p>
+<pre><code>Emma    84  ← frame start
 Grace   90
 Henry  104  ← current row and frame end
 Irene  110
-Frank  120
-```
-
-Let's say Irene's salary increased to 110. The current record is Henry, with a salary of 104. The last record with a salary of 104 is also Henry. Therefore, the end of the frame is Henry.
-
-```
-Emma    84  ← frame start
+Frank  120</code></pre>
+<p>Let's say Irene's salary increased to 110. The current record is Henry, with a salary of 104. The last record with a salary of 104 is also Henry. Therefore, the end of the frame is Henry.</p>
+<pre><code>Emma    84  ← frame start
 Grace   90
 Henry  104  ← current row
 Irene  104
-Frank  104  ← frame end
-```
-
-Let's say Franks's salary decreased to 104. The current record is Henry, with a salary of 104. The last record with a salary of 104 is Frank. Therefore, the end of the frame is Frank.
-
----
+Frank  104  ← frame end</code></pre>
+<p>Let's say Franks's salary decreased to 104. The current record is Henry, with a salary of 104. The last record with a salary of 104 is Frank. Therefore, the end of the frame is Frank.</p>
+</div>
 
 The partition is fixed, but the frame depends on the current record and is constantly changing:
 
@@ -410,9 +395,6 @@ For `last_value()` to work as we expect, we will have to "nail" the frame bounda
 </figure>
 </div>
 </div>
-
-> **Why is it so complicated?**
-> If you have such a reaction, I understand completely. There are certain benefits from using frames, but why the authors of the SQL standard chose this unobvious default behavior, I do not know. We just have to deal with it.
 
 Let's summarize how `first_value()` and `last_value()` work:
 
