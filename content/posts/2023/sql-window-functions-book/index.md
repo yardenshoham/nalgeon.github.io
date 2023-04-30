@@ -63,8 +63,9 @@ Here is what you will learn:
     </li>
     <li>Practice
         <ul>
-            <li>Product analytics</li>
+            <li>Finance</li>
             <li>Clustering</li>
+            <li>Data cleaning</li>
         </ul>
     </li>
 </ol>
@@ -79,7 +80,7 @@ Here is what you will learn:
 
 To preview the first few chapters, visit the links in the table of contents above.
 
-10 of the 13 chapters are ready, and I'll publish the rest by May 2023. You can buy an early access release for $10.
+70% of the book is finished, and I'll publish the rest in May 2023. You can buy an early access version for $10.
 
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
