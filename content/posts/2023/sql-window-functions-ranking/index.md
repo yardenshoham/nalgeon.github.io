@@ -10,7 +10,7 @@ featured = true
 
 _This is an excerpt from my book [SQL Window Functions Explained](/sql-window-functions-book). The book is a clear and visual introduction to the topic with lots of practical exercises._
 
-Ranking means coming up with all kinds of ratings, starting from the winners of the World Swimming Championships and ending with the Forbes 500.
+Ranking means coming up with all kinds of ratings, from the winners of the World Swimming Championships to the Forbes 500.
 
 We will rank records from the toy `employees` table:
 
@@ -35,13 +35,14 @@ We will rank records from the toy `employees` table:
 
 Table of contents:
 
-- [Salary rating](#salary-rating)
-- [Window ordering vs. result ordering](#window-ordering-vs-result-ordering)
-- [Sorting uniqueness](#sorting-uniqueness)
-- [​​Salary rating by department](#salary-rating-by-department)
-- [Salary groups](#salary-groups)
-- [Ranking functions](#ranking-functions)
-- [Keep it up](#keep-it-up)
+-   [Salary rating](#salary-rating)
+-   [Window ordering vs. result ordering](#window-ordering-vs-result-ordering)
+-   [Sorting uniqueness](#sorting-uniqueness)
+-   [Multiple windows](#multiple-windows)
+-   [​​Salary rating by department](#salary-rating-by-department)
+-   [Salary groups](#salary-groups)
+-   [Ranking functions](#ranking-functions)
+-   [Keep it up](#keep-it-up)
 
 <div class="boxed">
 <h3>Databases</h3>
@@ -58,7 +59,7 @@ Table of contents:
 
 ## Salary rating
 
-Let's make an employee rating by salary:
+Let's rank employees by salary:
 
 <div class="row">
 <div class="col-xs-12 col-sm-5">
@@ -138,7 +139,7 @@ window w as (order by salary desc)
 
 Our goal is to calculate the rank over the window `w`. In SQL, this is written as `dense_rank() over w`.
 
-`dense_rank()` is a _window function_ that counts the rank over the specified _window_. The logic of `dense_rank()` is the same as when we counted manually — start with one and increase the rank every time the next window value differs from the previous one.
+`dense_rank()` is a _window function_ that counts the rank over the specified window. The logic of `dense_rank()` is the same as when we counted manually — start with one and increase the rank every time the next window value differs from the previous one.
 
 Let's add the window definition and the window function to the original query:
 
@@ -181,36 +182,26 @@ order by salary desc, id;
 
 The window starts working only when a window function in `select` uses it.
 
----
-
-**Window queries in Oracle and MS SQL Server databases**
-
-Neither Oracle nor SQL Server support the `window` clause. To make a window query work in these databases, move the window definition inside the `over` clause.
-
-Instead of this:
-
-```sql
-select
+<div class="boxed">
+<h3>Window queries in Oracle and MS SQL Server databases</h3>
+<p>Neither Oracle nor SQL Server support the <code>window</code> clause. To make a window query work in these databases, move the window definition inside the <code>over</code> clause.</p>
+<p>Instead of this:</p>
+<pre><code>select
   dense_rank() over w as "rank",
   name, department, salary
 from employees
 window w as (order by salary desc)
 order by "rank", id;
-```
-
-Do this:
-
-```sql
-select
+</code></pre>
+<p>Do this:</p>
+<pre><code>select
   dense_rank() over (
     order by salary desc
   ) as "rank",
   name, department, salary
 from employees
-order by "rank", id;
-```
-
----
+order by "rank", id;</code></pre>
+</div>
 
 ## Window ordering vs. result ordering
 
@@ -258,7 +249,7 @@ If the query's `order by` clause is not specified, the result order is undefined
 
 ## Sorting uniqueness
 
-Another popular question is why to include the `id` column in the result ordering:
+Another common question is why to include the `id` column in the result ordering:
 
 ```sql
 select
@@ -277,9 +268,40 @@ Why use `order by rank, id` instead of `order by rank`? To know how to sort empl
 <p>If you are okay with just theory for now, though — let's continue.</p>
 </div>
 
+## Multiple windows
+
+Another common question (not related to sorting) is how to define multiple windows in a query.
+
+The answer is to write them in a comma-separated fashion in the `window` clause:
+
+```
+select ...
+from ...
+where ...
+window
+  w1 as (...),
+  w2 as (...),
+  w3 as (...)
+;
+```
+
+For example, let's rank employees by salary both in ascending and descending order:
+
+```sql
+select
+  dense_rank() over w1 as r_asc,
+  dense_rank() over w2 as r_desc,
+  name, salary
+from employees
+window
+  w1 as (order by salary asc),
+  w2 as (order by salary desc)
+order by salary, id;
+```
+
 ## ​​Salary rating by department
 
-Let's make an employee salary rating independently for each department:
+Let's rank employees by salary for each department independently:
 
 <div class="row">
 <div class="col-xs-12 col-sm-5">
@@ -391,7 +413,7 @@ Here's an animation showing how the engine calculates the rank for each record:
 
 ## Salary groups
 
-Let's divide the employees into three groups depending on the size of the salary:
+Let's divide the employees into three groups according to their salary:
 
 -   high-paid,
 -   medium-paid,
@@ -486,7 +508,7 @@ order by salary desc, tile;
 ```
 
 <div class="boxed">
-<h3>✎ Exercises: Salary groups in each of the cities (+1 more)</h3>
+<h3>✎ Exercises: Salary groups in cities (+1 more)</h3>
 <p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises; that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
 <p>If you are okay with just theory for now, though — let's continue.</p>
 </div>
