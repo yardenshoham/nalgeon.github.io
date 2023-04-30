@@ -186,8 +186,8 @@ after<br>
 </code></pre></div><p>Here we replaced <code>prev</code> → <code>lag(salary, 1) over w</code>. The database engine replaces the <code>function_name(...) over window_name</code> statement with the specific value that the function returned. So the window function can be called right inside the calculations, and you will often find such queries in the documentation and examples.</p>
 <div class=boxed>
 <h3>✎ Exercise: Sibling employee salary</h3>
-<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises; that's why I recommend <a href=https://antonz.gumroad.com/l/sql-windows>getting it</a>.</p>
-<p>If you are okay with just theory for now, though — let's continue.</p>
+<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises — that's why I recommend <a href=https://antonz.gumroad.com/l/sql-windows>getting it</a>.</p>
+<p>If you are okay with just theory for now, let's continue.</p>
 </div>
 <h2 id=department-salary-range>Department salary range</h2>
 <p>Let&rsquo;s see how an employee&rsquo;s salary compares to the minimum and maximum wages in their department:</p>
@@ -402,8 +402,8 @@ Frank  104  ← frame end</code></pre>
 </div>
 <div class=boxed>
 <h3>✎ Exercise: City salary ratio</h3>
-<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises; that's why I recommend <a href=https://antonz.gumroad.com/l/sql-windows>getting it</a>.</p>
-<p>If you are okay with just theory for now, though — let's continue.</p>
+<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises — that's why I recommend <a href=https://antonz.gumroad.com/l/sql-windows>getting it</a>.</p>
+<p>If you are okay with just theory for now, let's continue.</p>
 </div>
 <h2 id=offset-functions>Offset functions</h2>
 <p>Here are the offset window functions:</p>
@@ -461,7 +461,7 @@ Frank  104  ← frame end</code></pre>
 <p>For the frame boundaries to match the partition boundaries (or the window boundaries if there is only one partition), use the following statement in the window definition:</p>
 <pre tabindex=0><code>rows between unbounded preceding and unbounded following
 </code></pre><h2 id=keep-it-up>Keep it up</h2>
-<p>You have learned how to compare rows with neighbors and window boundaries. In the <span class=color-gray>next chapter</span> (coming soon) we will aggregate data!</p>
+<p>You have learned how to compare rows with neighbors and window boundaries. In the <a href=/sql-window-functions-aggregation>next chapter</a> we will aggregate data!</p>
 <p>
 <a class=button href=https://antonz.gumroad.com/l/sql-windows>
 Get the book
