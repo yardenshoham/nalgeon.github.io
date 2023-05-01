@@ -5,7 +5,6 @@ description = "Comparing individual values with totals and averages."
 image = "/sql-window-functions-aggregation/cover.png"
 slug = "sql-window-functions-aggregation"
 tags = ["data"]
-featured = true
 +++
 
 _This is an excerpt from my book [SQL Window Functions Explained](/sql-window-functions-book). The book is a clear and visual introduction to the topic with lots of practical exercises._
