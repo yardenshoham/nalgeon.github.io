@@ -1,4 +1,391 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 30 Apr 2023 18:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Aggregating Data with SQL Window Functions</title><link>https://antonz.org/sql-window-functions-aggregation/</link><pubDate>Sun, 30 Apr 2023 18:30:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-aggregation/</guid><description>Comparing individual values with totals and averages.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Mon, 01 May 2023 12:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Rolling Aggregates with SQL Window Functions</title><link>https://antonz.org/sql-window-functions-rolling-aggregates/</link><pubDate>Mon, 01 May 2023 12:00:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-rolling-aggregates/</guid><description>Moving averages, cumulative totals and other sliding aggregates.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
+<p>​Rolling aggregates (also known as sliding or moving aggregates) are just totals — sum, average, count etc. But instead of calculating them across all elements, we take a different approach.</p>
+<p>Let&rsquo;s look at some examples. We&rsquo;ll use the <code>expenses</code> table, which contains the monthly income and expenses of the company our employees work for. To make examples concise, we&rsquo;ll only consider the first nine months of 2020:</p>
+<pre tabindex="0"><code>select
+  year, month, income, expense
+from expenses
+where year = 2020 and month &lt;= 9
+order by month;
+</code></pre><pre tabindex="0"><code>┌──────┬───────┬────────┬─────────┐
+│ year │ month │ income │ expense │
+├──────┼───────┼────────┼─────────┤
+│ 2020 │ 1     │ 94     │ 82      │
+│ 2020 │ 2     │ 94     │ 75      │
+│ 2020 │ 3     │ 94     │ 104     │
+│ 2020 │ 4     │ 100    │ 94      │
+│ 2020 │ 5     │ 100    │ 99      │
+│ 2020 │ 6     │ 100    │ 105     │
+│ 2020 │ 7     │ 100    │ 95      │
+│ 2020 │ 8     │ 100    │ 110     │
+│ 2020 │ 9     │ 104    │ 104     │
+└──────┴───────┴────────┴─────────┘
+</code></pre><p><a href="https://sqlime.org/#employees.db">playground</a> • <a href="/sql-window-functions-book/employees.sql">download</a></p>
+<p>Table of contents:</p>
+<ul>
+<li><a href="#moving-average">Moving average</a></li>
+<li><a href="#frame">Frame</a></li>
+<li><a href="#cumulative-total">Cumulative total</a></li>
+<li><a href="#default-frame">Default frame</a></li>
+<li><a href="#rolling-aggregates-functions">Rolling aggregates functions</a></li>
+</ul>
+<h2 id="moving-average">Moving average</h2>
+<p>Judging by the data, the income is growing: 94 in January → 104 in September. But are the expenses growing as well? It&rsquo;s hard to tell right away: expenses vary from month to month. To smooth out these spikes, we&rsquo;ll use the &ldquo;3-month average&rdquo; — the average between the previous, current, and next month&rsquo;s expenses for each month:</p>
+<ul>
+<li>moving average for January = (January + February) / 2;</li>
+<li>for February = (January + February + March) / 3;</li>
+<li>for March = (February + March + April) / 3;</li>
+<li>for April = (March + April + May) / 3;</li>
+<li>and so on.</li>
+</ul>
+<p>Let&rsquo;s calculate the moving average for all months:</p>
+<div class="row">
+<div class="col-xs-12 col-sm-5">
+    before<br/>
+    <figure><img src="before.png" width="300" alt="Before moving average"/></figure>
+</div>
+<div class="col-xs-12 col-sm-5">
+    after<br/>
+    <figure><img src="avg-after.png" width="300" alt="After moving average"/></figure>
+</div>
+</div>
+<p>The <code>roll_avg</code> column contains the expenses moving average for three months (previous, current, and following). Now it is clear that expenses are steadily growing.</p>
+<p>How do we go from &ldquo;before&rdquo; to &ldquo;after&rdquo;?</p>
+<p>Let&rsquo;s sort the table by month:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>, <span style="color:#000">expense</span>,
+  <span style="color:#a90d91">null</span> <span style="color:#a90d91">as</span> <span style="color:#000">roll_avg</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">expenses</span>
+<span style="color:#a90d91">where</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2020</span> <span style="color:#a90d91">and</span> <span style="color:#a90d91">month</span> <span style="color:#000">&lt;=</span> <span style="color:#1c01ce">9</span>
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>;
+</code></pre></div><p>Now let&rsquo;s traverse from the first record to the last. At each step, we will calculate the average among the previous, current, and next values from the <code>expense</code> column:</p>
+<div class="row">
+<div class="col-xs-12 col-sm-5">
+    ➀<br/>
+    <figure><img src="avg/03.png" width="300" alt="Moving average step #1"/></figure>
+</div>
+<div class="col-xs-12 col-sm-5">
+    ➁<br/>
+    <figure><img src="avg/04.png" width="300" alt="Moving average step #2"/></figure>
+</div>
+</div>
+<div class="row">
+<div class="col-xs-12 col-sm-5">
+    ➂<br/>
+    <figure><img src="avg/05.png" width="300" alt="Moving average step #3"/></figure>
+</div>
+<div class="col-xs-12 col-sm-5">
+    ➃<br/>
+    <figure><img src="avg/06.png" width="300" alt="Moving average step #4"/></figure>
+</div>
+</div>
+<div class="row">
+<div class="col-xs-12 col-sm-5">
+    ➄<br/>
+    <figure><img src="avg/07.png" width="300" alt="Moving average step #5"/></figure>
+</div>
+<div class="col-xs-12 col-sm-5">
+    <p>and so on...</p>
+</div>
+</div>
+<p>In a single gif:</p>
+<div class="row">
+<div class="col-xs-12 col-sm-5">
+<figure>
+  <img src="avg.gif" width="300" alt="Moving average animation"/>
+</figure>
+</div>
+</div>
+<p>The blue frame shifts down at each step — this is how we get the moving average. To describe this in SQL, we need to revisit the concept of <em>frames</em> that we encountered in the <a href="/sql-window-functions-offset/">Comparing by Offset</a> chapter:</p>
+<ol>
+<li>The window consists of one or more partitions (in our case, there is only one partition with the company&rsquo;s expenses).</li>
+<li>Within the partition, records are ordered by specific columns (<code>order by year, month</code>).</li>
+<li>Each record has its own frame.</li>
+</ol>
+<p>The frame at each step covers three records — previous, current and next:</p>
+<div class="row">
+<div class="col-xs-12 col-sm-5">
+    expenses<br/>
+    <figure><img src="current-row-1.png" width="300" alt="Current row 1"/></figure>
+</div>
+<div class="col-xs-12 col-sm-5">
+    expenses<br/>
+    <figure><img src="current-row-2.png" width="300" alt="Current row 2"/></figure>
+</div>
+</div>
+<p>Here&rsquo;s how to write it in SQL:</p>
+<pre tabindex="0"><code>window w as (
+  order by year, month
+  rows between 1 preceding and 1 following
+)
+</code></pre><p>The <code>rows</code> line is the frame definition. It literally says:</p>
+<blockquote>
+<p>Select rows from the previous one to the following one.</p>
+</blockquote>
+<p>We will deal with frames in detail in the next step, but for now, let&rsquo;s finish with our query.</p>
+<p>Calculate the average expenses with the <code>avg()</code> function:</p>
+<pre tabindex="0"><code>avg(expense) over w
+</code></pre><p>Add rounding and bring everything together:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>, <span style="color:#000">expense</span>,
+  <span style="color:#000">round</span>(<span style="color:#a90d91">avg</span>(<span style="color:#000">expense</span>) <span style="color:#000">over</span> <span style="color:#000">w</span>) <span style="color:#a90d91">as</span> <span style="color:#000">roll_avg</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">expenses</span>
+<span style="color:#a90d91">where</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2020</span> <span style="color:#a90d91">and</span> <span style="color:#a90d91">month</span> <span style="color:#000">&lt;=</span> <span style="color:#1c01ce">9</span>
+<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (
+  <span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>
+  <span style="color:#a90d91">rows</span> <span style="color:#a90d91">between</span> <span style="color:#1c01ce">1</span> <span style="color:#000">preceding</span> <span style="color:#a90d91">and</span> <span style="color:#1c01ce">1</span> <span style="color:#000">following</span>
+)
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>;
+</code></pre></div><p>The expenses moving average is ready!</p>
+<h2 id="frame">Frame</h2>
+<p>In general, the frame is defined like this:</p>
+<pre tabindex="0"><code>rows between X preceding and Y following
+</code></pre><p>Where <code>X</code> is the number of rows before the current one, and <code>Y</code> is the number of rows after the current one:</p>
+<div class="row">
+<div class="col-xs-12 col-sm-5">
+    <figure><img src="preceding-following-1.png" width="300" alt="Between 2 preceding and 1 following"/></figure>
+</div>
+<div class="col-xs-12 col-sm-5">
+    <figure><img src="preceding-following-2.png" width="300" alt="Between 1 preceding and 2 following"/></figure>
+</div>
+</div>
+<p>If you specify the value <code>unbounded</code> instead of <code>X</code> or <code>Y</code> — this means &ldquo;from/to the partition boundary&rdquo;:</p>
+<div class="row">
+<div class="col-xs-12 col-sm-5">
+    <figure><img src="unbounded-preceding.png" width="300" alt="Unbounded preceding"/></figure>
+</div>
+<div class="col-xs-12 col-sm-5">
+    <figure><img src="unbounded-following.png" width="300" alt="Unbounded following"/></figure>
+</div>
+</div>
+<p>If you specify the value <code>current row</code> instead of <code>X preceding</code> or <code>Y following</code> — this means &ldquo;the current record&rdquo;:</p>
+<div class="row">
+<div class="col-xs-12 col-sm-5">
+    <figure><img src="preceding-current.png" width="300" alt="Between 2 preceding and current row"/></figure>
+</div>
+<div class="col-xs-12 col-sm-5">
+    <figure><img src="current-following.png" width="300" alt="Between current row and 2 following"/></figure>
+</div>
+</div>
+<p>The frame never goes beyond the partition boundaries. If the frame encounters a boundary, it is cut off:</p>
+<div class="row">
+<div class="col-xs-12 col-sm-5">
+    <figure><img src="boundary-1.png" width="300" alt="Partition start"/></figure>
+</div>
+<div class="col-xs-12 col-sm-5">
+    <figure><img src="boundary-2.png" width="300" alt="Partition end"/></figure>
+</div>
+</div>
+<p>Frames have much more capabilities, but we will limit ourselves to these for now. We will discuss the rest in the next part of the book — it is fully devoted to frames.</p>
+<div class="boxed">
+<h3>✎ Exercise: Frame definition (+2 more)</h3>
+<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises — that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
+<p>If you are okay with just theory for now, let's continue.</p>
+</div>
+<h2 id="cumulative-total">Cumulative total</h2>
+<p>Thanks to the moving average, we know that income and expenses are growing. But how do they relate to each other? We want to understand whether the company is &ldquo;in the black&rdquo; or &ldquo;in the red&rdquo;, considering all the money earned and spent.</p>
+<p>It is essential to see the values for each month, not only for the end of the year. If everything is OK at in September, but the company went negative in June — this is a potential problem (companies call this situation a &ldquo;cash gap&rdquo;).</p>
+<p>Let&rsquo;s calculate income and expenses by month as a cumulative total:</p>
+<ul>
+<li>cumulative income for January = January;</li>
+<li>for February = January + February;</li>
+<li>for March = January + February + March;</li>
+<li>for April = January + February + March + April;</li>
+<li>and so on.</li>
+</ul>
+<div class="row">
+<div class="col-xs-12 col-sm-7">
+<figure>
+  <img src="sum-after.png" width="450" alt="After cumulative sum"/>
+</figure>
+</div>
+</div>
+<p><code>t_</code> columns show cumulative values:</p>
+<ul>
+<li>income (<code>t_income</code>),</li>
+<li>expenses (<code>t_expense</code>),</li>
+<li>profit (<code>t_profit</code>).</li>
+</ul>
+<pre tabindex="0"><code>t_profit = t_income - t_expense
+</code></pre><p>How do we calculate them?</p>
+<p>Let&rsquo;s sort the table by month:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>, <span style="color:#000">income</span>, <span style="color:#000">expense</span>,
+  <span style="color:#a90d91">null</span> <span style="color:#a90d91">as</span> <span style="color:#000">t_income</span>,
+  <span style="color:#a90d91">null</span> <span style="color:#a90d91">as</span> <span style="color:#000">t_expense</span>,
+  <span style="color:#a90d91">null</span> <span style="color:#a90d91">as</span> <span style="color:#000">t_profit</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">expenses</span>
+<span style="color:#a90d91">where</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2020</span> <span style="color:#a90d91">and</span> <span style="color:#a90d91">month</span> <span style="color:#000">&lt;=</span> <span style="color:#1c01ce">9</span>
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>;
+</code></pre></div><p>Now let&rsquo;s traverse from the first record to the last. At each step, we will calculate the totals from the first row to the current row:</p>
+<div class="row">
+<div class="col-xs-12 col-sm-5">
+    ➀<br/>
+    <figure><img src="sum/03.png" width="300" alt="Cumulative sum step #1"/></figure>
+</div>
+<div class="col-xs-12 col-sm-5">
+    ➁<br/>
+    <figure><img src="sum/04.png" width="300" alt="Cumulative sum step #2"/></figure>
+</div>
+</div>
+<div class="row">
+<div class="col-xs-12 col-sm-5">
+    ➂<br/>
+    <figure><img src="sum/05.png" width="300" alt="Cumulative sum step #3"/></figure>
+</div>
+<div class="col-xs-12 col-sm-5">
+    ➃<br/>
+    <figure><img src="sum/06.png" width="300" alt="Cumulative sum step #4"/></figure>
+</div>
+</div>
+<div class="row">
+<div class="col-xs-12 col-sm-5">
+    ➄<br/>
+    <figure><img src="sum/07.png" width="300" alt="Cumulative sum step #5"/></figure>
+</div>
+<div class="col-xs-12 col-sm-5">
+    <p>and so on...</p>
+</div>
+</div>
+<p>In a single gif:</p>
+<div class="row">
+<div class="col-xs-12 col-sm-7">
+<figure>
+  <img src="sum.gif" width="450" alt="Cumulative sum animation"/>
+</figure>
+</div>
+</div>
+<p>At each step, the frame covers rows from the first one to the current one. We already know how to define this frame in SQL:</p>
+<pre tabindex="0"><code>window w as (
+  order by year, month
+  rows between unbounded preceding and current row
+)
+</code></pre><p>Calculate total income and expenses with the <code>sum()</code> function:</p>
+<pre tabindex="0"><code>sum(income) over w as t_income,
+sum(expense) over w as t_expense,
+</code></pre><p>Calculate profit as the difference between income and expenses:</p>
+<pre tabindex="0"><code>(sum(income) over w) - (sum(expense) over w) as t_profit
+</code></pre><p>All together:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>, <span style="color:#000">income</span>, <span style="color:#000">expense</span>,
+  <span style="color:#a90d91">sum</span>(<span style="color:#000">income</span>) <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#000">t_income</span>,
+  <span style="color:#a90d91">sum</span>(<span style="color:#000">expense</span>) <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#000">t_expense</span>,
+  (<span style="color:#a90d91">sum</span>(<span style="color:#000">income</span>) <span style="color:#000">over</span> <span style="color:#000">w</span>) <span style="color:#000">-</span> (<span style="color:#a90d91">sum</span>(<span style="color:#000">expense</span>) <span style="color:#000">over</span> <span style="color:#000">w</span>) <span style="color:#a90d91">as</span> <span style="color:#000">t_profit</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">expenses</span>
+<span style="color:#a90d91">where</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2020</span> <span style="color:#a90d91">and</span> <span style="color:#a90d91">month</span> <span style="color:#000">&lt;=</span> <span style="color:#1c01ce">9</span>
+<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (
+  <span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>
+  <span style="color:#a90d91">rows</span> <span style="color:#a90d91">between</span> <span style="color:#000">unbounded</span> <span style="color:#000">preceding</span> <span style="color:#a90d91">and</span> <span style="color:#a90d91">current</span> <span style="color:#a90d91">row</span>
+)
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>;
+</code></pre></div><p>As you can see from <code>t_profit</code>, the company is doing well. In some months, expenses exceed income, but there is no gap due to the accumulated cash reserve.</p>
+<div class="boxed">
+<h3>✎ Exercise: Cumulative salary fund</h3>
+<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises — that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
+<p>If you are okay with just theory for now, let's continue.</p>
+</div>
+<h2 id="default-frame">Default frame</h2>
+<p>Let&rsquo;s take a query that calculates cumulative expenses:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>, <span style="color:#000">expense</span>,
+  <span style="color:#a90d91">sum</span>(<span style="color:#000">expense</span>) <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#000">total</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">expenses</span>
+<span style="color:#a90d91">where</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2020</span> <span style="color:#a90d91">and</span> <span style="color:#a90d91">month</span> <span style="color:#000">&lt;=</span> <span style="color:#1c01ce">9</span>
+<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (
+  <span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>
+  <span style="color:#a90d91">rows</span> <span style="color:#a90d91">between</span> <span style="color:#000">unbounded</span> <span style="color:#000">preceding</span> <span style="color:#a90d91">and</span> <span style="color:#a90d91">current</span> <span style="color:#a90d91">row</span>
+)
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>;
+</code></pre></div><p>And remove the frame definition:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>, <span style="color:#000">expense</span>,
+  <span style="color:#a90d91">sum</span>(<span style="color:#000">expense</span>) <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#000">total</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">expenses</span>
+<span style="color:#a90d91">where</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2020</span> <span style="color:#a90d91">and</span> <span style="color:#a90d91">month</span> <span style="color:#000">&lt;=</span> <span style="color:#1c01ce">9</span>
+<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (
+  <span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>
+)
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>;
+</code></pre></div><p>You&rsquo;d expect the same <code>total</code> in all rows — total expenses for nine months. But instead, we&rsquo;ve got this:</p>
+<div class="row">
+<div class="col-xs-12 col-sm-5">
+    expectation<br/>
+                <pre><code>┌───────┬─────────┬───────┐
+│ month │ expense │ total │
+├───────┼─────────┼───────┤
+│ 1     │ 82      │ 868   │
+│ 2     │ 75      │ 868   │
+│ 3     │ 104     │ 868   │
+│ 4     │ 94      │ 868   │
+│ 5     │ 99      │ 868   │
+│ 6     │ 105     │ 868   │
+│ 7     │ 95      │ 868   │
+│ 8     │ 110     │ 868   │
+│ 9     │ 104     │ 868   │
+└───────┴─────────┴───────┘</code></pre>
+</div>
+<div class="col-xs-12 col-sm-5">
+    reality<br/>
+                <pre><code>┌───────┬─────────┬───────┐
+│ month │ expense │ total │
+├───────┼─────────┼───────┤
+│ 1     │ 82      │ 82    │
+│ 2     │ 75      │ 157   │
+│ 3     │ 104     │ 261   │
+│ 4     │ 94      │ 355   │
+│ 5     │ 99      │ 454   │
+│ 6     │ 105     │ 559   │
+│ 7     │ 95      │ 654   │
+│ 8     │ 110     │ 764   │
+│ 9     │ 104     │ 868   │
+└───────┴─────────┴───────┘</code></pre>
+</div>
+</div>
+<p>The query without a frame still calculated cumulative expenses — exactly as the query with a frame. How is this possible?</p>
+<p>It&rsquo;s all about the presence of sorting in the window (<code>order by year, month</code>). The rule is as follows:</p>
+<ul>
+<li>if there is an <code>order by</code> in the window definition,</li>
+<li>and an aggregation function is used,</li>
+<li>and there is no frame definition,</li>
+<li>then the default frame is used.</li>
+</ul>
+<p>The default frame in our query spreads from the first to the current record. Therefore, the results match the query with the explicit frame (<code>rows between unbounded preceding and current row</code>).</p>
+<p>But it&rsquo;s not always the case. That&rsquo;s why I recommend specifying the frame explicitly until you understand the various frame types. Make your life easier — add a frame definition whenever you add an <code>order by</code> to the window.</p>
+<p>If we remove the <code>order by</code> from the window, the aggregate turns from rolling into a regular one:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>, <span style="color:#000">expense</span>,
+  <span style="color:#a90d91">sum</span>(<span style="color:#000">expense</span>) <span style="color:#000">over</span> () <span style="color:#a90d91">as</span> <span style="color:#000">total</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">expenses</span>
+<span style="color:#a90d91">where</span> <span style="color:#a90d91">year</span> <span style="color:#000">=</span> <span style="color:#1c01ce">2020</span> <span style="color:#a90d91">and</span> <span style="color:#a90d91">month</span> <span style="color:#000">&lt;=</span> <span style="color:#1c01ce">9</span>
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#a90d91">year</span>, <span style="color:#a90d91">month</span>;
+</code></pre></div><p>No surprises here.</p>
+<h2 id="rolling-aggregates-functions">Rolling aggregates functions</h2>
+<p>Rolling aggregates use the same functions as regular ones:</p>
+<ul>
+<li><code>min()</code> and <code>max()</code>,</li>
+<li><code>count()</code>, <code>avg()</code> and <code>sum()</code>,</li>
+<li><code>group_concat()</code>.</li>
+</ul>
+<p>The only difference is the presence of a frame in rolling aggregates.</p>
+<p class="align-center">⌘&nbsp;⌘&nbsp;⌘</p>
+<p>We have seen four types of tasks commonly solved with window functions in SQL:</p>
+<ul>
+<li>Ranking (various ratings).</li>
+<li>Comparing by offset (neighbors and boundaries).</li>
+<li>Aggregation (count, sum, and average).</li>
+<li>Rolling aggregates (moving average and cumulative total).</li>
+</ul>
+<p>To learn more about window functions or to get some practice — buy my book <em>SQL Window Functions Explained</em>.</p>
+<p>
+    <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
+        Get the book
+    </a>
+</p>
+<p><sqlime-db name="employees" path="/sql-window-functions-book/employees.sql"></sqlime-db>
+<sqlime-examples db="employees" selector="div.highlight" editable></sqlime-examples></p>
+<script src="/assets/sqlime/sqlite3.js"></script>
+<script src="/assets/sqlime/sqlime-db.js"></script>
+<script src="/assets/sqlime/sqlime-examples.js"></script>
+]]></content:encoded></item><item><title>Aggregating Data with SQL Window Functions</title><link>https://antonz.org/sql-window-functions-aggregation/</link><pubDate>Sun, 30 Apr 2023 18:30:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-aggregation/</guid><description>Comparing individual values with totals and averages.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
 <p>Aggregation means counting totals or averages (or other <em>aggregates</em>). For example, the average salary per city. Or the total number of gold medals for each country in the Olympic Games standings.</p>
 <p>We will aggregate records from the <code>employees</code> table:</p>
 <pre tabindex="0"><code>┌────┬───────┬────────┬────────────┬────────┐
@@ -18,13 +405,13 @@
 </code></pre><p><a href="https://sqlime.org/#employees.db">playground</a> • <a href="/sql-window-functions-book/employees.sql">download</a></p>
 <p>Table of contents:</p>
 <ul>
-<li><a href="#comparing-with-the-salary-fund">Comparing with the salary fund</a></li>
+<li><a href="#partitioned-aggregates">Partitioned aggregates</a></li>
 <li><a href="#filtering-and-execution-order">Filtering and execution order</a></li>
 <li><a href="#window-definition">Window definition</a></li>
 <li><a href="#aggregation-functions">Aggregation functions</a></li>
 <li><a href="#keep-it-up">Keep it up</a></li>
 </ul>
-<h2 id="comparing-with-the-salary-fund">Comparing with the salary fund</h2>
+<h2 id="partitioned-aggregates">Partitioned aggregates</h2>
 <p>Each department has a salary fund — money spent monthly on paying employees' salaries. Let&rsquo;s see what percentage of this fund represents each employee&rsquo;s salary:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-5">
@@ -244,7 +631,7 @@
 </tbody>
 </table>
 <h2 id="keep-it-up">Keep it up</h2>
-<p>You have learned how to calculate regular window aggregates. In the <span class="color-gray">next chapter</span> (coming soon) we will try rolling aggregates!</p>
+<p>You have learned how to calculate regular window aggregates. In the <a href="/sql-window-functions-rolling-aggregates">next chapter</a> we will try rolling aggregates!</p>
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
         Get the book
@@ -707,14 +1094,14 @@ sqlite&gt; select * from fileio_read('data.txt');
 </code></pre><p><a href="https://sqlime.org/#employees.db">playground</a> • <a href="/sql-window-functions-book/employees.sql">download</a></p>
 <p>Table of contents:</p>
 <ul>
-<li><a href="#salary-difference-with-neighbor">Salary difference with neighbor</a></li>
-<li><a href="#department-salary-range">Department salary range</a></li>
+<li><a href="#comparing-with-neighbors">Comparing with neighbors</a></li>
+<li><a href="#comparing-to-boundaries">Comparing to boundaries</a></li>
 <li><a href="#window-partition-frame">Window, partition, frame</a></li>
-<li><a href="#department-salary-range-revisited">Department salary range revisited</a></li>
+<li><a href="#comparing-to-boundaries-revisited">Comparing to boundaries revisited</a></li>
 <li><a href="#offset-functions">Offset functions</a></li>
 <li><a href="#keep-it-up">Keep it up</a></li>
 </ul>
-<h2 id="salary-difference-with-neighbor">Salary difference with neighbor</h2>
+<h2 id="comparing-with-neighbors">Comparing with neighbors</h2>
 <p>Let&rsquo;s arrange employees by salary and see if the gap between neighbors is large:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-5">
@@ -819,7 +1206,7 @@ sqlite&gt; select * from fileio_read('data.txt');
 <p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises — that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
 <p>If you are okay with just theory for now, let's continue.</p>
 </div>
-<h2 id="department-salary-range">Department salary range</h2>
+<h2 id="comparing-to-boundaries">Comparing to boundaries</h2>
 <p>Let&rsquo;s see how an employee&rsquo;s salary compares to the minimum and maximum wages in their department:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-5">
@@ -998,7 +1385,7 @@ Frank  104  ← frame end</code></pre>
 <blockquote>
 <p><strong>Note</strong>. If you don&rsquo;t quite understand what a frame is and how it is formed, it&rsquo;s okay. Frames are one of the most challenging topics in SQL windows, and they cannot be fully explained in one go. We will study frames throughout the book and gradually sort everything out.</p>
 </blockquote>
-<h2 id="department-salary-range-revisited">Department salary range revisited</h2>
+<h2 id="comparing-to-boundaries-revisited">Comparing to boundaries revisited</h2>
 <p>Let&rsquo;s take our window:</p>
 <pre tabindex="0"><code>window w as (
   partition by department
@@ -1310,12 +1697,12 @@ Frank  104  ← frame end</code></pre>
 </code></pre><p><a href="https://sqlime.org/#employees.db">playground</a> • <a href="/sql-window-functions-book/employees.sql">download</a></p>
 <p>Table of contents:</p>
 <ul>
-<li><a href="#salary-rating">Salary rating</a></li>
+<li><a href="#window-function">Window function</a></li>
 <li><a href="#window-ordering-vs-result-ordering">Window ordering vs. result ordering</a></li>
 <li><a href="#sorting-uniqueness">Sorting uniqueness</a></li>
 <li><a href="#multiple-windows">Multiple windows</a></li>
-<li><a href="#salary-rating-by-department">​​Salary rating by department</a></li>
-<li><a href="#salary-groups">Salary groups</a></li>
+<li><a href="#partitions">​Partitions</a></li>
+<li><a href="#groups">Groups</a></li>
 <li><a href="#ranking-functions">Ranking functions</a></li>
 <li><a href="#keep-it-up">Keep it up</a></li>
 </ul>
@@ -1331,7 +1718,7 @@ Frank  104  ← frame end</code></pre>
 <p>Oracle 11g+, MS SQL 2012+, and Google BigQuery are also fine. They lack certain advanced capabilities, just like MySQL. If you use one of them — the article will also be helpful.</p>
 <p>You can use any of the mentioned DBMS if you have one available. Or an <a href="https://sqlime.org/#employees.db">online playground</a>.</p>
 </div>
-<h2 id="salary-rating">Salary rating</h2>
+<h2 id="window-function">Window function</h2>
 <p>Let&rsquo;s rank employees by salary:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-5">
@@ -1507,7 +1894,7 @@ window
   <span style="color:#000">w1</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">asc</span>),
   <span style="color:#000">w2</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>)
 <span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span>, <span style="color:#000">id</span>;
-</code></pre></div><h2 id="salary-rating-by-department">​​Salary rating by department</h2>
+</code></pre></div><h2 id="partitions">​Partitions</h2>
 <p>Let&rsquo;s rank employees by salary for each department independently:</p>
 <div class="row">
 <div class="col-xs-12 col-sm-5">
@@ -1595,7 +1982,7 @@ window
 <p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises — that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
 <p>If you are okay with just theory for now, let's continue.</p>
 </div>
-<h2 id="salary-groups">Salary groups</h2>
+<h2 id="groups">Groups</h2>
 <p>Let&rsquo;s divide the employees into three groups according to their salary:</p>
 <ul>
 <li>high-paid,</li>
@@ -1891,71 +2278,4 @@ rank<br/>
 <span style="color:#000">fmt</span>.<span style="color:#000">Println</span>(<span style="color:#000">cmp</span>)
 <span style="color:#177500">// 1
 </span></code></pre></div><p>Overall, a great release! Looking forward to trying everything in production.</p>
-]]></content:encoded></item><item><title>Regular Expressions in SQLite</title><link>https://antonz.org/sqlean-regexp/</link><pubDate>Sat, 04 Feb 2023 11:20:00 +0000</pubDate><guid>https://antonz.org/sqlean-regexp/</guid><description>Use a robust pattern matching and text replacement tool from SQL.</description><content:encoded><![CDATA[<p>Regular expressions are probably the most powerful text processing tool without programming.</p>
-<p>SQLite does not support regular expressions by default. However, you can easily enable them using the <code>sqlean-regexp</code> extension.</p>
-<blockquote>
-<p><strong>Note</strong>. Unlike other DBMS, adding extensions to SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
-</blockquote>
-<p>With <code>sqlean-regexp</code>, matching a string against a pattern becomes as easy as:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#177500">-- count messages containing digits
-</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#a90d91">from</span> <span style="color:#000">messages</span>
-<span style="color:#a90d91">where</span> <span style="color:#000">msg_text</span> <span style="color:#000">regexp</span> <span style="color:#c41a16">&#39;\d+&#39;</span>;
-<span style="color:#177500">-- 42
-</span></code></pre></div><h2 id="pattern-matching-and-text-replacement">Pattern matching and text replacement</h2>
-<p>There are three main tasks people usually solve using regular expressions:</p>
-<ol>
-<li>Match a string against the pattern.</li>
-<li>Extract a part of the string that matches the pattern.</li>
-<li>Replace all parts of the string that match the pattern.</li>
-</ol>
-<p><code>sqlean-regexp</code> provides a separate function for each of these tasks.</p>
-<h3 id="regexp_likesource-pattern"><code>regexp_like(source, pattern)</code></h3>
-<p>Checks if the source string matches the pattern.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">regexp_like</span>(<span style="color:#c41a16">&#39;Meet me at 10:30&#39;</span>, <span style="color:#c41a16">&#39;\d+:\d+&#39;</span>);
-<span style="color:#177500">-- 1
-</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#000">regexp_like</span>(<span style="color:#c41a16">&#39;Meet me at the cinema&#39;</span>, <span style="color:#c41a16">&#39;\d+:\d+&#39;</span>);
-<span style="color:#177500">-- 0
-</span></code></pre></div><h3 id="regexp_substrsource-pattern"><code>regexp_substr(source, pattern)</code></h3>
-<p>Returns a substring of the source string that matches the pattern.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;Meet me at 10:30&#39;</span>, <span style="color:#c41a16">&#39;\d+:\d+&#39;</span>);
-<span style="color:#177500">-- 10:30
-</span><span style="color:#177500"></span>
-<span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;Meet me at 17:05&#39;</span>, <span style="color:#c41a16">&#39;\d+:\d+&#39;</span>);
-<span style="color:#177500">-- 17:05
-</span></code></pre></div><h3 id="regexp_replacesource-pattern-replacement"><code>regexp_replace(source, pattern, replacement)</code></h3>
-<p>Replaces all matching substrings with the replacement string.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">regexp_replace</span>(<span style="color:#c41a16">&#39;password = &#34;123456&#34;&#39;</span>, <span style="color:#c41a16">&#39;&#34;[^&#34;]+&#34;&#39;</span>, <span style="color:#c41a16">&#39;***&#39;</span>);
-<span style="color:#177500">-- password = ***
-</span><span style="color:#177500"></span>
-<span style="color:#a90d91">select</span> <span style="color:#000">regexp_replace</span>(<span style="color:#c41a16">&#39;1 2 3 4&#39;</span>, <span style="color:#c41a16">&#39;[2468]&#39;</span>, <span style="color:#c41a16">&#39;even&#39;</span>);
-<span style="color:#177500">-- 1 even 3 even
-</span></code></pre></div><h2 id="pattern-syntax">Pattern syntax</h2>
-<p><code>sqlean-regexp</code> supports pretty advanced syntax, including various groups, lazy quantifiers, and look-arounds:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;the year is 2020&#39;</span>, <span style="color:#c41a16">&#39;(\d{2})\1&#39;</span>);
-<span style="color:#177500">-- 2020
-</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;the year is 2021&#39;</span>, <span style="color:#c41a16">&#39;(\d{2})\1&#39;</span>);
-<span style="color:#177500">-- (null)
-</span><span style="color:#177500"></span>
-<span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;1 2 3 2 4 5&#39;</span>, <span style="color:#c41a16">&#39;.*2&#39;</span>);
-<span style="color:#177500">-- 1 2 3 2
-</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;1 2 3 2 4 5&#39;</span>, <span style="color:#c41a16">&#39;.*?2&#39;</span>);
-<span style="color:#177500">-- 1 2
-</span><span style="color:#177500"></span>
-<span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;new year&#39;</span>, <span style="color:#c41a16">&#39;(\w+)\s(?=year)&#39;</span>);
-<span style="color:#177500">-- new
-</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#000">regexp_substr</span>(<span style="color:#c41a16">&#39;last year&#39;</span>, <span style="color:#c41a16">&#39;(\w+)\s(?=year)&#39;</span>);
-<span style="color:#177500">-- last
-</span></code></pre></div><h2 id="installation-and-usage">Installation and Usage</h2>
-<ol>
-<li>
-<p>Download the <a href="https://github.com/nalgeon/sqlean/releases/latest">latest release</a></p>
-</li>
-<li>
-<p>Use with SQLite command-line interface:</p>
-</li>
-</ol>
-<pre tabindex="0"><code>sqlite&gt; .load ./regexp
-sqlite&gt; select regexp_like('abcdef', 'b.d');
-</code></pre><p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/install.md">How to Install an Extension</a> for usage with IDE, Python, etc.</p>
-<p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/regexp.md">Extension Documentation</a> for reference.</p>
 ]]></content:encoded></item></channel></rss>

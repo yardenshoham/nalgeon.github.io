@@ -77,14 +77,14 @@
 </code></pre><p><a href=https://sqlime.org/#employees.db>playground</a> • <a href=/sql-window-functions-book/employees.sql>download</a></p>
 <p>Table of contents:</p>
 <ul>
-<li><a href=#salary-difference-with-neighbor>Salary difference with neighbor</a></li>
-<li><a href=#department-salary-range>Department salary range</a></li>
+<li><a href=#comparing-with-neighbors>Comparing with neighbors</a></li>
+<li><a href=#comparing-to-boundaries>Comparing to boundaries</a></li>
 <li><a href=#window-partition-frame>Window, partition, frame</a></li>
-<li><a href=#department-salary-range-revisited>Department salary range revisited</a></li>
+<li><a href=#comparing-to-boundaries-revisited>Comparing to boundaries revisited</a></li>
 <li><a href=#offset-functions>Offset functions</a></li>
 <li><a href=#keep-it-up>Keep it up</a></li>
 </ul>
-<h2 id=salary-difference-with-neighbor>Salary difference with neighbor</h2>
+<h2 id=comparing-with-neighbors>Comparing with neighbors</h2>
 <p>Let&rsquo;s arrange employees by salary and see if the gap between neighbors is large:</p>
 <div class=row>
 <div class="col-xs-12 col-sm-5">
@@ -189,7 +189,7 @@ after<br>
 <p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises — that's why I recommend <a href=https://antonz.gumroad.com/l/sql-windows>getting it</a>.</p>
 <p>If you are okay with just theory for now, let's continue.</p>
 </div>
-<h2 id=department-salary-range>Department salary range</h2>
+<h2 id=comparing-to-boundaries>Comparing to boundaries</h2>
 <p>Let&rsquo;s see how an employee&rsquo;s salary compares to the minimum and maximum wages in their department:</p>
 <div class=row>
 <div class="col-xs-12 col-sm-5">
@@ -368,7 +368,7 @@ Frank  104  ← frame end</code></pre>
 <blockquote>
 <p><strong>Note</strong>. If you don&rsquo;t quite understand what a frame is and how it is formed, it&rsquo;s okay. Frames are one of the most challenging topics in SQL windows, and they cannot be fully explained in one go. We will study frames throughout the book and gradually sort everything out.</p>
 </blockquote>
-<h2 id=department-salary-range-revisited>Department salary range revisited</h2>
+<h2 id=comparing-to-boundaries-revisited>Comparing to boundaries revisited</h2>
 <p>Let&rsquo;s take our window:</p>
 <pre tabindex=0><code>window w as (
   partition by department

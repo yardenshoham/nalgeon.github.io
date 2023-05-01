@@ -76,12 +76,12 @@
 </code></pre><p><a href=https://sqlime.org/#employees.db>playground</a> • <a href=/sql-window-functions-book/employees.sql>download</a></p>
 <p>Table of contents:</p>
 <ul>
-<li><a href=#salary-rating>Salary rating</a></li>
+<li><a href=#window-function>Window function</a></li>
 <li><a href=#window-ordering-vs-result-ordering>Window ordering vs. result ordering</a></li>
 <li><a href=#sorting-uniqueness>Sorting uniqueness</a></li>
 <li><a href=#multiple-windows>Multiple windows</a></li>
-<li><a href=#salary-rating-by-department>​​Salary rating by department</a></li>
-<li><a href=#salary-groups>Salary groups</a></li>
+<li><a href=#partitions>​Partitions</a></li>
+<li><a href=#groups>Groups</a></li>
 <li><a href=#ranking-functions>Ranking functions</a></li>
 <li><a href=#keep-it-up>Keep it up</a></li>
 </ul>
@@ -97,7 +97,7 @@
 <p>Oracle 11g+, MS SQL 2012+, and Google BigQuery are also fine. They lack certain advanced capabilities, just like MySQL. If you use one of them — the article will also be helpful.</p>
 <p>You can use any of the mentioned DBMS if you have one available. Or an <a href=https://sqlime.org/#employees.db>online playground</a>.</p>
 </div>
-<h2 id=salary-rating>Salary rating</h2>
+<h2 id=window-function>Window function</h2>
 <p>Let&rsquo;s rank employees by salary:</p>
 <div class=row>
 <div class="col-xs-12 col-sm-5">
@@ -273,7 +273,7 @@ window
   <span style=color:#000>w1</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>asc</span>),
   <span style=color:#000>w2</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>)
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span>, <span style=color:#000>id</span>;
-</code></pre></div><h2 id=salary-rating-by-department>​​Salary rating by department</h2>
+</code></pre></div><h2 id=partitions>​Partitions</h2>
 <p>Let&rsquo;s rank employees by salary for each department independently:</p>
 <div class=row>
 <div class="col-xs-12 col-sm-5">
@@ -361,7 +361,7 @@ after<br>
 <p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises — that's why I recommend <a href=https://antonz.gumroad.com/l/sql-windows>getting it</a>.</p>
 <p>If you are okay with just theory for now, let's continue.</p>
 </div>
-<h2 id=salary-groups>Salary groups</h2>
+<h2 id=groups>Groups</h2>
 <p>Let&rsquo;s divide the employees into three groups according to their salary:</p>
 <ul>
 <li>high-paid,</li>
