@@ -34,13 +34,13 @@ We will aggregate records from the `employees` table:
 
 Table of contents:
 
--   [Comparing with the salary fund](#comparing-with-the-salary-fund)
+-   [Partitioned aggregates](#partitioned-aggregates)
 -   [Filtering and execution order](#filtering-and-execution-order)
 -   [Window definition](#window-definition)
 -   [Aggregation functions](#aggregation-functions)
 -   [Keep it up](#keep-it-up)
 
-## Comparing with the salary fund
+## Partitioned aggregates
 
 Each department has a salary fund — money spent monthly on paying employees' salaries. Let's see what percentage of this fund represents each employee's salary:
 

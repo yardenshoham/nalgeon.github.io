@@ -37,14 +37,14 @@ We will compare records from the `employees` table:
 
 Table of contents:
 
--   [Salary difference with neighbor](#salary-difference-with-neighbor)
--   [Department salary range](#department-salary-range)
+-   [Comparing with neighbors](#comparing-with-neighbors)
+-   [Comparing to boundaries](#comparing-to-boundaries)
 -   [Window, partition, frame](#window-partition-frame)
--   [Department salary range revisited](#department-salary-range-revisited)
+-   [Comparing to boundaries revisited](#comparing-to-boundaries-revisited)
 -   [Offset functions](#offset-functions)
 -   [Keep it up](#keep-it-up)
 
-## Salary difference with neighbor
+## Comparing with neighbors
 
 Let's arrange employees by salary and see if the gap between neighbors is large:
 
@@ -186,7 +186,7 @@ Here we replaced `prev` → `lag(salary, 1) over w`. The database engine replace
 <p>If you are okay with just theory for now, let's continue.</p>
 </div>
 
-## Department salary range
+## Comparing to boundaries
 
 Let's see how an employee's salary compares to the minimum and maximum wages in their department:
 
@@ -409,7 +409,7 @@ Now let's figure out how to nail the frame to the partition — and finish with 
 
 > **Note**. If you don't quite understand what a frame is and how it is formed, it's okay. Frames are one of the most challenging topics in SQL windows, and they cannot be fully explained in one go. We will study frames throughout the book and gradually sort everything out.
 
-## Department salary range revisited
+## Comparing to boundaries revisited
 
 Let's take our window:
 

@@ -42,13 +42,13 @@ order by month;
 
 Table of contents:
 
--   [Expenses moving average](#expenses-moving-average)
+-   [Moving average](#moving-average)
 -   [Frame](#frame)
--   [Cumulative profit](#cumulative-profit)
+-   [Cumulative total](#cumulative-total)
 -   [Default frame](#default-frame)
 -   [Rolling aggregates functions](#rolling-aggregates-functions)
 
-## Expenses moving average
+## Moving average
 
 Judging by the data, the income is growing: 94 in January → 104 in September. But are the expenses growing as well? It's hard to tell right away: expenses vary from month to month. To smooth out these spikes, we'll use the "3-month average" — the average between the previous, current, and next month's expenses for each month:
 
@@ -247,7 +247,7 @@ Frames have much more capabilities, but we will limit ourselves to these for now
 <p>If you are okay with just theory for now, let's continue.</p>
 </div>
 
-## Cumulative profit
+## Cumulative total
 
 Thanks to the moving average, we know that income and expenses are growing. But how do they relate to each other? We want to understand whether the company is "in the black" or "in the red", considering all the money earned and spent.
 

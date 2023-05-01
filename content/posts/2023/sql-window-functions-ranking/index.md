@@ -35,12 +35,12 @@ We will rank records from the toy `employees` table:
 
 Table of contents:
 
--   [Salary rating](#salary-rating)
+-   [Window function](#window-function)
 -   [Window ordering vs. result ordering](#window-ordering-vs-result-ordering)
 -   [Sorting uniqueness](#sorting-uniqueness)
 -   [Multiple windows](#multiple-windows)
--   [​​Salary rating by department](#salary-rating-by-department)
--   [Salary groups](#salary-groups)
+-   [​Partitions](#partitions)
+-   [Groups](#groups)
 -   [Ranking functions](#ranking-functions)
 -   [Keep it up](#keep-it-up)
 
@@ -57,7 +57,7 @@ Table of contents:
 <p>You can use any of the mentioned DBMS if you have one available. Or an <a href="https://sqlime.org/#employees.db">online playground</a>.</p>
 </div>
 
-## Salary rating
+## Window function
 
 Let's rank employees by salary:
 
@@ -299,7 +299,7 @@ window
 order by salary, id;
 ```
 
-## ​​Salary rating by department
+## ​Partitions
 
 Let's rank employees by salary for each department independently:
 
@@ -411,7 +411,7 @@ Here's an animation showing how the engine calculates the rank for each record:
 <p>If you are okay with just theory for now, let's continue.</p>
 </div>
 
-## Salary groups
+## Groups
 
 Let's divide the employees into three groups according to their salary:
 
