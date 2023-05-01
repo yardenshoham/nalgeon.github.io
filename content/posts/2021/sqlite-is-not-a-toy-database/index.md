@@ -400,12 +400,8 @@ db = sqlite3.connect("file::memory:?cache=shared")
 
 ## And so much more
 
-There are fancy [window functions](/sql-window-functions-book) (just like in PostgreSQL). `UPSERT`, `UPDATE FROM`, and `generate_series()`. R-Tree indexes. Regular expressions, fuzzy-search, and geo. In terms of features, SQLite can compete with any 'big' DBMS.
-
-There is also great tooling around SQLite. I especially like [Datasette](https://datasette.io/) - an open-source tool for exploring and publishing SQLite datasets. And [DBeaver](https://dbeaver.io/) is an excellent open-source database IDE with the latest SQLite versions support.
+There are fancy [window functions](/sql-window-functions-book). [`UPSERT`](https://sqlite.org/lang_upsert.html), [`UPDATE FROM`](https://sqlite.org/lang_update.html#update_from) and [`generate_series()`](https://sqlite.org/series.html). [R-Tree indexes](https://sqlite.org/rtree.html). [Regular expressions](https://github.com/nalgeon/sqlean/blob/main/docs/regexp.md), [fuzzy-search](https://github.com/nalgeon/sqlean/blob/main/docs/fuzzy.md) and [dynamic SQL](https://github.com/nalgeon/sqlean/blob/main/docs/define.md). In terms of features, SQLite can compete with any 'big' DBMS.
 
 I hope this article will inspire you to try SQLite. Thanks for reading!
 
 P.S. Interested in learning advanced SQLite features? Check out my book — [SQL Window Functions Explained](/sql-window-functions-book)
-
-[Comments on Hacker News](https://news.ycombinator.com/item?id=26580614)
