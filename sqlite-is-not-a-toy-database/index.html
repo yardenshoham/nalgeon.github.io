@@ -338,11 +338,9 @@ select city, foundation_year, timezone from city limit 10;
 </code></pre></div><p>You can even access it from multiple connections:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=color:#000>db</span> <span style=color:#000>=</span> <span style=color:#000>sqlite3</span><span style=color:#000>.</span><span style=color:#000>connect</span>(<span style=color:#c41a16>&#34;file::memory:?cache=shared&#34;</span>)
 </code></pre></div><h2 id=and-so-much-more>And so much more</h2>
-<p>There are fancy <a href=/sql-window-functions-book>window functions</a> (just like in PostgreSQL). <code>UPSERT</code>, <code>UPDATE FROM</code>, and <code>generate_series()</code>. R-Tree indexes. Regular expressions, fuzzy-search, and geo. In terms of features, SQLite can compete with any &lsquo;big&rsquo; DBMS.</p>
-<p>There is also great tooling around SQLite. I especially like <a href=https://datasette.io/>Datasette</a> - an open-source tool for exploring and publishing SQLite datasets. And <a href=https://dbeaver.io/>DBeaver</a> is an excellent open-source database IDE with the latest SQLite versions support.</p>
+<p>There are fancy <a href=/sql-window-functions-book>window functions</a>. <a href=https://sqlite.org/lang_upsert.html><code>UPSERT</code></a>, <a href=https://sqlite.org/lang_update.html#update_from><code>UPDATE FROM</code></a> and <a href=https://sqlite.org/series.html><code>generate_series()</code></a>. <a href=https://sqlite.org/rtree.html>R-Tree indexes</a>. <a href=https://github.com/nalgeon/sqlean/blob/main/docs/regexp.md>Regular expressions</a>, <a href=https://github.com/nalgeon/sqlean/blob/main/docs/fuzzy.md>fuzzy-search</a> and <a href=https://github.com/nalgeon/sqlean/blob/main/docs/define.md>dynamic SQL</a>. In terms of features, SQLite can compete with any &lsquo;big&rsquo; DBMS.</p>
 <p>I hope this article will inspire you to try SQLite. Thanks for reading!</p>
 <p>P.S. Interested in learning advanced SQLite features? Check out my book — <a href=/sql-window-functions-book>SQL Window Functions Explained</a></p>
-<p><a href="https://news.ycombinator.com/item?id=26580614">Comments on Hacker News</a></p>
 <p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
 </div>
 </div><footer class=post__footer>
