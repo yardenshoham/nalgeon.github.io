@@ -100,7 +100,7 @@ Let's find the highest-paid people in each department:
 
 No more salary raises for them, I guess.
 
-## Comparison with offset
+## Comparing by offset
 
 Comparing by offset means looking at the difference between neighboring values. For example, if you compare the countries ranked 5th and 6th in the world in terms of GDP, how different are they? What about 1st and 6th?
 
@@ -242,7 +242,7 @@ Now it is clear that the company is doing well. In some months, expenses exceed 
 SQL window functions help to solve the following tasks:
 
 -   Ranking (all kinds of ratings).
--   Comparison with offset (neighboring elements and boundaries).
+-   Comparing by offset (neighboring elements and boundaries).
 -   Aggregation (sum and average).
 -   Rolling aggregates (sum and average in dynamics).
 

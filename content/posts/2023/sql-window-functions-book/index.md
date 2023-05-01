@@ -49,7 +49,7 @@ Here is what you will learn:
             <li><a href="/sql-window-functions-ranking">Ranking</a></li>
             <li><a href="/sql-window-functions-offset">Offset</a></li>
             <li><a href="/sql-window-functions-aggregation">Aggregation</a></li>
-            <li>Rolling aggregates</li>
+            <li><a href="/sql-window-functions-rolling-aggregates">Rolling aggregates</a></li>
             <li>Statistics</li>
         </ul>
     </li>

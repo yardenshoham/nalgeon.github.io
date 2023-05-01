@@ -290,7 +290,7 @@ Here are the aggregation window functions:
 
 ## Keep it up
 
-You have learned how to calculate regular window aggregates. In the <span class="color-gray">next chapter</span> (coming soon) we will try rolling aggregates!
+You have learned how to calculate regular window aggregates. In the [next chapter](/sql-window-functions-rolling-aggregates) we will try rolling aggregates!
 
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
