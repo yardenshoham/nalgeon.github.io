@@ -80,7 +80,7 @@ Here is what you will learn:
 
 To preview the first few chapters, visit the links in the table of contents above.
 
-70% of the book is finished, and I'll publish the rest in May 2023. You can buy an early access version for $10.
+70% of the book is finished, and I'll release the rest in May 2023. You can buy an early access version for $10 (you'll also get the full book when it's published).
 
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
