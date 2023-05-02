@@ -57,6 +57,7 @@
 <h1>Comparing by Offset with SQL Window Functions</h1>
 </header>
 <p><em>This is an excerpt from my book <a href=/sql-window-functions-book>SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
+<p>Previously we&rsquo;ve covered <a href=/sql-window-functions-ranking/>ranking</a> window functions.</p>
 <p>Comparing by offset means looking at the difference between neighboring values. For example, if you compare the countries ranked 5th and 6th in the world in terms of GDP, how different are they? What about 1st and 6th?</p>
 <p>Sometimes we compare with boundaries instead of neighbors. For example, there are 50 top tennis players in the world, and Maria Sakkari is ranked 10th. How do her stats compare to Iga Swiatek, who is ranked 1st? How does she compare to Lin Zhou, who is ranked 50th?</p>
 <p>We will compare records from the <code>employees</code> table:</p>
@@ -461,7 +462,7 @@ Frank  104  ← frame end</code></pre>
 <p>For the frame boundaries to match the partition boundaries (or the window boundaries if there is only one partition), use the following statement in the window definition:</p>
 <pre tabindex=0><code>rows between unbounded preceding and unbounded following
 </code></pre><h2 id=keep-it-up>Keep it up</h2>
-<p>You have learned how to compare rows with neighbors and window boundaries. In the <a href=/sql-window-functions-aggregation>next chapter</a> we will aggregate data!</p>
+<p>You have learned how to compare rows with neighbors and window boundaries. In the next chapter we will <a href=/sql-window-functions-aggregation/>aggregate data</a>!</p>
 <p>
 <a class=button href=https://antonz.gumroad.com/l/sql-windows>
 Get the book

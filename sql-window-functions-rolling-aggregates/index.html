@@ -57,6 +57,7 @@
 <h1>Rolling Aggregates with SQL Window Functions</h1>
 </header>
 <p><em>This is an excerpt from my book <a href=/sql-window-functions-book>SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
+<p>Previously we&rsquo;ve covered <a href=/sql-window-functions-ranking/>ranking</a>, <a href=/sql-window-functions-offset/>offset</a> and <a href=/sql-window-functions-aggregation/>aggregate</a> window functions.</p>
 <p>​Rolling aggregates (also known as sliding or moving aggregates) are just totals — sum, average, count etc. But instead of calculating them across all elements, we take a different approach.</p>
 <p>Let&rsquo;s look at some examples. We&rsquo;ll use the <code>expenses</code> table, which contains the monthly income and expenses of the company our employees work for. To make examples concise, we&rsquo;ll only consider the first nine months of 2020:</p>
 <pre tabindex=0><code>select

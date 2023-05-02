@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Mon, 01 May 2023 12:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Rolling Aggregates with SQL Window Functions</title><link>https://antonz.org/sql-window-functions-rolling-aggregates/</link><pubDate>Mon, 01 May 2023 12:00:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-rolling-aggregates/</guid><description>Moving averages, cumulative totals and other sliding aggregates.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
+<p>Previously we&rsquo;ve covered <a href="/sql-window-functions-ranking/">ranking</a>, <a href="/sql-window-functions-offset/">offset</a> and <a href="/sql-window-functions-aggregation/">aggregate</a> window functions.</p>
 <p>​Rolling aggregates (also known as sliding or moving aggregates) are just totals — sum, average, count etc. But instead of calculating them across all elements, we take a different approach.</p>
 <p>Let&rsquo;s look at some examples. We&rsquo;ll use the <code>expenses</code> table, which contains the monthly income and expenses of the company our employees work for. To make examples concise, we&rsquo;ll only consider the first nine months of 2020:</p>
 <pre tabindex="0"><code>select
@@ -386,6 +387,7 @@ sum(expense) over w as t_expense,
 <script src="/assets/sqlime/sqlime-db.js"></script>
 <script src="/assets/sqlime/sqlime-examples.js"></script>
 ]]></content:encoded></item><item><title>Aggregating Data with SQL Window Functions</title><link>https://antonz.org/sql-window-functions-aggregation/</link><pubDate>Sun, 30 Apr 2023 18:30:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-aggregation/</guid><description>Comparing individual values with totals and averages.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
+<p>Previously we&rsquo;ve covered <a href="/sql-window-functions-ranking/">ranking</a> and <a href="/sql-window-functions-offset/">offset</a> window functions.</p>
 <p>Aggregation means counting totals or averages (or other <em>aggregates</em>). For example, the average salary per city. Or the total number of gold medals for each country in the Olympic Games standings.</p>
 <p>We will aggregate records from the <code>employees</code> table:</p>
 <pre tabindex="0"><code>┌────┬───────┬────────┬────────────┬────────┐
@@ -631,7 +633,7 @@ sum(expense) over w as t_expense,
 </tbody>
 </table>
 <h2 id="keep-it-up">Keep it up</h2>
-<p>You have learned how to calculate regular window aggregates. In the <a href="/sql-window-functions-rolling-aggregates">next chapter</a> we will try rolling aggregates!</p>
+<p>You have learned how to calculate regular window aggregates. In the next chapter we will try <a href="/sql-window-functions-rolling-aggregates/">rolling aggregates</a>!</p>
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
         Get the book
@@ -1074,6 +1076,7 @@ sqlite&gt; select * from fileio_read('data.txt');
 </code></pre><p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/install.md">How to Install an Extension</a> for usage with IDE, Python, etc.</p>
 <p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/fileio.md">Extension Documentation</a> for reference.</p>
 ]]></content:encoded></item><item><title>Comparing by Offset with SQL Window Functions</title><link>https://antonz.org/sql-window-functions-offset/</link><pubDate>Thu, 16 Feb 2023 14:00:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-offset/</guid><description>Comparing records with neighbors and boundaries.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
+<p>Previously we&rsquo;ve covered <a href="/sql-window-functions-ranking/">ranking</a> window functions.</p>
 <p>Comparing by offset means looking at the difference between neighboring values. For example, if you compare the countries ranked 5th and 6th in the world in terms of GDP, how different are they? What about 1st and 6th?</p>
 <p>Sometimes we compare with boundaries instead of neighbors. For example, there are 50 top tennis players in the world, and Maria Sakkari is ranked 10th. How do her stats compare to Iga Swiatek, who is ranked 1st? How does she compare to Lin Zhou, who is ranked 50th?</p>
 <p>We will compare records from the <code>employees</code> table:</p>
@@ -1478,7 +1481,7 @@ Frank  104  ← frame end</code></pre>
 <p>For the frame boundaries to match the partition boundaries (or the window boundaries if there is only one partition), use the following statement in the window definition:</p>
 <pre tabindex="0"><code>rows between unbounded preceding and unbounded following
 </code></pre><h2 id="keep-it-up">Keep it up</h2>
-<p>You have learned how to compare rows with neighbors and window boundaries. In the <a href="/sql-window-functions-aggregation">next chapter</a> we will aggregate data!</p>
+<p>You have learned how to compare rows with neighbors and window boundaries. In the next chapter we will <a href="/sql-window-functions-aggregation/">aggregate data</a>!</p>
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
         Get the book
@@ -2132,7 +2135,7 @@ rank<br/>
 </div>
 <p><code>dense_rank()</code> assigns Alice the third place, while <code>rank()</code> assigns the fourth because Henry and Irene already occupied the second and third. It is the same with Grace after Cindy and Dave. That&rsquo;s the whole difference.</p>
 <h2 id="keep-it-up">Keep it up</h2>
-<p>You have learned what &ldquo;window&rdquo; and &ldquo;window functions&rdquo; are and how to use them to rank data. In the <a href="/sql-window-functions-offset">next chapter</a>, we will deal with window offsets and comparisons!</p>
+<p>You have learned what &ldquo;window&rdquo; and &ldquo;window functions&rdquo; are and how to use them to rank data. In the next chapter, we will deal with <a href="/sql-window-functions-offset/">window offsets</a> and comparisons!</p>
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
         Get the book
