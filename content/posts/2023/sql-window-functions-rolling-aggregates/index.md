@@ -491,11 +491,11 @@ The only difference is the presence of a frame in rolling aggregates.
 
 <p class="align-center">⌘&nbsp;⌘&nbsp;⌘</p>
 
-We have seen four types of tasks commonly solved with window functions in SQL:
+Over the course of four articles, we have seen four types of tasks commonly solved with window functions in SQL:
 
--   Ranking (various ratings).
--   Comparing by offset (neighbors and boundaries).
--   Aggregation (count, sum, and average).
+-   [Ranking](/sql-window-functions-ranking/) (various ratings).
+-   [Comparing by offset](/sql-window-functions-offset/) (neighbors and boundaries).
+-   [Aggregation](/sql-window-functions-aggregation/) (count, sum, and average).
 -   Rolling aggregates (moving average and cumulative total).
 
 To learn more about window functions or to get some practice — buy my book _SQL Window Functions Explained_.
