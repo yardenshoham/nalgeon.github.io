@@ -10,6 +10,8 @@ featured = true
 
 _This is an excerpt from my book [SQL Window Functions Explained](/sql-window-functions-book). The book is a clear and visual introduction to the topic with lots of practical exercises._
 
+Previously we've covered [ranking](/sql-window-functions-ranking/) window functions.
+
 Comparing by offset means looking at the difference between neighboring values. For example, if you compare the countries ranked 5th and 6th in the world in terms of GDP, how different are they? What about 1st and 6th?
 
 Sometimes we compare with boundaries instead of neighbors. For example, there are 50 top tennis players in the world, and Maria Sakkari is ranked 10th. How do her stats compare to Iga Swiatek, who is ranked 1st? How does she compare to Lin Zhou, who is ranked 50th?
@@ -507,7 +509,7 @@ rows between unbounded preceding and unbounded following
 
 ## Keep it up
 
-You have learned how to compare rows with neighbors and window boundaries. In the [next chapter](/sql-window-functions-aggregation) we will aggregate data!
+You have learned how to compare rows with neighbors and window boundaries. In the next chapter we will [aggregate data](/sql-window-functions-aggregation/)!
 
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">

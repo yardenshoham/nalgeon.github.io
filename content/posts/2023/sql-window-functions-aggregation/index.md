@@ -9,6 +9,8 @@ tags = ["data"]
 
 _This is an excerpt from my book [SQL Window Functions Explained](/sql-window-functions-book). The book is a clear and visual introduction to the topic with lots of practical exercises._
 
+Previously we've covered [ranking](/sql-window-functions-ranking/) and [offset](/sql-window-functions-offset/) window functions.
+
 Aggregation means counting totals or averages (or other _aggregates_). For example, the average salary per city. Or the total number of gold medals for each country in the Olympic Games standings.
 
 We will aggregate records from the `employees` table:
@@ -290,7 +292,7 @@ Here are the aggregation window functions:
 
 ## Keep it up
 
-You have learned how to calculate regular window aggregates. In the [next chapter](/sql-window-functions-rolling-aggregates) we will try rolling aggregates!
+You have learned how to calculate regular window aggregates. In the next chapter we will try [rolling aggregates](/sql-window-functions-rolling-aggregates/)!
 
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">

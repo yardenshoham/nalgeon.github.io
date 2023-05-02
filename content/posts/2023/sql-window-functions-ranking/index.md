@@ -582,7 +582,7 @@ rank<br/>
 
 ## Keep it up
 
-You have learned what "window" and "window functions" are and how to use them to rank data. In the [next chapter](/sql-window-functions-offset), we will deal with window offsets and comparisons!
+You have learned what "window" and "window functions" are and how to use them to rank data. In the next chapter, we will deal with [window offsets](/sql-window-functions-offset/) and comparisons!
 
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
