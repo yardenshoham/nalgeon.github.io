@@ -258,10 +258,8 @@ In 2023 I decided to write a book based on the original course. Here it is.
 -   56 interactive exercises (with solutions)
 -   PDF 17.8 × 23.3 cm (7 × 9.2 inches)
 
-70% of the book is finished, and I'll release the rest in May 2023. You can buy an early access version for $10 (you'll also get the full book when it's published).
-
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
-        Get the book for $10
+        Get the book for $20
     </a>
 </p>
