@@ -38,7 +38,50 @@ It is a clear and visual introduction to window functions. Clear — because I c
 
 Window functions are a complex topic. So the book only teaches a little at a time. It gives just enough theory and a lot of practice, because it's the only way to turn abstract knowledge into skills.
 
-The book starts with SQL windows basics (Part 1) and goes through frame nuances (Part 2) to some pretty advanced stuff (Part 3).
+<div class="row">
+    <div class="col-xs-6 col-sm-4 col-md-3 col-tile">
+        <a href="page/01.jpg" target="_blank" class="img-link">
+            <img src="peek/01.jpg" alt="Book cover" class="img-bordered-thin">
+        </a>
+    </div>
+    <div class="col-xs-6 col-sm-4 col-md-3 col-tile hidden-mobile">
+        <a href="page/02.png" target="_blank" class="img-link">
+            <img src="peek/02.jpg" alt="Page 3" class="img-bordered-thin">
+        </a>
+    </div>
+    <div class="col-xs-6 col-sm-4 col-md-3 col-tile hidden-mobile">
+        <a href="page/03.png" target="_blank" class="img-link">
+            <img src="peek/03.jpg" alt="Page 15" class="img-bordered-thin">
+        </a>
+    </div>
+    <div class="col-xs-6 col-sm-4 col-md-3 col-tile">
+        <a href="page/04.png" target="_blank" class="img-link">
+            <img src="peek/04.jpg" alt="Page 30" class="img-bordered-thin">
+        </a>
+    </div>
+    <div class="col-xs-6 col-sm-4 col-md-3 col-tile">
+        <a href="page/05.png" target="_blank" class="img-link">
+            <img src="peek/05.jpg" alt="Page 58" class="img-bordered-thin">
+        </a>
+    </div>
+    <div class="col-xs-6 col-sm-4 col-md-3 col-tile hidden-mobile">
+        <a href="page/06.png" target="_blank" class="img-link">
+            <img src="peek/06.jpg" alt="Page 62" class="img-bordered-thin">
+        </a>
+    </div>
+    <div class="col-xs-6 col-sm-4 col-md-3 col-tile hidden-mobile">
+        <a href="page/07.png" target="_blank" class="img-link">
+            <img src="peek/07.jpg" alt="Page 88" class="img-bordered-thin">
+        </a>
+    </div>
+    <div class="col-xs-6 col-sm-4 col-md-3 col-tile">
+        <a href="page/08.png" target="_blank" class="img-link">
+            <img src="peek/08.jpg" alt="Page 126" class="img-bordered-thin">
+        </a>
+    </div>
+</div>
+
+A step-by-step narrative combined with numerous visuals helps readers understand the material. Fifty-six interactive exercises with solutions ensure that you master window functions in practice.
 
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
@@ -194,6 +237,8 @@ The book starts with SQL windows basics (Part 1) and goes through frame nuances 
     </div>
 </details>
 
+The book starts with SQL windows basics (Part 1) and goes through frame nuances (Part 2) to some pretty advanced stuff (Part 3).
+
 To preview the first few chapters, visit the links in the table of contents above.
 
 ## About the author
@@ -208,7 +253,7 @@ In 2023 I decided to write a book based on the original course. Here it is.
 
 ## Book details
 
--   295 pages
+-   296 pages
 -   100+ pictures and GIFs
 -   56 interactive exercises (with solutions)
 -   PDF 17.8 × 23.3 cm (7 × 9.2 inches)
