@@ -83,6 +83,14 @@ Window functions are a complex topic. So the book only teaches a little at a tim
 
 A step-by-step narrative combined with numerous visuals helps readers understand the material. Fifty-six interactive exercises with solutions ensure that you master window functions in practice.
 
+You can use the book with any of the following DBMSs:
+
+-   MySQL 8.0.2+ (MariaDB 10.2+)
+-   PostgreSQL 11+
+-   SQLite 3.28+
+-   MS SQL 2012+
+-   Oracle 11g+
+
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
         Get the book
