@@ -32,6 +32,8 @@ The easiest way to explain this is through concrete examples. We will work with 
 
 Let's look at some tasks that are convenient to solve using SQL window functions. We'll save the technical details for later chapters. For now, let's review the use cases.
 
+However, if you are eager to start practicing, feel free to skip this chapter and move on to the [next one](/sql-window-functions-ranking/).
+
 ## Ranking
 
 Ranking means coming up with all kinds of ratings, from the winners of the World Swimming Championships to the Forbes 500.
