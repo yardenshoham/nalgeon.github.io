@@ -1,6 +1,6 @@
 +++
 date = 2023-01-22T18:00:00Z
-title = "SQL Window Functions Explained"
+title = "SQL Window Functions Explained [Book]"
 description = "A clear and visual introduction to window functions in SQL."
 image = "/sql-window-functions-book/cover.png"
 slug = "sql-window-functions-book"
@@ -268,6 +268,9 @@ In 2023 I decided to write a book based on the original course. Here it is.
 
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
-        Get the book for $20
+        Get the ebook for $20
     </a>
+    <span class="nowrap">
+        or <a href="https://www.amazon.com/dp/B0C47R3N6S">paperback for $35</a>
+    </span>
 </p>
