@@ -55,6 +55,20 @@ from employees
 order by "rank", id;
 ```
 
+We can also rewrite the query without window functions:
+
+```sql
+select
+  (
+    select count(*)
+    from employees as e2
+    where e2.salary > e1.salary
+  ) + 1 as "rank",
+  e1.name, e1.department, e1.salary
+from employees as e1
+order by "rank", e1.id;
+```
+
 <br>
 
 Want to learn more about window functions? Read my book — [**SQL Window Functions Explained**](/sql-window-functions-book/)
