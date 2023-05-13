@@ -27,6 +27,16 @@
   <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
 <span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
 <span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#c41a16">&#34;rank&#34;</span>, <span style="color:#000">id</span>;
+</code></pre></div><p>We can also rewrite the query without window functions:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  (
+    <span style="color:#a90d91">select</span> <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>)
+    <span style="color:#a90d91">from</span> <span style="color:#000">employees</span> <span style="color:#a90d91">as</span> <span style="color:#000">e2</span>
+    <span style="color:#a90d91">where</span> <span style="color:#000">e2</span>.<span style="color:#000">salary</span> <span style="color:#000">&gt;</span> <span style="color:#000">e1</span>.<span style="color:#000">salary</span>
+  ) <span style="color:#000">+</span> <span style="color:#1c01ce">1</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
+  <span style="color:#000">e1</span>.<span style="color:#000">name</span>, <span style="color:#000">e1</span>.<span style="color:#000">department</span>, <span style="color:#000">e1</span>.<span style="color:#000">salary</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span> <span style="color:#a90d91">as</span> <span style="color:#000">e1</span>
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#c41a16">&#34;rank&#34;</span>, <span style="color:#000">e1</span>.<span style="color:#000">id</span>;
 </code></pre></div><br>
 <p>Want to learn more about window functions? Read my book — <a href="/sql-window-functions-book/"><strong>SQL Window Functions Explained</strong></a></p>
 <p><sqlime-db name="employees" path="/sql-window-functions-book/employees.sql"></sqlime-db>
