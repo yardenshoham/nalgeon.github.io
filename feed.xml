@@ -1,4 +1,176 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 11 May 2023 15:50:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Ranking Records in SQL</title><link>https://antonz.org/sql-ranking/</link><pubDate>Thu, 11 May 2023 15:50:00 +0000</pubDate><guid>https://antonz.org/sql-ranking/</guid><description>Assigning a rank to each row based on the value of one or more columns.</description><content:encoded><![CDATA[<p><em>This post is part of the &ldquo;SQL Recipe&rdquo; series, where I provide short patterns for solving common SQL data analysis tasks.</em></p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 14 May 2023 13:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>SQL Cheat Sheet</title><link>https://antonz.org/sql-cheatsheet/</link><pubDate>Sun, 14 May 2023 13:00:00 +0000</pubDate><guid>https://antonz.org/sql-cheatsheet/</guid><description>For those who knew SQL, but kinda forgot it.</description><content:encoded><![CDATA[<p>This is a short cheat sheet for those who were once familiar with SQL selects, but haven&rsquo;t given it much practice since. The examples are interactive, so you can both read and practice.</p>
+<p>We will use the toy <code>employees</code> table:</p>
+<pre tabindex="0"><code>┌────┬───────┬────────┬────────────┬────────┐
+│ id │ name  │  city  │ department │ salary │
+├────┼───────┼────────┼────────────┼────────┤
+│ 11 │ Diane │ London │ hr         │ 70     │
+│ 12 │ Bob   │ London │ hr         │ 78     │
+│ 21 │ Emma  │ London │ it         │ 84     │
+│ 22 │ Grace │ Berlin │ it         │ 90     │
+│ 23 │ Henry │ London │ it         │ 104    │
+│ 24 │ Irene │ Berlin │ it         │ 104    │
+│ 25 │ Frank │ Berlin │ it         │ 120    │
+│ 31 │ Cindy │ Berlin │ sales      │ 96     │
+│ 32 │ Dave  │ London │ sales      │ 96     │
+│ 33 │ Alice │ Berlin │ sales      │ 100    │
+└────┴───────┴────────┴────────────┴────────┘
+</code></pre><h2 id="basics">Basics</h2>
+<p>The basic building blocks of an SQL query.</p>
+<h3 id="select--from-">select &hellip; from &hellip;</h3>
+<p>Selects rows from the specified table, keeping only the listed columns in each row.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">id</span>, <span style="color:#000">name</span>, <span style="color:#000">salary</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>;
+</code></pre></div><h3 id="where">where</h3>
+<p>Select only rows that meet the conditions.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">id</span>, <span style="color:#000">name</span>, <span style="color:#000">salary</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
+<span style="color:#a90d91">where</span> <span style="color:#000">city</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#39;Berlin&#39;</span>;
+</code></pre></div><p>There are different types of conditions:</p>
+<ul>
+<li>strict equality: <code>city = 'Berling'</code></li>
+<li>inequality: <code>salary &gt; 100</code></li>
+<li>range inclusion: <code>id between 20 and 29</code></li>
+<li>set inclusion: <code>department in ('hr', 'it')</code></li>
+<li>pattern matching: <code>name like 'A%'</code></li>
+<li>null value checking: <code>city is null</code></li>
+</ul>
+<p>Conditions can be combined with <code>or</code> (to select rows that match <em>any</em> of the conditions):</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">id</span>, <span style="color:#000">name</span>, <span style="color:#000">salary</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
+<span style="color:#a90d91">where</span> <span style="color:#000">department</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#39;hr&#39;</span> <span style="color:#a90d91">or</span> <span style="color:#000">department</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#39;it&#39;</span>;
+</code></pre></div><p>Or with <code>and</code> (to select rows that match <em>all</em> of the conditions):</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">id</span>, <span style="color:#000">name</span>, <span style="color:#000">salary</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
+<span style="color:#a90d91">where</span> <span style="color:#000">city</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#39;London&#39;</span> <span style="color:#a90d91">and</span> <span style="color:#000">department</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#39;it&#39;</span>;
+</code></pre></div><h3 id="distinct">distinct</h3>
+<p>Selects only unique values (i.e., no repetitions) listed in the <code>select</code> columns.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#a90d91">distinct</span> <span style="color:#000">department</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>;
+</code></pre></div><h3 id="order-by">order by</h3>
+<p>Sorts the results according to the specified columns.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">id</span>, <span style="color:#000">name</span>, <span style="color:#000">salary</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span>, <span style="color:#000">id</span>;
+</code></pre></div><p>Sorts from smallest to largest by default, but does the opposite if you add <code>desc</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">id</span>, <span style="color:#000">name</span>, <span style="color:#000">salary</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>, <span style="color:#000">id</span>;
+</code></pre></div><h3 id="limit">limit</h3>
+<p>Returns only the first N rows of the result set. Typically used with <code>order by</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">id</span>, <span style="color:#000">name</span>, <span style="color:#000">salary</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
+<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span>
+<span style="color:#a90d91">limit</span> <span style="color:#1c01ce">5</span>;
+</code></pre></div><h2 id="grouping">Grouping</h2>
+<p>Grouping data and calculating aggregates.</p>
+<h3 id="group-by">group by</h3>
+<p>Combines rows with the same value in specified columns. It is used in conjunction with one of several aggregate functions:</p>
+<p><code>count(*)</code> counts the number of rows with the same <code>group by</code> column value.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#177500">-- number of employees in each city
+</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#000">city</span>, <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>)
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
+<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#000">city</span>;
+</code></pre></div><p><code>sum(column)</code> calculates the sum of the <code>column</code> values among the rows with the same <code>group by</code> column value.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#177500">-- total salary fund in each city
+</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#000">city</span>, <span style="color:#a90d91">sum</span>(<span style="color:#000">salary</span>)
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
+<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#000">city</span>;
+</code></pre></div><p><code>avg(column)</code> calculates the average of the <code>column</code> values among the rows with the same <code>group by</code> column value.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#177500">-- average salary in each city
+</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#000">city</span>, <span style="color:#a90d91">avg</span>(<span style="color:#000">salary</span>)
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
+<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#000">city</span>;
+</code></pre></div><p><code>max(column)</code> calculates the maximum of the <code>column</code> values among the rows with the same <code>group by</code> column value.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#177500">-- maximum salary in each city
+</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#000">city</span>, <span style="color:#a90d91">max</span>(<span style="color:#000">salary</span>)
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
+<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#000">city</span>;
+</code></pre></div><p><code>min(column)</code> calculates the minimum of the <code>column</code> values among the rows with the same <code>group by</code> column value.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#177500">-- minimum salary in each city
+</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#000">city</span>, <span style="color:#a90d91">min</span>(<span style="color:#000">salary</span>)
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
+<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#000">city</span>;
+</code></pre></div><p>We can group by multiple columns:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#177500">-- average salary in each department for each city
+</span><span style="color:#177500"></span><span style="color:#a90d91">select</span>
+  <span style="color:#000">city</span>, <span style="color:#000">department</span>,
+  <span style="color:#000">round</span>(<span style="color:#a90d91">avg</span>(<span style="color:#000">salary</span>)) <span style="color:#a90d91">as</span> <span style="color:#000">avg_salary</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
+<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#000">city</span>, <span style="color:#000">department</span>;
+</code></pre></div><h3 id="having">having</h3>
+<p>Filters rows from the result <em>after</em> the <code>group by</code> is executed — unlike <code>where</code>, which filters out rows <em>before</em> the <code>group by</code> is executed.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#177500">-- departments with more than 3 employees
+</span><span style="color:#177500"></span><span style="color:#a90d91">select</span> <span style="color:#000">department</span>, <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>)
+<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
+<span style="color:#a90d91">group</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>
+<span style="color:#a90d91">having</span> <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#000">&gt;</span> <span style="color:#1c01ce">3</span>;
+</code></pre></div><h2 id="table-join">Table join</h2>
+<p>Merging multiple tables in the query result.</p>
+<p>Suppose there are two tables — <code>jobs</code> and <code>companies</code>.</p>
+<div class="row">
+<div class="col-xs-12 col-sm-8">
+<figure>
+  <img alt="Jobs and companies" src="./join-3.png">
+</figure>
+</div>
+</div>
+<p>In the <code>jobs</code> table there is a company identifier called <code>company_id</code>. However, the name of the company is in the other table — <code>companies</code>.</p>
+<h3 id="inner-join">Inner JOIN</h3>
+<p>We want to select records from the <code>jobs</code> table, but we also want to add the company name to them. We can do this by using a table <code>join</code> operation:</p>
+<div class="row">
+<div class="col-xs-12 col-sm-8">
+<figure>
+  <img alt="Inner JOIN" src="./join-1.png">
+</figure>
+</div>
+</div>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#000">jobs</span>.<span style="color:#000">id</span>,
+  <span style="color:#000">jobs</span>.<span style="color:#000">name</span>,
+  <span style="color:#000">jobs</span>.<span style="color:#000">company_id</span>,
+  <span style="color:#000">companies</span>.<span style="color:#000">name</span> <span style="color:#a90d91">as</span> <span style="color:#000">company_name</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">jobs</span>
+  <span style="color:#a90d91">join</span> <span style="color:#000">companies</span> <span style="color:#a90d91">on</span> <span style="color:#000">jobs</span>.<span style="color:#000">company_id</span> <span style="color:#000">=</span> <span style="color:#000">companies</span>.<span style="color:#000">id</span>;
+</code></pre></div><p>For each row in the <code>jobs</code> table, the database engine looks in the <code>companies</code> table, finds the value where <code>id = jobs.company_id</code>, extracts the <code>name</code>, and adds it to the result. If no matching value is found (as in the case of &ldquo;UI Designer&rdquo; with a company ID of <code>99</code>), the row is not included in the result.</p>
+<h3 id="outer-join-left-join">Outer JOIN (LEFT JOIN)</h3>
+<p>The outer join is very similar to an inner join.</p>
+<div class="row">
+<div class="col-xs-12 col-sm-8">
+<figure>
+  <img alt="Outer join" src="./join-2.png">
+</figure>
+</div>
+</div>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#000">jobs</span>.<span style="color:#000">id</span>,
+  <span style="color:#000">jobs</span>.<span style="color:#000">name</span>,
+  <span style="color:#000">jobs</span>.<span style="color:#000">company_id</span>,
+  <span style="color:#000">companies</span>.<span style="color:#000">name</span> <span style="color:#a90d91">as</span> <span style="color:#000">company_name</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">jobs</span>
+  <span style="color:#a90d91">left</span> <span style="color:#a90d91">join</span> <span style="color:#000">companies</span> <span style="color:#a90d91">on</span> <span style="color:#000">jobs</span>.<span style="color:#000">company_id</span> <span style="color:#000">=</span> <span style="color:#000">companies</span>.<span style="color:#000">id</span>;
+</code></pre></div><p>The difference is that even if the row with <code>id = jobs.company_id</code> (&ldquo;UI Designer&rdquo; in our example) is not found in the <code>companies</code> table, the row from <code>jobs</code> will still appear in the result. The company name will be <code>null</code> in this case.</p>
+<p>An inner JOIN can be thought of as saying:</p>
+<blockquote>
+<p>Given these two tables, I want to see records that match based on the specified criteria.</p>
+</blockquote>
+<p>An outer (left) JOIN, on the other hand, says:</p>
+<blockquote>
+<p>Given these two tables, I want to see records that match based on the specified criteria. I also want to see all records from the left table that do not match the right table.</p>
+</blockquote>
+<h2 id="summary">Summary</h2>
+<p>We covered the basics of SQL for selecting data:</p>
+<ul>
+<li>Query parts: columns, tables, filtering, sorting.</li>
+<li>Data grouping and aggregation functions.</li>
+<li>Table joins.</li>
+</ul>
+<p>Of course, SQL has many more capabilities, but that&rsquo;s another story.</p>
+<p><sqlime-db name="sample" path="./sample.sql"></sqlime-db>
+<sqlime-examples db="sample" selector="div.highlight" editable></sqlime-examples></p>
+<script src="/assets/sqlime/sqlite3.js"></script>
+<script src="/assets/sqlime/sqlime-db.js"></script>
+<script src="/assets/sqlime/sqlime-examples.js"></script>
+]]></content:encoded></item><item><title>Ranking Records in SQL</title><link>https://antonz.org/sql-ranking/</link><pubDate>Thu, 11 May 2023 15:50:00 +0000</pubDate><guid>https://antonz.org/sql-ranking/</guid><description>Assigning a rank to each row based on the value of one or more columns.</description><content:encoded><![CDATA[<p><em>This post is part of the &ldquo;SQL Recipe&rdquo; series, where I provide short patterns for solving common SQL data analysis tasks.</em></p>
 <p>Suppose we want to create a ranking, where the position of each record is determined by the value of one or more columns.</p>
 <p>The solution is to use the <code>rank()</code> function over an SQL window ordered by target columns.</p>
 <h2 id="example">Example</h2>
@@ -1727,470 +1899,4 @@ Frank  104  ← frame end</code></pre>
 <li>Utilizing the <code>pivotvtab</code> extension.</li>
 </ol>
 <p>P.S. Interested in using SQL for data analytics? Check out my book — <a href="/sql-window-functions-book">SQL Window Functions Explained</a></p>
-]]></content:encoded></item><item><title>Ranking Data with SQL Window Functions</title><link>https://antonz.org/sql-window-functions-ranking/</link><pubDate>Wed, 08 Feb 2023 13:30:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-ranking/</guid><description>Making ratings and dividing data into partitions.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
-<p>Ranking means coming up with all kinds of ratings, from the winners of the World Swimming Championships to the Forbes 500.</p>
-<p>We will rank records from the toy <code>employees</code> table:</p>
-<pre tabindex="0"><code>┌────┬───────┬────────┬────────────┬────────┐
-│ id │ name  │  city  │ department │ salary │
-├────┼───────┼────────┼────────────┼────────┤
-│ 11 │ Diane │ London │ hr         │ 70     │
-│ 12 │ Bob   │ London │ hr         │ 78     │
-│ 21 │ Emma  │ London │ it         │ 84     │
-│ 22 │ Grace │ Berlin │ it         │ 90     │
-│ 23 │ Henry │ London │ it         │ 104    │
-│ 24 │ Irene │ Berlin │ it         │ 104    │
-│ 25 │ Frank │ Berlin │ it         │ 120    │
-│ 31 │ Cindy │ Berlin │ sales      │ 96     │
-│ 32 │ Dave  │ London │ sales      │ 96     │
-│ 33 │ Alice │ Berlin │ sales      │ 100    │
-└────┴───────┴────────┴────────────┴────────┘
-</code></pre><p><a href="https://sqlime.org/#employees.db">playground</a> • <a href="/sql-window-functions-book/employees.sql">download</a></p>
-<p>Table of contents:</p>
-<ul>
-<li><a href="#window-function">Window function</a></li>
-<li><a href="#window-ordering-vs-result-ordering">Window ordering vs. result ordering</a></li>
-<li><a href="#sorting-uniqueness">Sorting uniqueness</a></li>
-<li><a href="#multiple-windows">Multiple windows</a></li>
-<li><a href="#partitions">​Partitions</a></li>
-<li><a href="#groups">Groups</a></li>
-<li><a href="#ranking-functions">Ranking functions</a></li>
-<li><a href="#keep-it-up">Keep it up</a></li>
-</ul>
-<div class="boxed">
-<h3>Databases</h3>
-<p>All modern relational databases support window functions to some extent. I tested this article on three of them:</p>
-<ul>
-  <li>MySQL 8.0.2+ (MariaDB 10.2+)</li>
-  <li>PostgreSQL 11+</li>
-  <li>SQLite 3.28+</li>
-</ul>
-<p>Windows are fully implemented in PostgreSQL, and almost fully in SQLite. MySQL has all the core features but lacks some of the advanced ones.</p>
-<p>Oracle 11g+, MS SQL 2012+, and Google BigQuery are also fine. They lack certain advanced capabilities, just like MySQL. If you use one of them — the article will also be helpful.</p>
-<p>You can use any of the mentioned DBMS if you have one available. Or an <a href="https://sqlime.org/#employees.db">online playground</a>.</p>
-</div>
-<h2 id="window-function">Window function</h2>
-<p>Let&rsquo;s rank employees by salary:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-    before<br/>
-    <figure><img src="before.png" width="300" alt="Before ranking"/></figure>
-</div>
-<div class="col-xs-12 col-sm-5">
-    after<br/>
-    <figure><img src="rank-after.png" width="300" alt="After ranking"/></figure>
-</div>
-</div>
-<p>Note that employees with the same salary received the same rank (Henry and Irene, Cindy and Dave).</p>
-<p>How do we go from &ldquo;before&rdquo; to &ldquo;after&rdquo;?</p>
-<p>First, let&rsquo;s sort the table in descending order of salary:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#a90d91">null</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>Now let&rsquo;s go from the first row to the last and calculate the rank of each record. We will start with one and increase the rank every time the salary value is less than the previous one:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-    ➀<br/>
-    <figure><img src="rank/03.png" width="300" alt="Ranking step #1"/></figure>
-</div>
-<div class="col-xs-12 col-sm-5">
-    ➁<br/>
-    <figure><img src="rank/04.png" width="300" alt="Ranking step #2"/></figure>
-</div>
-</div>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-    ➂<br/>
-    <figure><img src="rank/05.png" width="300" alt="Ranking step #3"/></figure>
-</div>
-<div class="col-xs-12 col-sm-5">
-    ➃<br/>
-    <figure><img src="rank/06.png" width="300" alt="Ranking step #4"/></figure>
-</div>
-</div>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-    ➄<br/>
-    <figure><img src="rank/07.png" width="300" alt="Ranking step #5"/></figure>
-</div>
-<div class="col-xs-12 col-sm-5">
-    <p>and so on...</p>
-</div>
-</div>
-<p>To compute the rank, at each step we will look at the <code>salary</code> values, highlighted with a blue frame. Let&rsquo;s call these values a <em>window</em>.</p>
-<p>Let&rsquo;s describe the window contents in plain English:</p>
-<ol>
-<li>These are the values of the salary column.</li>
-<li>They are ordered from larger to smaller values.</li>
-</ol>
-<p>Let&rsquo;s express it in SQL:</p>
-<pre tabindex="0"><code>window w as (order by salary desc)
-</code></pre><ul>
-<li><code>window</code> — a keyword announcing that the window definition will follow;</li>
-<li><code>w</code> — the name of the window (could be anything);</li>
-<li><code>(order by salary desc)</code> — the window definition (&ldquo;values of the salary column in descending order&rdquo;).</li>
-</ul>
-<p>Our goal is to calculate the rank over the window <code>w</code>. In SQL, this is written as <code>dense_rank() over w</code>.</p>
-<p><code>dense_rank()</code> is a <em>window function</em> that counts the rank over the specified window. The logic of <code>dense_rank()</code> is the same as when we counted manually — start with one and increase the rank every time the next window value differs from the previous one.</p>
-<p>Let&rsquo;s add the window definition and the window function to the original query:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">dense_rank</span>() <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#c41a16">&#34;rank&#34;</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>Here&rsquo;s how the engine executes this query:</p>
-<ol>
-<li>Take the table specified in <code>from</code>.</li>
-<li>Select all records from it.</li>
-<li>Calculate the value of <code>dense_rank()</code> for each record using the window <code>w</code>.</li>
-<li>Sort the result as specified in <code>order by</code>.</li>
-</ol>
-<p>Here&rsquo;s an animation of how the engine executes step 3, where the rank is assigned:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-<figure>
-  <img src="rank.gif" width="300" alt="Ranking animation"/>
-</figure>
-</div>
-</div>
-<p>The <code>window</code> clause itself does not affect query results. It only defines the window that we can use in the query. If we remove the <code>dense_rank()</code> call, the query will work as if there is no window:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#a90d91">null</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>The window starts working only when a window function in <code>select</code> uses it.</p>
-<div class="boxed">
-<h3>Window queries in Oracle and MS SQL Server databases</h3>
-<p>Neither Oracle nor SQL Server support the <code>window</code> clause. To make a window query work in these databases, move the window definition inside the <code>over</code> clause.</p>
-<p>Instead of this:</p>
-<pre><code>select
-  dense_rank() over w as "rank",
-  name, department, salary
-from employees
-window w as (order by salary desc)
-order by "rank", id;
-</code></pre>
-<p>Do this:</p>
-<pre><code>select
-  dense_rank() over (
-    order by salary desc
-  ) as "rank",
-  name, department, salary
-from employees
-order by "rank", id;</code></pre>
-</div>
-<h2 id="window-ordering-vs-result-ordering">Window ordering vs. result ordering</h2>
-<p>People often have questions about window sorting. Let&rsquo;s break them down.</p>
-<p>Here is a query that calculates a salary rating:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">dense_rank</span>() <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#c41a16">&#34;rank&#34;</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>Let&rsquo;s leave the <code>order by</code> in the window but remove it from the main query:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">dense_rank</span>() <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>);
-</code></pre></div><p>Nothing has changed. So why use <code>order by</code> in the main query?</p>
-<p>The window&rsquo;s <code>order by</code> defines the window sorting, while the main query&rsquo;s <code>order by</code> defines the final result sorting after the rest of the query is complete.</p>
-<p>Let&rsquo;s say we want to assign a rank in descending order of salary but sort in the opposite, ascending order:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">dense_rank</span>() <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">asc</span>;
-</code></pre></div><p>As you can see, the rank is assigned according to the window sorting (<code>salary desc</code>), and the results are ordered according to the main query sorting (<code>salary asc</code>).</p>
-<p>If the query&rsquo;s <code>order by</code> clause is not specified, the result order is undefined. Sometimes it might work out (as in the example with the ascending salary ranking), and sometimes it might not. It&rsquo;s not worth relying on luck, so always specify the order of results explicitly.</p>
-<h2 id="sorting-uniqueness">Sorting uniqueness</h2>
-<p>Another common question is why to include the <code>id</code> column in the result ordering:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">dense_rank</span>() <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#c41a16">&#34;rank&#34;</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>Why use <code>order by rank, id</code> instead of <code>order by rank</code>? To know how to sort employees with the same rank. Without the <code>id</code>, the order of records &ldquo;Henry-Irene&rdquo; and &ldquo;Cindy-Dave&rdquo; is undefined, and the DB engine can arrange them in any order. But with the <code>id</code>, everything is clear: &ldquo;Henry, then Irene&rdquo; and &ldquo;Cindy, then Dave&rdquo;.</p>
-<div class="boxed">
-<h3>✎ Exercise: Ranking by name</h3>
-<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises — that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
-<p>If you are okay with just theory for now, let's continue.</p>
-</div>
-<h2 id="multiple-windows">Multiple windows</h2>
-<p>Another common question (not related to sorting) is how to define multiple windows in a query.</p>
-<p>The answer is to write them in a comma-separated fashion in the <code>window</code> clause:</p>
-<pre tabindex="0"><code>select ...
-from ...
-where ...
-window
-  w1 as (...),
-  w2 as (...),
-  w3 as (...)
-;
-</code></pre><p>For example, let&rsquo;s rank employees by salary both in ascending and descending order:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">dense_rank</span>() <span style="color:#000">over</span> <span style="color:#000">w1</span> <span style="color:#a90d91">as</span> <span style="color:#000">r_asc</span>,
-  <span style="color:#000">dense_rank</span>() <span style="color:#000">over</span> <span style="color:#000">w2</span> <span style="color:#a90d91">as</span> <span style="color:#000">r_desc</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span>
-  <span style="color:#000">w1</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">asc</span>),
-  <span style="color:#000">w2</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span>, <span style="color:#000">id</span>;
-</code></pre></div><h2 id="partitions">​Partitions</h2>
-<p>Let&rsquo;s rank employees by salary for each department independently:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-    before<br/>
-    <figure><img src="before.png" width="300" alt="Before partitioned ranking"/></figure>
-</div>
-<div class="col-xs-12 col-sm-5">
-    after<br/>
-    <figure><img src="partition-after.png" width="300" alt="After partitioned ranking"/></figure>
-</div>
-</div>
-<p>How do we go from &ldquo;before&rdquo; to &ldquo;after&rdquo;?</p>
-<p>First, let&rsquo;s sort the table by department. Within the same department, let&rsquo;s sort in descending order of salary:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#a90d91">null</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>, <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>Now let&rsquo;s go from the first row to the last and calculate the rank of each record. We will start with one and increase the rank every time the <code>salary</code> value is less than the previous one. When switching between departments, we will reset the rank back to 1:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-    ➀<br/>
-    <figure><img src="partition/03.png" width="300" alt="Partitioned ranking step #1"/></figure>
-</div>
-<div class="col-xs-12 col-sm-5">
-    ➁<br/>
-    <figure><img src="partition/04.png" width="300" alt="Partitioned ranking step #2"/></figure>
-</div>
-</div>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-    ➂<br/>
-    <figure><img src="partition/05.png" width="300" alt="Partitioned ranking step #3"/></figure>
-</div>
-<div class="col-xs-12 col-sm-5">
-    ➃<br/>
-    <figure><img src="partition/06.png" width="300" alt="Partitioned ranking step #4"/></figure>
-</div>
-</div>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-    ➄<br/>
-    <figure><img src="partition/07.png" width="300" alt="Partitioned ranking step #5"/></figure>
-</div>
-<div class="col-xs-12 col-sm-5">
-    <p>and so on...</p>
-</div>
-</div>
-<p>To compute the rank, at each step we will look at the <code>salary</code> values, highlighted with a blue frame. It is the <em>window</em> in this case.</p>
-<p>The window changes depending on which department the current record belongs to. Let&rsquo;s describe it in plain English:</p>
-<ol>
-<li>The window is split into several independent partitions — one for each department.</li>
-<li>Inside each partition, records are ordered by decreasing salary.</li>
-</ol>
-<p>Let&rsquo;s express it in SQL:</p>
-<pre tabindex="0"><code>window w as (
-  partition by department
-  order by salary desc
-)
-</code></pre><ul>
-<li><code>partition by department</code> specifies how to split the window into partitions;</li>
-<li><code>order by salary desc</code> sets the sorting within the partition.</li>
-</ul>
-<p>The rank calculation function remains the same — <code>dense_rank()</code>.</p>
-<p>Let&rsquo;s add the window definition and the window function to the original query:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">dense_rank</span>() <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (
-  <span style="color:#000">partition</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>
-  <span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>
-)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>, <span style="color:#c41a16">&#34;rank&#34;</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>Here&rsquo;s an animation showing how the engine calculates the rank for each record:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-<figure>
-    <img src="partition.gif" width="300" alt="Partitioned ranking animation"/>
-</figure>
-</div>
-</div>
-<div class="boxed">
-<h3>✎ Exercise: Salary rating by city</h3>
-<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises — that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
-<p>If you are okay with just theory for now, let's continue.</p>
-</div>
-<h2 id="groups">Groups</h2>
-<p>Let&rsquo;s divide the employees into three groups according to their salary:</p>
-<ul>
-<li>high-paid,</li>
-<li>medium-paid,</li>
-<li>low-paid.</li>
-</ul>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-    before<br/>
-    <figure><img src="before.png" width="300" alt="Before tiles"/></figure>
-</div>
-<div class="col-xs-12 col-sm-5">
-    after<br/>
-    <figure><img src="ntile-after.png" width="300" alt="After tiles"/></figure>
-</div>
-</div>
-<p>How do we go from &ldquo;before&rdquo; to &ldquo;after&rdquo;?</p>
-<p>First, let&rsquo;s sort the table in descending order of salary:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#a90d91">null</span> <span style="color:#a90d91">as</span> <span style="color:#000">tile</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>There are 10 records and 3 groups — which means two groups of 3 records and one of 4 records. For example:</p>
-<pre tabindex="0"><code>┌──────┬───────┬────────────┬────────┐
-│ tile │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│      │ Frank │ it         │ 120    │
-│      │ Henry │ it         │ 104    │
-│      │ Irene │ it         │ 104    │
-│      │ Alice │ sales      │ 100    │
-├──────┼───────┼────────────┼────────┤
-│      │ Cindy │ sales      │ 96     │
-│      │ Dave  │ sales      │ 96     │
-│      │ Grace │ it         │ 90     │
-├──────┼───────┼────────────┼────────┤
-│      │ Emma  │ it         │ 84     │
-│      │ Bob   │ hr         │ 78     │
-│      │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
-</code></pre><p>To draw the boundaries between the groups, we must analyze all the salaries, sorted in descending order. Therefore, the window is the same as we used for salary rating:</p>
-<pre tabindex="0"><code>window w as (order by salary desc)
-</code></pre><p>But the function is different — <code>ntile(n)</code>, where <code>n</code> is the number of groups. In our case <code>n = 3</code>:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">ntile</span>(<span style="color:#1c01ce">3</span>) <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#000">tile</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>, <span style="color:#000">id</span>;
-</code></pre></div><p><code>ntile(n)</code> splits all records into <code>n</code> groups and returns the group number for each record. If the total number of records (10 in our case) is not divisible by the group size (3), then the former groups will be larger than the latter.</p>
-<p><code>ntile()</code> always tries to split the data so that the groups are of the same size. So records with the same salary value may end up in different (adjacent) groups:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">ntile</span>(<span style="color:#1c01ce">2</span>) <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#000">tile</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>, <span style="color:#000">id</span>)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>, <span style="color:#000">tile</span>;
-</code></pre></div><pre tabindex="0"><code>┌──────┬───────┬────────────┬────────┐
-│ tile │ name  │ department │ salary │
-├──────┼───────┼────────────┼────────┤
-│ 1    │ Frank │ it         │ 120    │
-│ ...  │ ...   │ ...        │ ...    │
-│ 1    │ Cindy │ sales      │ 96     │ &lt;-- (!)
-├──────┼───────┼────────────┼────────┤
-│ 2    │ Dave  │ sales      │ 96     │ &lt;-- (!)
-│ ...  │ ...   │ ...        │ ...    │
-│ 2    │ Diane │ hr         │ 70     │
-└──────┴───────┴────────────┴────────┘
-</code></pre><div class="boxed">
-<h3>✎ Exercises: Salary groups in cities (+1 more)</h3>
-<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises; that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
-<p>If you are okay with just theory for now, though — let's continue.</p>
-</div>
-<h2 id="ranking-functions">Ranking functions</h2>
-<p>Here are the ranking window functions:</p>
-<table>
-<thead>
-<tr>
-<th>Function</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>row_number()</code></td>
-<td>returns the row ordinal number</td>
-</tr>
-<tr>
-<td><code>dense_rank()</code></td>
-<td>returns row rank</td>
-</tr>
-<tr>
-<td><code>rank()</code></td>
-<td>returns row rank with possible gaps (see below)</td>
-</tr>
-<tr>
-<td><code>ntile(n)</code></td>
-<td>splits all rows into <code>n</code> groups and returns the index of the group that the row belongs to</td>
-</tr>
-</tbody>
-</table>
-<p>We have already seen <code>dense_rank()</code> and <code>ntile()</code>.</p>
-<p><code>row_number()</code> numbers the rows in the order specified in <code>order by</code>. No surprises here.</p>
-<p><code>rank()</code> is similar to <code>dense_rank()</code>, and the difference is easier to explain with an example.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">•••</span> <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#c41a16">&#34;rank&#34;</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>Let&rsquo;s try substituting <code>•••</code> with <code>dense_rank()</code> and <code>rank()</code>:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6">
-dense_rank<br/>
-<pre><code>┌──────┬───────┬────────┐
-│ rank │ name  │ salary │
-├──────┼───────┼────────┤
-│ 1    │ Frank │ 120    │
-│ 2    │ Henry │ 104    │
-│ 2    │ Irene │ 104    │
-│ 3    │ Alice │ 100    │ (!)
-│ 4    │ Cindy │ 96     │
-│ 4    │ Dave  │ 96     │
-│ 5    │ Grace │ 90     │ (!)
-│ 6    │ Emma  │ 84     │
-│ 7    │ Bob   │ 78     │
-│ 8    │ Diane │ 70     │
-└──────┴───────┴────────┘</code></pre>
-</div>
-<div class="col-xs-12 col-sm-6">
-rank<br/>
-<pre><code>┌──────┬───────┬────────┐
-│ rank │ name  │ salary │
-├──────┼───────┼────────┤
-│ 1    │ Frank │ 120    │
-│ 2    │ Henry │ 104    │
-│ 2    │ Irene │ 104    │
-│ 4    │ Alice │ 100    │ (!)
-│ 5    │ Cindy │ 96     │
-│ 5    │ Dave  │ 96     │
-│ 7    │ Grace │ 90     │ (!)
-│ 8    │ Emma  │ 84     │
-│ 9    │ Bob   │ 78     │
-│ 10   │ Diane │ 70     │
-└──────┴───────┴────────┘</code></pre>
-</div>
-</div>
-<p><code>dense_rank()</code> assigns Alice the third place, while <code>rank()</code> assigns the fourth because Henry and Irene already occupied the second and third. It is the same with Grace after Cindy and Dave. That&rsquo;s the whole difference.</p>
-<h2 id="keep-it-up">Keep it up</h2>
-<p>You have learned what &ldquo;window&rdquo; and &ldquo;window functions&rdquo; are and how to use them to rank data. In the next chapter, we will deal with <a href="/sql-window-functions-offset/">window offsets</a> and comparisons!</p>
-<p>
-    <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
-        Get the book
-    </a>
-</p>
-<p><sqlime-db name="employees" path="/sql-window-functions-book/employees.sql"></sqlime-db>
-<sqlime-examples db="employees" selector="div.highlight" editable></sqlime-examples></p>
-<script src="/assets/sqlime/sqlite3.js"></script>
-<script src="/assets/sqlime/sqlime-db.js"></script>
-<script src="/assets/sqlime/sqlime-examples.js"></script>
 ]]></content:encoded></item></channel></rss>

@@ -1,0 +1,276 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>SQL Cheat Sheet</title>
+<meta name=description content="For those who knew SQL, but kinda forgot it.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.fe03afa13d4e1d4607de8f21a6d227f1314ba69e0bf3e4c1e4ce111080af6bb8.css>
+<link rel=icon href=/assets/favicon/favicon.ico sizes=any>
+<link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=manifest href=/assets/favicon/manifest.json>
+<link rel=canonical href=https://antonz.org/sql-cheatsheet/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SQL Cheat Sheet">
+<meta property="og:description" content="For those who knew SQL, but kinda forgot it.">
+<meta property="og:url" content="https://antonz.org/sql-cheatsheet/">
+<meta property="og:image" content="https://antonz.org/sql-cheatsheet/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="SQL Cheat Sheet">
+<meta name=twitter:description content="For those who knew SQL, but kinda forgot it.">
+<meta name=twitter:url content="https://antonz.org/sql-cheatsheet/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/sql-cheatsheet/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>SQL Cheat Sheet</h1>
+</header>
+<p>This is a short cheat sheet for those who were once familiar with SQL selects, but haven&rsquo;t given it much practice since. The examples are interactive, so you can both read and practice.</p>
+<p>We will use the toy <code>employees</code> table:</p>
+<pre tabindex=0><code>┌────┬───────┬────────┬────────────┬────────┐
+│ id │ name  │  city  │ department │ salary │
+├────┼───────┼────────┼────────────┼────────┤
+│ 11 │ Diane │ London │ hr         │ 70     │
+│ 12 │ Bob   │ London │ hr         │ 78     │
+│ 21 │ Emma  │ London │ it         │ 84     │
+│ 22 │ Grace │ Berlin │ it         │ 90     │
+│ 23 │ Henry │ London │ it         │ 104    │
+│ 24 │ Irene │ Berlin │ it         │ 104    │
+│ 25 │ Frank │ Berlin │ it         │ 120    │
+│ 31 │ Cindy │ Berlin │ sales      │ 96     │
+│ 32 │ Dave  │ London │ sales      │ 96     │
+│ 33 │ Alice │ Berlin │ sales      │ 100    │
+└────┴───────┴────────┴────────────┴────────┘
+</code></pre><h2 id=basics>Basics</h2>
+<p>The basic building blocks of an SQL query.</p>
+<h3 id=select--from->select &mldr; from &mldr;</h3>
+<p>Selects rows from the specified table, keeping only the listed columns in each row.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>id</span>, <span style=color:#000>name</span>, <span style=color:#000>salary</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>;
+</code></pre></div><h3 id=where>where</h3>
+<p>Select only rows that meet the conditions.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>id</span>, <span style=color:#000>name</span>, <span style=color:#000>salary</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>where</span> <span style=color:#000>city</span> <span style=color:#000>=</span> <span style=color:#c41a16>&#39;Berlin&#39;</span>;
+</code></pre></div><p>There are different types of conditions:</p>
+<ul>
+<li>strict equality: <code>city = 'Berling'</code></li>
+<li>inequality: <code>salary > 100</code></li>
+<li>range inclusion: <code>id between 20 and 29</code></li>
+<li>set inclusion: <code>department in ('hr', 'it')</code></li>
+<li>pattern matching: <code>name like 'A%'</code></li>
+<li>null value checking: <code>city is null</code></li>
+</ul>
+<p>Conditions can be combined with <code>or</code> (to select rows that match <em>any</em> of the conditions):</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>id</span>, <span style=color:#000>name</span>, <span style=color:#000>salary</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>where</span> <span style=color:#000>department</span> <span style=color:#000>=</span> <span style=color:#c41a16>&#39;hr&#39;</span> <span style=color:#a90d91>or</span> <span style=color:#000>department</span> <span style=color:#000>=</span> <span style=color:#c41a16>&#39;it&#39;</span>;
+</code></pre></div><p>Or with <code>and</code> (to select rows that match <em>all</em> of the conditions):</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>id</span>, <span style=color:#000>name</span>, <span style=color:#000>salary</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>where</span> <span style=color:#000>city</span> <span style=color:#000>=</span> <span style=color:#c41a16>&#39;London&#39;</span> <span style=color:#a90d91>and</span> <span style=color:#000>department</span> <span style=color:#000>=</span> <span style=color:#c41a16>&#39;it&#39;</span>;
+</code></pre></div><h3 id=distinct>distinct</h3>
+<p>Selects only unique values (i.e., no repetitions) listed in the <code>select</code> columns.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#a90d91>distinct</span> <span style=color:#000>department</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>;
+</code></pre></div><h3 id=order-by>order by</h3>
+<p>Sorts the results according to the specified columns.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>id</span>, <span style=color:#000>name</span>, <span style=color:#000>salary</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span>, <span style=color:#000>id</span>;
+</code></pre></div><p>Sorts from smallest to largest by default, but does the opposite if you add <code>desc</code>.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>id</span>, <span style=color:#000>name</span>, <span style=color:#000>salary</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>, <span style=color:#000>id</span>;
+</code></pre></div><h3 id=limit>limit</h3>
+<p>Returns only the first N rows of the result set. Typically used with <code>order by</code>.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>id</span>, <span style=color:#000>name</span>, <span style=color:#000>salary</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span>
+<span style=color:#a90d91>limit</span> <span style=color:#1c01ce>5</span>;
+</code></pre></div><h2 id=grouping>Grouping</h2>
+<p>Grouping data and calculating aggregates.</p>
+<h3 id=group-by>group by</h3>
+<p>Combines rows with the same value in specified columns. It is used in conjunction with one of several aggregate functions:</p>
+<p><code>count(*)</code> counts the number of rows with the same <code>group by</code> column value.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#177500>-- number of employees in each city
+</span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#000>city</span>, <span style=color:#a90d91>count</span>(<span style=color:#000>*</span>)
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> <span style=color:#000>city</span>;
+</code></pre></div><p><code>sum(column)</code> calculates the sum of the <code>column</code> values among the rows with the same <code>group by</code> column value.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#177500>-- total salary fund in each city
+</span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#000>city</span>, <span style=color:#a90d91>sum</span>(<span style=color:#000>salary</span>)
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> <span style=color:#000>city</span>;
+</code></pre></div><p><code>avg(column)</code> calculates the average of the <code>column</code> values among the rows with the same <code>group by</code> column value.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#177500>-- average salary in each city
+</span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#000>city</span>, <span style=color:#a90d91>avg</span>(<span style=color:#000>salary</span>)
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> <span style=color:#000>city</span>;
+</code></pre></div><p><code>max(column)</code> calculates the maximum of the <code>column</code> values among the rows with the same <code>group by</code> column value.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#177500>-- maximum salary in each city
+</span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#000>city</span>, <span style=color:#a90d91>max</span>(<span style=color:#000>salary</span>)
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> <span style=color:#000>city</span>;
+</code></pre></div><p><code>min(column)</code> calculates the minimum of the <code>column</code> values among the rows with the same <code>group by</code> column value.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#177500>-- minimum salary in each city
+</span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#000>city</span>, <span style=color:#a90d91>min</span>(<span style=color:#000>salary</span>)
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> <span style=color:#000>city</span>;
+</code></pre></div><p>We can group by multiple columns:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#177500>-- average salary in each department for each city
+</span><span style=color:#177500></span><span style=color:#a90d91>select</span>
+  <span style=color:#000>city</span>, <span style=color:#000>department</span>,
+  <span style=color:#000>round</span>(<span style=color:#a90d91>avg</span>(<span style=color:#000>salary</span>)) <span style=color:#a90d91>as</span> <span style=color:#000>avg_salary</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> <span style=color:#000>city</span>, <span style=color:#000>department</span>;
+</code></pre></div><h3 id=having>having</h3>
+<p>Filters rows from the result <em>after</em> the <code>group by</code> is executed — unlike <code>where</code>, which filters out rows <em>before</em> the <code>group by</code> is executed.</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#177500>-- departments with more than 3 employees
+</span><span style=color:#177500></span><span style=color:#a90d91>select</span> <span style=color:#000>department</span>, <span style=color:#a90d91>count</span>(<span style=color:#000>*</span>)
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>group</span> <span style=color:#a90d91>by</span> <span style=color:#000>department</span>
+<span style=color:#a90d91>having</span> <span style=color:#a90d91>count</span>(<span style=color:#000>*</span>) <span style=color:#000>&gt;</span> <span style=color:#1c01ce>3</span>;
+</code></pre></div><h2 id=table-join>Table join</h2>
+<p>Merging multiple tables in the query result.</p>
+<p>Suppose there are two tables — <code>jobs</code> and <code>companies</code>.</p>
+<div class=row>
+<div class="col-xs-12 col-sm-8">
+<figure>
+<img alt="Jobs and companies" src=./join-3.png>
+</figure>
+</div>
+</div>
+<p>In the <code>jobs</code> table there is a company identifier called <code>company_id</code>. However, the name of the company is in the other table — <code>companies</code>.</p>
+<h3 id=inner-join>Inner JOIN</h3>
+<p>We want to select records from the <code>jobs</code> table, but we also want to add the company name to them. We can do this by using a table <code>join</code> operation:</p>
+<div class=row>
+<div class="col-xs-12 col-sm-8">
+<figure>
+<img alt="Inner JOIN" src=./join-1.png>
+</figure>
+</div>
+</div>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
+  <span style=color:#000>jobs</span>.<span style=color:#000>id</span>,
+  <span style=color:#000>jobs</span>.<span style=color:#000>name</span>,
+  <span style=color:#000>jobs</span>.<span style=color:#000>company_id</span>,
+  <span style=color:#000>companies</span>.<span style=color:#000>name</span> <span style=color:#a90d91>as</span> <span style=color:#000>company_name</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>jobs</span>
+  <span style=color:#a90d91>join</span> <span style=color:#000>companies</span> <span style=color:#a90d91>on</span> <span style=color:#000>jobs</span>.<span style=color:#000>company_id</span> <span style=color:#000>=</span> <span style=color:#000>companies</span>.<span style=color:#000>id</span>;
+</code></pre></div><p>For each row in the <code>jobs</code> table, the database engine looks in the <code>companies</code> table, finds the value where <code>id = jobs.company_id</code>, extracts the <code>name</code>, and adds it to the result. If no matching value is found (as in the case of &ldquo;UI Designer&rdquo; with a company ID of <code>99</code>), the row is not included in the result.</p>
+<h3 id=outer-join-left-join>Outer JOIN (LEFT JOIN)</h3>
+<p>The outer join is very similar to an inner join.</p>
+<div class=row>
+<div class="col-xs-12 col-sm-8">
+<figure>
+<img alt="Outer join" src=./join-2.png>
+</figure>
+</div>
+</div>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
+  <span style=color:#000>jobs</span>.<span style=color:#000>id</span>,
+  <span style=color:#000>jobs</span>.<span style=color:#000>name</span>,
+  <span style=color:#000>jobs</span>.<span style=color:#000>company_id</span>,
+  <span style=color:#000>companies</span>.<span style=color:#000>name</span> <span style=color:#a90d91>as</span> <span style=color:#000>company_name</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>jobs</span>
+  <span style=color:#a90d91>left</span> <span style=color:#a90d91>join</span> <span style=color:#000>companies</span> <span style=color:#a90d91>on</span> <span style=color:#000>jobs</span>.<span style=color:#000>company_id</span> <span style=color:#000>=</span> <span style=color:#000>companies</span>.<span style=color:#000>id</span>;
+</code></pre></div><p>The difference is that even if the row with <code>id = jobs.company_id</code> (&ldquo;UI Designer&rdquo; in our example) is not found in the <code>companies</code> table, the row from <code>jobs</code> will still appear in the result. The company name will be <code>null</code> in this case.</p>
+<p>An inner JOIN can be thought of as saying:</p>
+<blockquote>
+<p>Given these two tables, I want to see records that match based on the specified criteria.</p>
+</blockquote>
+<p>An outer (left) JOIN, on the other hand, says:</p>
+<blockquote>
+<p>Given these two tables, I want to see records that match based on the specified criteria. I also want to see all records from the left table that do not match the right table.</p>
+</blockquote>
+<h2 id=summary>Summary</h2>
+<p>We covered the basics of SQL for selecting data:</p>
+<ul>
+<li>Query parts: columns, tables, filtering, sorting.</li>
+<li>Data grouping and aggregation functions.</li>
+<li>Table joins.</li>
+</ul>
+<p>Of course, SQL has many more capabilities, but that&rsquo;s another story.</p>
+<p><sqlime-db name=sample path=./sample.sql></sqlime-db>
+<sqlime-examples db=sample selector=div.highlight editable></sqlime-examples></p>
+<script src=/assets/sqlime/sqlite3.js></script>
+<script src=/assets/sqlime/sqlime-db.js></script>
+<script src=/assets/sqlime/sqlime-examples.js></script>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2023-05-14 13:00:00 +0000 UTC">14 May, 2023</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/data/>data</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/sql-ranking/>Ranking Records in SQL</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sql-ranking/>Ranking Records in SQL</a></p>
+<p><a href=/sql-window-functions-rolling-aggregates/>Rolling Aggregates with SQL Window Functions</a></p>
+<p><a href=/sql-window-functions-aggregation/>Aggregating Data with SQL Window Functions</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
