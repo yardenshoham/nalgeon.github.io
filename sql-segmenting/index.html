@@ -1,0 +1,163 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Segmenting Data in SQL</title>
+<meta name=description content="Assigning each record to a specific segment based on the value of one or more columns.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.fe03afa13d4e1d4607de8f21a6d227f1314ba69e0bf3e4c1e4ce111080af6bb8.css>
+<link rel=icon href=/assets/favicon/favicon.ico sizes=any>
+<link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=manifest href=/assets/favicon/manifest.json>
+<link rel=canonical href=https://antonz.org/sql-segmenting/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Segmenting Data in SQL">
+<meta property="og:description" content="Assigning each record to a specific segment based on the value of one or more columns.">
+<meta property="og:url" content="https://antonz.org/sql-segmenting/">
+<meta property="og:image" content="https://antonz.org/sql-segmenting/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Segmenting Data in SQL">
+<meta name=twitter:description content="Assigning each record to a specific segment based on the value of one or more columns.">
+<meta name=twitter:url content="https://antonz.org/sql-segmenting/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/sql-segmenting/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Segmenting Data in SQL</h1>
+</header>
+<p><em>This post is part of the &ldquo;SQL Recipe&rdquo; series, where I provide short patterns for solving common SQL data analysis tasks.</em></p>
+<p>Suppose we want to divide our data into several segments based on the value of one or more columns (e.g., to assign customers or products to different groups for marketing purposes).</p>
+<p>The solution is to use the <code>ntile()</code> function over an SQL window ordered by target columns.</p>
+<h2 id=example>Example</h2>
+<p>Let&rsquo;s divide the <code>employees</code> into three groups according to their salary:</p>
+<ul>
+<li>high-paid,</li>
+<li>medium-paid,</li>
+<li>low-paid.</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
+  <span style=color:#000>ntile</span>(<span style=color:#1c01ce>3</span>) <span style=color:#000>over</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> <span style=color:#000>tile</span>,
+  <span style=color:#000>name</span>, <span style=color:#000>salary</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>)
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>, <span style=color:#000>id</span>;
+</code></pre></div><p>The <code>ntile(n)</code> function splits all records into <code>n</code> groups and returns the group number for each record. If the total number of records (10 in our case) is not divisible by the group size (3), then the former groups will be larger than the latter.</p>
+<h2 id=alternatives>Alternatives</h2>
+<p><code>ntile()</code> always tries to split the data so that the groups are of the same size. So records with the same value may end up in different (adjacent) groups:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
+  <span style=color:#000>ntile</span>(<span style=color:#1c01ce>2</span>) <span style=color:#000>over</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> <span style=color:#000>tile</span>,
+  <span style=color:#000>name</span>, <span style=color:#000>salary</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>, <span style=color:#000>id</span>)
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>, <span style=color:#000>tile</span>;
+</code></pre></div><p>To avoid this, we can use the following (much more complicated) formula instead of <code>ntile(n)</code>:</p>
+<pre tabindex=0><code>1 + ((rank() over w) - 1) * N / count(*) over () as tile
+</code></pre><p>For <code>n = 2</code>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
+  <span style=color:#1c01ce>1</span> <span style=color:#000>+</span> ((<span style=color:#000>rank</span>() <span style=color:#000>over</span> <span style=color:#000>w</span>) <span style=color:#000>-</span> <span style=color:#1c01ce>1</span>) <span style=color:#000>*</span> <span style=color:#1c01ce>2</span> <span style=color:#000>/</span> <span style=color:#a90d91>count</span>(<span style=color:#000>*</span>) <span style=color:#000>over</span> () <span style=color:#a90d91>as</span> <span style=color:#000>tile</span>,
+  <span style=color:#000>name</span>, <span style=color:#000>salary</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>)
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>, <span style=color:#000>id</span>;
+</code></pre></div><h2 id=compatibility>Compatibility</h2>
+<p>All major vendors support the <code>ntile()</code> window function. Some of them, such as MS SQL and Oracle, do not support the <code>window</code> clause. In these cases, we can inline the window definition:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
+  <span style=color:#000>ntile</span>(<span style=color:#1c01ce>3</span>) <span style=color:#000>over</span> (
+    <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>
+  ) <span style=color:#a90d91>as</span> <span style=color:#000>tile</span>,
+  <span style=color:#000>name</span>, <span style=color:#000>salary</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>, <span style=color:#000>id</span>;
+</code></pre></div><p>We can also rewrite the query without window functions:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
+  <span style=color:#000>ceil</span>(
+    (<span style=color:#a90d91>select</span> <span style=color:#a90d91>count</span>(<span style=color:#000>*</span>) <span style=color:#a90d91>from</span> <span style=color:#000>employees</span> <span style=color:#a90d91>as</span> <span style=color:#000>e2</span> <span style=color:#a90d91>where</span> <span style=color:#000>e2</span>.<span style=color:#000>salary</span> <span style=color:#000>&gt;</span> <span style=color:#000>e1</span>.<span style=color:#000>salary</span>) <span style=color:#000>*</span> <span style=color:#1c01ce>3</span> <span style=color:#000>/</span>
+    (<span style=color:#a90d91>select</span> <span style=color:#a90d91>count</span>(<span style=color:#000>*</span>) <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>)
+  ) <span style=color:#000>+</span> <span style=color:#1c01ce>1</span> <span style=color:#a90d91>as</span> <span style=color:#000>tile</span>,
+  <span style=color:#000>name</span>, <span style=color:#000>salary</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>employees</span> <span style=color:#a90d91>as</span> <span style=color:#000>e1</span>
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>, <span style=color:#000>id</span>;
+</code></pre></div><br>
+<p>Want to learn more about window functions? Read my book — <a href=/sql-window-functions-book/><strong>SQL Window Functions Explained</strong></a></p>
+<p><sqlime-db name=employees path=/sql-window-functions-book/employees.sql></sqlime-db>
+<sqlime-examples db=employees selector=div.highlight editable></sqlime-examples></p>
+<script src=/assets/sqlime/sqlite3.js></script>
+<script src=/assets/sqlime/sqlime-db.js></script>
+<script src=/assets/sqlime/sqlime-examples.js></script>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2023-05-23 15:30:00 +0000 UTC">23 May, 2023</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/data/>data</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/sql-cheatsheet/>SQL Cheat Sheet</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sql-cheatsheet/>SQL Cheat Sheet</a></p>
+<p><a href=/sql-ranking/>Ranking Records in SQL</a></p>
+<p><a href=/sql-window-functions-rolling-aggregates/>Rolling Aggregates with SQL Window Functions</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
