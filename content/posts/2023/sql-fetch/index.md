@@ -29,7 +29,7 @@ limit 5;
 └────┴───────┴────────────┴────────┘
 ```
 
-And yet, according to the standard, we should use be using `fetch`:
+And yet, according to the standard, we should be using `fetch`:
 
 ```sql
 select * from employees
@@ -37,7 +37,7 @@ order by salary desc
 fetch first 5 rows only;
 ```
 
-`fetch first N row only` does exactly what `limit N` does. But `fetch` can do more.
+`fetch first N rows only` does exactly what `limit N` does. But `fetch` can do more.
 
 ## Limit with ties
 
