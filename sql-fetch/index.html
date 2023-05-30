@@ -70,11 +70,11 @@
 │ 33 │ Alice │ sales      │ 100    │
 │ 31 │ Cindy │ sales      │ 96     │
 └────┴───────┴────────────┴────────┘
-</code></pre><p>And yet, according to the standard, we should use be using <code>fetch</code>:</p>
+</code></pre><p>And yet, according to the standard, we should be using <code>fetch</code>:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
 <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>
 <span style=color:#a90d91>fetch</span> <span style=color:#a90d91>first</span> <span style=color:#1c01ce>5</span> <span style=color:#a90d91>rows</span> <span style=color:#a90d91>only</span>;
-</code></pre></div><p><code>fetch first N row only</code> does exactly what <code>limit N</code> does. But <code>fetch</code> can do more.</p>
+</code></pre></div><p><code>fetch first N rows only</code> does exactly what <code>limit N</code> does. But <code>fetch</code> can do more.</p>
 <h2 id=limit-with-ties>Limit with ties</h2>
 <p>Suppose we want to select the top 5 employees by salary, but also select anyone with the same salary as the last (5th) employee. Here comes <code>with ties</code>:</p>
 <div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
