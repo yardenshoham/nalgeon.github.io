@@ -1,0 +1,182 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>LIMIT vs. FETCH in SQL</title>
+<meta name=description content="According to the standard, we should use be using FETCH.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.fe03afa13d4e1d4607de8f21a6d227f1314ba69e0bf3e4c1e4ce111080af6bb8.css>
+<link rel=icon href=/assets/favicon/favicon.ico sizes=any>
+<link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=manifest href=/assets/favicon/manifest.json>
+<link rel=canonical href=https://antonz.org/sql-fetch/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LIMIT vs. FETCH in SQL">
+<meta property="og:description" content="According to the standard, we should use be using FETCH.">
+<meta property="og:url" content="https://antonz.org/sql-fetch/">
+<meta property="og:image" content="https://antonz.org/sql-fetch/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="LIMIT vs. FETCH in SQL">
+<meta name=twitter:description content="According to the standard, we should use be using FETCH.">
+<meta name=twitter:url content="https://antonz.org/sql-fetch/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/sql-fetch/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>LIMIT vs. FETCH in SQL</h1>
+</header>
+<p>Fun fact: There is no <code>limit</code> clause in the SQL standard.</p>
+<p>Everyone uses <code>limit</code>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>
+<span style=color:#a90d91>limit</span> <span style=color:#1c01ce>5</span>;
+</code></pre></div><pre tabindex=0><code>┌────┬───────┬────────────┬────────┐
+│ id │ name  │ department │ salary │
+├────┼───────┼────────────┼────────┤
+│ 25 │ Frank │ it         │ 120    │
+│ 23 │ Henry │ it         │ 104    │
+│ 24 │ Irene │ it         │ 104    │
+│ 33 │ Alice │ sales      │ 100    │
+│ 31 │ Cindy │ sales      │ 96     │
+└────┴───────┴────────────┴────────┘
+</code></pre><p>And yet, according to the standard, we should use be using <code>fetch</code>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>
+<span style=color:#a90d91>fetch</span> <span style=color:#a90d91>first</span> <span style=color:#1c01ce>5</span> <span style=color:#a90d91>rows</span> <span style=color:#a90d91>only</span>;
+</code></pre></div><p><code>fetch first N row only</code> does exactly what <code>limit N</code> does. But <code>fetch</code> can do more.</p>
+<h2 id=limit-with-ties>Limit with ties</h2>
+<p>Suppose we want to select the top 5 employees by salary, but also select anyone with the same salary as the last (5th) employee. Here comes <code>with ties</code>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>
+<span style=color:#a90d91>fetch</span> <span style=color:#a90d91>first</span> <span style=color:#1c01ce>5</span> <span style=color:#a90d91>rows</span> <span style=color:#a90d91>with</span> <span style=color:#000>ties</span>;
+</code></pre></div><pre tabindex=0><code>┌────┬───────┬────────────┬────────┐
+│ id │ name  │ department │ salary │
+├────┼───────┼────────────┼────────┤
+│ 25 │ Frank │ it         │ 120    │
+│ 23 │ Henry │ it         │ 104    │
+│ 24 │ Irene │ it         │ 104    │
+│ 33 │ Alice │ sales      │ 100    │
+│ 31 │ Cindy │ sales      │ 96     │
+│ 32 │ Dave  │ sales      │ 96     │
+└────┴───────┴────────────┴────────┘
+</code></pre><h2 id=relative-limit>Relative limit</h2>
+<p>Suppose we want to select the top 10% of employees by salary. <code>percent</code> to the rescue:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>
+<span style=color:#a90d91>fetch</span> <span style=color:#a90d91>first</span> <span style=color:#1c01ce>10</span> <span style=color:#000>percent</span> <span style=color:#a90d91>rows</span> <span style=color:#a90d91>only</span>;
+</code></pre></div><pre tabindex=0><code>┌────┬───────┬────────────┬────────┐
+│ id │ name  │ department │ salary │
+├────┼───────┼────────────┼────────┤
+│ 25 │ Frank │ it         │ 120    │
+│ 23 │ Henry │ it         │ 104    │
+└────┴───────┴────────────┴────────┘
+</code></pre><p>(there are 20 employees, so 10% is 2 records)</p>
+<h2 id=offset-with-fetch>Offset with fetch</h2>
+<p>Suppose we want to skip the first 3 employees and select the next 5. No problem: <code>fetch</code> plays nicely with <code>offset</code>, as does <code>limit</code>:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>
+<span style=color:#a90d91>offset</span> <span style=color:#1c01ce>3</span> <span style=color:#a90d91>rows</span>
+<span style=color:#a90d91>fetch</span> <span style=color:#a90d91>next</span> <span style=color:#1c01ce>5</span> <span style=color:#a90d91>rows</span> <span style=color:#a90d91>only</span>;
+</code></pre></div><pre tabindex=0><code>┌────┬───────┬────────────┬────────┐
+│ id │ name  │ department │ salary │
+├────┼───────┼────────────┼────────┤
+│ 33 │ Alice │ sales      │ 100    │
+│ 31 │ Cindy │ sales      │ 96     │
+│ 32 │ Dave  │ sales      │ 96     │
+│ 22 │ Grace │ it         │ 90     │
+│ 21 │ Emma  │ it         │ 84     │
+└────┴───────┴────────────┴────────┘
+</code></pre><p><code>next</code> here is just a syntactic sugar, a synonym for <code>first</code> in the previous examples. We can use <code>first</code> and get exactly the same result:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>*</span> <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>salary</span> <span style=color:#a90d91>desc</span>
+<span style=color:#a90d91>offset</span> <span style=color:#1c01ce>3</span> <span style=color:#a90d91>rows</span>
+<span style=color:#a90d91>fetch</span> <span style=color:#a90d91>first</span> <span style=color:#1c01ce>5</span> <span style=color:#a90d91>rows</span> <span style=color:#a90d91>only</span>;
+</code></pre></div><p>Oh, and by the way, <code>row</code> and <code>rows</code> are also synonyms.</p>
+<h2 id=database-support>Database support</h2>
+<p>The following DBMS support <code>fetch</code>:</p>
+<ul>
+<li>PostgreSQL 8.4+</li>
+<li>Oracle 12c+</li>
+<li>MS SQL 2012+</li>
+<li>DB2 9+</li>
+</ul>
+<p>However, only Oracle supports <code>percent</code> fetching.</p>
+<p>MySQL and SQLite do not support <code>fetch</code> at all.</p>
+<p>P.S. Interested in mastering advanced SQL? Check out my book — <a href=/sql-window-functions-book>SQL Window Functions Explained</a></p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2023-05-30 18:00:00 +0000 UTC">30 May, 2023</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/data/>data</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/sql-segmenting/>Segmenting Data in SQL</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sql-segmenting/>Segmenting Data in SQL</a></p>
+<p><a href=/sql-cheatsheet/>SQL Cheat Sheet</a></p>
+<p><a href=/sql-ranking/>Ranking Records in SQL</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
