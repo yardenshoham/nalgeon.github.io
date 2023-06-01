@@ -1,0 +1,174 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Base64 and other encodings in SQLite</title>
+<meta name=description content="Encoding binary data into a textual representation and vice versa.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.fe03afa13d4e1d4607de8f21a6d227f1314ba69e0bf3e4c1e4ce111080af6bb8.css>
+<link rel=icon href=/assets/favicon/favicon.ico sizes=any>
+<link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=manifest href=/assets/favicon/manifest.json>
+<link rel=canonical href=https://antonz.org/sqlean-encode/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Base64 and other encodings in SQLite">
+<meta property="og:description" content="Encoding binary data into a textual representation and vice versa.">
+<meta property="og:url" content="https://antonz.org/sqlean-encode/">
+<meta property="og:image" content="https://antonz.org/sqlean-encode/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Base64 and other encodings in SQLite">
+<meta name=twitter:description content="Encoding binary data into a textual representation and vice versa.">
+<meta name=twitter:url content="https://antonz.org/sqlean-encode/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/sqlean-encode/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+<div class="col-xs-6 col-sm-3"><div class=search-module>
+<form action=https://duckduckgo.com/>
+<input type=hidden name=kf value=-1>
+<input type=hidden name=kz value=-1>
+<input type=hidden name=kaf value=1>
+<input type=hidden name=ko value=-2>
+<input type=hidden name=k1 value=-1>
+<input type=hidden name=sites value=antonz.org>
+<input type=search name=q autocomplete=off placeholder=Search aria-label=Search>
+</form>
+</div></div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Base64 and other encodings in SQLite</h1>
+</header>
+<p>You&rsquo;ve probably heard about hexadecimal encoding in SQLite:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>hex</span>(<span style=color:#c41a16>&#39;hello&#39;</span>);
+<span style=color:#177500>-- 68656C6C6F
+</span><span style=color:#177500></span>
+<span style=color:#a90d91>select</span> <span style=color:#000>unhex</span>(<span style=color:#c41a16>&#39;68656C6C6F&#39;</span>);
+<span style=color:#177500>-- hello
+</span></code></pre></div><p>SQLite does not support other encoding algorithms by default. However, you can easily enable them using the <code>sqlean-crypto</code> extension (not related to cryptocurrency in any way).</p>
+<blockquote>
+<p><strong>Note</strong>. Unlike other DBMS, adding extensions to SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
+</blockquote>
+<p><code>sqlean-crypto</code> adds two functions:</p>
+<ul>
+<li><code>encode(data, algo)</code> encodes binary data into a textual representation using the specified algorithm.</li>
+<li><code>decode(text, algo)</code> decodes binary data from a textual representation using the specified algorithm.</li>
+</ul>
+<p>Supported algorithms: <code>base32</code>, <code>base64</code>, <code>base85</code>, <code>hex</code> and <code>url</code>.</p>
+<p><a href=https://en.wikipedia.org/wiki/Base32>Base32</a> uses 32 human-readable characters to represent binary data:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>encode</span>(<span style=color:#c41a16>&#39;hello&#39;</span>, <span style=color:#c41a16>&#39;base32&#39;</span>);
+<span style=color:#177500>-- NBSWY3DP
+</span><span style=color:#177500></span>
+<span style=color:#a90d91>select</span> <span style=color:#000>decode</span>(<span style=color:#c41a16>&#39;NBSWY3DP&#39;</span>, <span style=color:#c41a16>&#39;base32&#39;</span>);
+<span style=color:#177500>-- hello
+</span></code></pre></div><p><a href=https://en.wikipedia.org/wiki/Base64>Base64</a> uses 64 printable characters to represent binary data:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>encode</span>(<span style=color:#c41a16>&#39;hello&#39;</span>, <span style=color:#c41a16>&#39;base64&#39;</span>);
+<span style=color:#177500>-- aGVsbG8=
+</span><span style=color:#177500></span>
+<span style=color:#a90d91>select</span> <span style=color:#000>decode</span>(<span style=color:#c41a16>&#39;aGVsbG8=&#39;</span>, <span style=color:#c41a16>&#39;base64&#39;</span>);
+<span style=color:#177500>-- hello
+</span></code></pre></div><p><a href=https://en.wikipedia.org/wiki/Ascii85>Base85</a> (aka Ascii85) uses 85 printable characters to represent binary data:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>encode</span>(<span style=color:#c41a16>&#39;hello&#39;</span>, <span style=color:#c41a16>&#39;base85&#39;</span>);
+<span style=color:#177500>-- BOu!rDZ
+</span><span style=color:#177500></span>
+<span style=color:#a90d91>select</span> <span style=color:#000>decode</span>(<span style=color:#c41a16>&#39;BOu!rDZ&#39;</span>, <span style=color:#c41a16>&#39;base85&#39;</span>);
+<span style=color:#177500>-- hello
+</span></code></pre></div><p><a href=https://en.wikipedia.org/wiki/Hexadecimal>Hexadecimal</a> uses 16 characters (0-9 and A-F) to represent binary data:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>encode</span>(<span style=color:#c41a16>&#39;hello&#39;</span>, <span style=color:#c41a16>&#39;hex&#39;</span>);
+<span style=color:#177500>-- 68656c6c6f
+</span><span style=color:#177500></span>
+<span style=color:#a90d91>select</span> <span style=color:#000>decode</span>(<span style=color:#c41a16>&#39;68656c6c6f&#39;</span>, <span style=color:#c41a16>&#39;hex&#39;</span>);
+<span style=color:#177500>-- hello
+</span></code></pre></div><p><a href=https://en.wikipedia.org/wiki/URL_encoding>URL encoding</a> replaces non-alphanumeric characters in a string with their corresponding percent-encoded values:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>encode</span>(<span style=color:#c41a16>&#39;hel lo!&#39;</span>, <span style=color:#c41a16>&#39;url&#39;</span>);
+<span style=color:#177500>-- hel%20lo%21
+</span><span style=color:#177500></span>
+<span style=color:#a90d91>select</span> <span style=color:#000>decode</span>(<span style=color:#c41a16>&#39;hel%20lo%21&#39;</span>, <span style=color:#c41a16>&#39;url&#39;</span>);
+<span style=color:#177500>-- hel lo!
+</span></code></pre></div><h2 id=installation-and-usage>Installation and Usage</h2>
+<ol>
+<li>
+<p>Download the <a href=https://github.com/nalgeon/sqlean/releases/latest>latest release</a></p>
+</li>
+<li>
+<p>Use with SQLite command-line interface:</p>
+</li>
+</ol>
+<pre tabindex=0><code>sqlite&gt; .load ./crypto
+sqlite&gt; select encode('hello', 'base64');
+</code></pre><p>See <a href=https://github.com/nalgeon/sqlean/blob/main/docs/install.md>How to Install an Extension</a> for usage with IDE, Python, etc.</p>
+<p>See <a href=https://github.com/nalgeon/sqlean/blob/main/docs/crypto.md>Extension Documentation</a> for reference.</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2023-06-01 18:30:00 +0000 UTC">01 Jun, 2023</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/sqlite/>sqlite</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/sql-fetch/>LIMIT vs. FETCH in SQL</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sqlime-ai/>AI SQLite Assistant</a></p>
+<p><a href=/interactive-sql-examples/>Interactive SQL Examples in JavaScript</a></p>
+<p><a href=/sqlean-fileio/>Reading and Writing Files in SQLite</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
