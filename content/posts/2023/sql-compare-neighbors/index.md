@@ -9,7 +9,7 @@ tags = ["data"]
 
 _This post is part of the "SQL Recipes" series, where I provide short patterns for solving common SQL data analysis tasks._
 
-Suppose we want to compare each data record with its neighbors based on the value of one or more columns. For example:
+Suppose we want to compare each data record with its neighbors based on some column value. For example:
 
 -   Compare sales from one month to the previous month (month-over-month or MoM change) or to the same month a year ago (year-over-year or YoY change).
 -   Compare financial results for a given period to the same period in the previous year (like-for-like or LFL analysis).
