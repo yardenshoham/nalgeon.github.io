@@ -1,0 +1,189 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Compare with Neighbors in SQL</title>
+<meta name=description content="Calculate the difference between each record and the previous or next one.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.fe03afa13d4e1d4607de8f21a6d227f1314ba69e0bf3e4c1e4ce111080af6bb8.css>
+<link rel=icon href=/assets/favicon/favicon.ico sizes=any>
+<link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=manifest href=/assets/favicon/manifest.json>
+<link rel=canonical href=https://antonz.org/sql-compare-neighbors/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Compare with Neighbors in SQL">
+<meta property="og:description" content="Calculate the difference between each record and the previous or next one.">
+<meta property="og:url" content="https://antonz.org/sql-compare-neighbors/">
+<meta property="og:image" content="https://antonz.org/sql-compare-neighbors/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Compare with Neighbors in SQL">
+<meta name=twitter:description content="Calculate the difference between each record and the previous or next one.">
+<meta name=twitter:url content="https://antonz.org/sql-compare-neighbors/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/sql-compare-neighbors/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+<div class="col-xs-6 col-sm-3"><div class=search-module>
+<form action=https://duckduckgo.com/>
+<input type=hidden name=kf value=-1>
+<input type=hidden name=kz value=-1>
+<input type=hidden name=kaf value=1>
+<input type=hidden name=ko value=-2>
+<input type=hidden name=k1 value=-1>
+<input type=hidden name=sites value=antonz.org>
+<input type=search name=q autocomplete=off placeholder=Search aria-label=Search>
+</form>
+</div></div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Compare with Neighbors in SQL</h1>
+</header>
+<p><em>This post is part of the &ldquo;SQL Recipes&rdquo; series, where I provide short patterns for solving common SQL data analysis tasks.</em></p>
+<p>Suppose we want to compare each data record with its neighbors based on the value of one or more columns. For example:</p>
+<ul>
+<li>Compare sales from one month to the previous month (month-over-month or MoM change) or to the same month a year ago (year-over-year or YoY change).</li>
+<li>Compare financial results for a given period to the same period in the previous year (like-for-like or LFL analysis).</li>
+<li>Observe the daily difference in stock prices to understand market trends.</li>
+<li>Calculate the difference in traffic between days of the week to plan capacity changes.</li>
+</ul>
+<p>The solution is to use the <code>lag()</code> function over an SQL window ordered by target columns.</p>
+<h2 id=example>Example</h2>
+<p>Let&rsquo;s compare the company&rsquo;s <code>expenses</code> for each month to the previous month in absolute terms:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
+  <span style=color:#a90d91>year</span>, <span style=color:#a90d91>month</span>,
+  <span style=color:#000>expense</span>,
+  <span style=color:#000>expense</span> <span style=color:#000>-</span> <span style=color:#000>lag</span>(<span style=color:#000>expense</span>) <span style=color:#000>over</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> <span style=color:#000>diff</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>expenses</span>
+<span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#a90d91>year</span>, <span style=color:#a90d91>month</span>)
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#a90d91>year</span>, <span style=color:#a90d91>month</span>;
+</code></pre></div><p>The <code>lag(value, offset)</code> function returns the <code>value</code> of the record that is <code>offset</code> rows behind the current one. By default, the offset is 1 and can be omitted.</p>
+<p>Now let&rsquo;s calculate the relative change from month to month:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
+  <span style=color:#a90d91>year</span>, <span style=color:#a90d91>month</span>, <span style=color:#000>expense</span>,
+  <span style=color:#000>round</span>(
+    (<span style=color:#000>expense</span> <span style=color:#000>-</span> <span style=color:#000>lag</span>(<span style=color:#000>expense</span>) <span style=color:#000>over</span> <span style=color:#000>w</span>)<span style=color:#000>*</span><span style=color:#1c01ce>100</span>.<span style=color:#1c01ce>0</span> <span style=color:#000>/</span> <span style=color:#000>lag</span>(<span style=color:#000>expense</span>) <span style=color:#000>over</span> <span style=color:#000>w</span>
+  ) <span style=color:#a90d91>as</span> <span style=color:#c41a16>&#34;diff %&#34;</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>expenses</span>
+<span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#a90d91>year</span>, <span style=color:#a90d91>month</span>)
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#a90d91>year</span>, <span style=color:#a90d91>month</span>;
+</code></pre></div><h2 id=alternatives>Alternatives</h2>
+<p>Suppose we want to compare quarterly <code>sales</code> with the previous year. This is where the <code>offset</code> parameter comes in handy:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>with</span> <span style=color:#a90d91>data</span> <span style=color:#a90d91>as</span> (
+  <span style=color:#a90d91>select</span>
+    <span style=color:#a90d91>year</span>, <span style=color:#000>quarter</span>,
+    <span style=color:#000>lag</span>(<span style=color:#000>amount</span>, <span style=color:#1c01ce>4</span>) <span style=color:#000>over</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> <span style=color:#000>prev</span>,
+    <span style=color:#000>amount</span> <span style=color:#a90d91>as</span> <span style=color:#a90d91>current</span>,
+    <span style=color:#000>round</span>(<span style=color:#000>amount</span><span style=color:#000>*</span><span style=color:#1c01ce>100</span>.<span style=color:#1c01ce>0</span> <span style=color:#000>/</span> <span style=color:#000>lag</span>(<span style=color:#000>amount</span>, <span style=color:#1c01ce>4</span>) <span style=color:#000>over</span> <span style=color:#000>w</span>) <span style=color:#a90d91>as</span> <span style=color:#c41a16>&#34;increase %&#34;</span>
+  <span style=color:#a90d91>from</span> <span style=color:#000>sales</span>
+  <span style=color:#000>window</span> <span style=color:#000>w</span> <span style=color:#a90d91>as</span> (<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#a90d91>year</span>, <span style=color:#000>quarter</span>)
+)
+<span style=color:#a90d91>select</span>
+  <span style=color:#000>quarter</span>,
+  <span style=color:#000>prev</span> <span style=color:#a90d91>as</span> <span style=color:#000>y2019</span>,
+  <span style=color:#a90d91>current</span> <span style=color:#a90d91>as</span> <span style=color:#000>y2020</span>,
+  <span style=color:#c41a16>&#34;increase %&#34;</span>
+<span style=color:#a90d91>from</span> <span style=color:#a90d91>data</span>
+<span style=color:#a90d91>where</span> <span style=color:#a90d91>year</span> <span style=color:#000>=</span> <span style=color:#1c01ce>2020</span>
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>quarter</span>;
+</code></pre></div><p>Looking back 4 quarters with <code>lag(amount, 4)</code> gives us the same quarter but from the previous year.</p>
+<p>There is also a <code>lead()</code> function. It works just like <code>lag()</code>, except that it looks forward instead of backward.</p>
+<h2 id=compatibility>Compatibility</h2>
+<p>All major vendors support the <code>lag()</code> and <code>lead()</code> window functions. Some of them, such as MS SQL and Oracle, do not support the <code>window</code> clause. In these cases, we can inline the window definition:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
+  <span style=color:#a90d91>year</span>, <span style=color:#a90d91>month</span>, <span style=color:#000>expense</span>,
+  <span style=color:#000>expense</span> <span style=color:#000>-</span> <span style=color:#000>lag</span>(<span style=color:#000>expense</span>) <span style=color:#000>over</span> (
+    <span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#a90d91>year</span>, <span style=color:#a90d91>month</span>
+  ) <span style=color:#a90d91>as</span> <span style=color:#000>diff</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>expenses</span>
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#a90d91>year</span>, <span style=color:#a90d91>month</span>;
+</code></pre></div><p>We can also rewrite the query without window functions:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
+  <span style=color:#000>cur</span>.<span style=color:#a90d91>year</span>, <span style=color:#000>cur</span>.<span style=color:#a90d91>month</span>, <span style=color:#000>cur</span>.<span style=color:#000>expense</span>,
+  <span style=color:#000>cur</span>.<span style=color:#000>expense</span> <span style=color:#000>-</span> <span style=color:#000>prev</span>.<span style=color:#000>expense</span> <span style=color:#a90d91>as</span> <span style=color:#000>diff</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>expenses</span> <span style=color:#000>cur</span>
+<span style=color:#a90d91>left</span> <span style=color:#a90d91>join</span> <span style=color:#000>expenses</span> <span style=color:#000>prev</span> <span style=color:#a90d91>on</span>
+  <span style=color:#000>cur</span>.<span style=color:#a90d91>year</span> <span style=color:#000>=</span> <span style=color:#000>prev</span>.<span style=color:#a90d91>year</span> <span style=color:#a90d91>and</span>
+  <span style=color:#000>cur</span>.<span style=color:#a90d91>month</span> <span style=color:#000>-</span> <span style=color:#1c01ce>1</span> <span style=color:#000>=</span> <span style=color:#000>prev</span>.<span style=color:#a90d91>month</span>
+<span style=color:#a90d91>order</span> <span style=color:#a90d91>by</span> <span style=color:#000>cur</span>.<span style=color:#a90d91>year</span>, <span style=color:#000>cur</span>.<span style=color:#a90d91>month</span>;
+</code></pre></div><br>
+<p>Want to learn more about window functions? Read my book — <a href=/sql-window-functions-book/><strong>SQL Window Functions Explained</strong></a></p>
+<p><sqlime-db name=employees path=data.sql></sqlime-db>
+<sqlime-examples db=employees selector=div.highlight editable></sqlime-examples></p>
+<script src=/assets/sqlime/sqlite3.js></script>
+<script src=/assets/sqlime/sqlime-db.js></script>
+<script src=/assets/sqlime/sqlime-examples.js></script>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2023-06-03 15:00:00 +0000 UTC">03 Jun, 2023</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/data/>data</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/sqlean-encode/>Base64 and other encodings in SQLite</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sql-fetch/>LIMIT vs. FETCH in SQL</a></p>
+<p><a href=/sql-segmenting/>Segmenting Data in SQL</a></p>
+<p><a href=/sql-cheatsheet/>SQL Cheat Sheet</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
