@@ -1,7 +1,7 @@
 <!doctype html><html lang=en>
 <head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>Segmenting Data in SQL</title>
+<title>SQL Recipe: Segmenting Data</title>
 <meta name=description content="Assigning each record to a specific segment based on the value of one or more columns.">
 <meta name=robots content="index, follow">
 <link rel=stylesheet type=text/css href=/assets/css/style.fe03afa13d4e1d4607de8f21a6d227f1314ba69e0bf3e4c1e4ce111080af6bb8.css>
@@ -12,12 +12,12 @@
 <link rel=canonical href=https://antonz.org/sql-segmenting/>
 <meta name=author content="Anton Zhiyanov">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Segmenting Data in SQL">
+<meta property="og:title" content="SQL Recipe: Segmenting Data">
 <meta property="og:description" content="Assigning each record to a specific segment based on the value of one or more columns.">
 <meta property="og:url" content="https://antonz.org/sql-segmenting/">
 <meta property="og:image" content="https://antonz.org/sql-segmenting/cover.png">
 <meta name=twitter:card content="summary_large_image">
-<meta name=twitter:title content="Segmenting Data in SQL">
+<meta name=twitter:title content="SQL Recipe: Segmenting Data">
 <meta name=twitter:description content="Assigning each record to a specific segment based on the value of one or more columns.">
 <meta name=twitter:url content="https://antonz.org/sql-segmenting/">
 <meta name=twitter:site content="@ohmypy">
@@ -65,9 +65,9 @@
 <div class=row>
 <div class="col-xs-12 col-sm-10 article">
 <header>
-<h1>Segmenting Data in SQL</h1>
+<h1>SQL Recipe: Segmenting Data</h1>
 </header>
-<p><em>This post is part of the &ldquo;SQL Recipe&rdquo; series, where I provide short patterns for solving common SQL data analysis tasks.</em></p>
+<p><em>This post is part of the &ldquo;SQL Recipes&rdquo; series, where I provide short patterns for solving common SQL data analysis tasks.</em></p>
 <p>Suppose we want to divide our data into several segments based on the value of one or more columns (e.g., to assign customers or products to different groups for marketing purposes).</p>
 <p>The solution is to use the <code>ntile()</code> function over an SQL window ordered by target columns.</p>
 <h2 id=example>Example</h2>
@@ -156,7 +156,7 @@
 <div class="col-xs-12 col-sm-8 col-md-6">
 <h3>See also</h3>
 <p><a href=/sql-cheatsheet/>SQL Cheat Sheet</a></p>
-<p><a href=/sql-ranking/>Ranking Records in SQL</a></p>
+<p><a href=/sql-ranking/>SQL Recipe: Ranking Records</a></p>
 <p><a href=/sql-window-functions-rolling-aggregates/>Rolling Aggregates with SQL Window Functions</a></p>
 </div>
 </div>
