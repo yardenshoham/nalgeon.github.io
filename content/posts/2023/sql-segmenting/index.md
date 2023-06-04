@@ -1,13 +1,13 @@
 +++
 date = 2023-05-23T15:30:00Z
-title = "Segmenting Data in SQL"
+title = "SQL Recipe: Segmenting Data"
 description = "Assigning each record to a specific segment based on the value of one or more columns."
 image = "/sql-segmenting/cover.png"
 slug = "sql-segmenting"
 tags = ["data"]
 +++
 
-_This post is part of the "SQL Recipe" series, where I provide short patterns for solving common SQL data analysis tasks._
+_This post is part of the "SQL Recipes" series, where I provide short patterns for solving common SQL data analysis tasks._
 
 Suppose we want to divide our data into several segments based on the value of one or more columns (e.g., to assign customers or products to different groups for marketing purposes).
 

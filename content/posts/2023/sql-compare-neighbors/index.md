@@ -1,6 +1,6 @@
 +++
 date = 2023-06-03T15:00:00Z
-title = "Compare with Neighbors in SQL"
+title = "SQL Recipe: Compare with Neighbors"
 description = "Calculate the difference between each record and the previous or next one."
 image = "/sql-compare-neighbors/cover.png"
 slug = "sql-compare-neighbors"

@@ -1,13 +1,13 @@
 +++
 date = 2023-05-11T15:50:00Z
-title = "Ranking Records in SQL"
+title = "SQL Recipe: Ranking Records"
 description = "Assigning a rank to each row based on the value of one or more columns."
 image = "/sql-ranking/cover.png"
 slug = "sql-ranking"
 tags = ["data"]
 +++
 
-_This post is part of the "SQL Recipe" series, where I provide short patterns for solving common SQL data analysis tasks._
+_This post is part of the "SQL Recipes" series, where I provide short patterns for solving common SQL data analysis tasks._
 
 Suppose we want to create a ranking, where the position of each record is determined by the value of one or more columns.
 
