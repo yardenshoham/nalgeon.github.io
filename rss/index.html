@@ -1,4 +1,88 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 03 Jun 2023 15:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>SQL Recipe: Compare with Neighbors</title><link>https://antonz.org/sql-compare-neighbors/</link><pubDate>Sat, 03 Jun 2023 15:00:00 +0000</pubDate><guid>https://antonz.org/sql-compare-neighbors/</guid><description>Calculate the difference between each record and the previous or next one.</description><content:encoded><![CDATA[<p><em>This post is part of the &ldquo;SQL Recipes&rdquo; series, where I provide short patterns for solving common SQL data analysis tasks.</em></p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 07 Jun 2023 14:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>More String Functions in SQLite</title><link>https://antonz.org/sqlean-text/</link><pubDate>Wed, 07 Jun 2023 14:00:00 +0000</pubDate><guid>https://antonz.org/sqlean-text/</guid><description>A rich set of string functions, from `slice`, `contains` and `count` to `split_part`, `trim` and `repeat`.</description><content:encoded><![CDATA[<p>SQLite includes basic text functions like <code>instr</code>, <code>substr</code> and <code>replace</code> (and even <code>trim</code> in later versions), which can get you quite far. But I&rsquo;ve always wanted a more complete set, like the one in PostgreSQL, Python or Go.</p>
+<p>So I&rsquo;ve created a <code>sqlean-text</code> extension that provides a rich set of string functions, from <code>slice</code>, <code>contains</code> and <code>count</code> to <code>split_part</code>, <code>translate</code> and <code>repeat</code>.</p>
+<blockquote>
+<p><strong>Note</strong>. Unlike other DBMS, adding extensions to SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
+</blockquote>
+<p><code>sqlean-text</code> contains 25 functions, many of which are postgres-compatible (i.e. they have the same alias and logic as in PostgreSQL). It can be useful when migrating from SQLite to PostgreSQL or vice versa.</p>
+<div class="row">
+<div class="col-xs-12 col-sm-8">
+<figure>
+  <img alt="Text functions" src="functions.png">
+  <figcaption>SQLite already has some text functions, but working with a full set is much nicer.</figcaption>
+</figure>
+</div>
+</div>
+<p>Note that some unicode-related functions like <code>upper</code> and <code>lower</code> are in the separate <a href="https://github.com/nalgeon/sqlean/blob/main/docs/unicode.md">unicode</a> extension. Regular expression functions are in the separate <a href="./sqlean-regexp/">regexp</a> extension.</p>
+<h2 id="substrings-and-slicing">Substrings and slicing</h2>
+<pre tabindex="0"><code>text_substring(str, start [,length])
+</code></pre><p>Extracts a substring of <code>length</code> characters starting at the <code>start</code> position.</p>
+<pre tabindex="0"><code>text_slice(str, start [,end])
+</code></pre><p>Extracts a substring from the <code>start</code> position inclusive to the <code>end</code> position non-inclusive.</p>
+<pre tabindex="0"><code>text_left(str, length)
+</code></pre><p>Extracts a substring of <code>length</code> characters from the beginning of the string.</p>
+<pre tabindex="0"><code>text_right(str, length)
+</code></pre><p>Extracts a substring of <code>length</code> characters from the end of the string.</p>
+<h2 id="search-and-match">Search and match</h2>
+<pre tabindex="0"><code>text_index(str, other)
+</code></pre><p>Returns the first index of the <code>other</code> substring in the original string.</p>
+<pre tabindex="0"><code>text_last_index(str, other)
+</code></pre><p>Returns the last index of the <code>other</code> substring in the original string.</p>
+<pre tabindex="0"><code>text_contains(str, other)
+</code></pre><p>Checks if the string contains the <code>other</code> substring.</p>
+<pre tabindex="0"><code>text_has_prefix(str, other)
+</code></pre><p>Checks if the string starts with the <code>other</code> substring.</p>
+<pre tabindex="0"><code>text_has_suffix(str, other)
+</code></pre><p>Checks if the string ends with the <code>other</code> substring.</p>
+<pre tabindex="0"><code>text_count(str, other)
+</code></pre><p>Counts how many times the <code>other</code> substring is contained in the original string.</p>
+<h2 id="split-and-join">Split and join</h2>
+<pre tabindex="0"><code>text_split(str, sep, n)
+</code></pre><p>Splits a string by a separator and returns the n-th part.</p>
+<pre tabindex="0"><code>text_concat(str, ...)
+</code></pre><p>Concatenates strings.</p>
+<pre tabindex="0"><code>text_join(sep, str, ...)
+</code></pre><p>Joins strings using the separator.</p>
+<pre tabindex="0"><code>text_repeat(str, count)
+</code></pre><p>Concatenates the string to itself a given number of times.</p>
+<h2 id="trim-and-pad">Trim and pad</h2>
+<pre tabindex="0"><code>text_ltrim(str [,chars])
+</code></pre><p>Trims certain characters from the beginning of the string.</p>
+<pre tabindex="0"><code>text_rtrim(str [,chars])
+</code></pre><p>Trims certain characters from the end of the string.</p>
+<pre tabindex="0"><code>text_trim(str [,chars])
+</code></pre><p>Trims certain characters from the beginning and end of the string.</p>
+<pre tabindex="0"><code>text_lpad(str, length [,fill])
+</code></pre><p>Pads the string to the specified length by prepending certain characters.</p>
+<pre tabindex="0"><code>text_rpad(str, length [,fill])
+</code></pre><p>Pads the string to the specified length by appending certain characters.</p>
+<h2 id="other-modifications">Other modifications</h2>
+<pre tabindex="0"><code>text_replace(str, old, new [,count])
+</code></pre><p>Replaces <code>old</code> substrings with <code>new</code> substrings in the original string, but not more than <code>count</code> times.</p>
+<pre tabindex="0"><code>text_translate(str, from, to)
+</code></pre><p>Replaces each string character that matches a character in the <code>from</code> set with the corresponding character in the <code>to</code> set.</p>
+<pre tabindex="0"><code>text_reverse(str)
+</code></pre><p>Reverses the order of the characters in the string.</p>
+<h2 id="string-properties">String properties</h2>
+<pre tabindex="0"><code>text_length(str)
+</code></pre><p>Returns the number of characters in the string.</p>
+<pre tabindex="0"><code>text_size(str)
+</code></pre><p>Returns the number of bytes in the string.</p>
+<pre tabindex="0"><code>text_bitsize(str)
+</code></pre><p>Returns the number of bits in the string.</p>
+<h2 id="installation-and-usage">Installation and Usage</h2>
+<ol>
+<li>
+<p>Download the <a href="https://github.com/nalgeon/sqlean/releases/latest">latest release</a></p>
+</li>
+<li>
+<p>Use with SQLite command-line interface:</p>
+</li>
+</ol>
+<pre tabindex="0"><code>sqlite&gt; .load ./text
+sqlite&gt; select reverse('hello');
+</code></pre><p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/install.md">How to Install an Extension</a> for usage with IDE, Python, etc.</p>
+<p>See <a href="https://github.com/nalgeon/sqlean/blob/main/docs/text.md">Extension Documentation</a> for reference.</p>
+]]></content:encoded></item><item><title>SQL Recipe: Compare with Neighbors</title><link>https://antonz.org/sql-compare-neighbors/</link><pubDate>Sat, 03 Jun 2023 15:00:00 +0000</pubDate><guid>https://antonz.org/sql-compare-neighbors/</guid><description>Calculate the difference between each record and the previous or next one.</description><content:encoded><![CDATA[<p><em>This post is part of the &ldquo;SQL Recipes&rdquo; series, where I provide short patterns for solving common SQL data analysis tasks.</em></p>
 <p>Suppose we want to compare each data record with its neighbors based on some column value. For example:</p>
 <ul>
 <li>Compare sales from one month to the previous month (month-over-month or MoM change) or to the same month a year ago (year-over-year or YoY change).</li>
@@ -1159,159 +1243,4 @@ sum(expense) over w as t_expense,
 <p class="big">
 <a href="https://sqlime.org/">Ask AI in Sqlime</a>
 </p>
-]]></content:encoded></item><item><title>ChatGPT Bot in Python</title><link>https://antonz.org/pokitoki/</link><pubDate>Sat, 11 Mar 2023 12:30:00 +0000</pubDate><guid>https://antonz.org/pokitoki/</guid><description>A Telegram chatbot that works via the official OpenAI API.</description><content:encoded><![CDATA[<p>In the last few months, people have been releasing a record number of AI-powered software. Of course I could not stay out of it.</p>
-<p>And so the <a href="https://github.com/nalgeon/pokitoki"><strong>pokitoki</strong></a> project was born. It&rsquo;s a a Telegram chat bot built using the ChatGPT (GPT-3.5 or GPT-4) language model from OpenAI.</p>
-<p>Notable features:</p>
-<ul>
-<li>Both one-on-one and group chats.</li>
-<li>Direct questions, mentions, follow-ups.</li>
-<li>Access external links (articles, code, data).</li>
-<li>Shortcuts (custom AI commands).</li>
-</ul>
-<h2 id="personal-chats">Personal chats</h2>
-<p>The bot acts as your personal assistant:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6">
-<figure>
-    <img src="./chat-1.png" alt="Sample chat" width="400" class="img-bordered-thin">
-</figure>
-</div>
-</div>
-<p>To allow other users to use the bot, list them in the <code>telegram_usernames</code> config property.</p>
-<p>The bot has a terrible memory, so don&rsquo;t expect it to remember any chat context by default. You can, however, reply with a follow-up question (<code>Ctrl/Cmd + ↑</code>). Alternatively, use a plus sign to follow up:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6">
-<figure>
-    <img src="./chat-2.png" alt="Follow-up by reply" width="400" class="img-bordered-thin">
-    <figcaption>follow up by replying<figcaption>
-</figure>
-</div>
-<div class="col-xs-12 col-sm-6">
-<figure>
-    <img src="./chat-3.png" alt="Follow-up by plus sign" width="400" class="img-bordered-thin">
-    <figcaption>or by writing a `+` sign<figcaption>
-</figure>
-</div>
-</div>
-<p>Available commands:</p>
-<ul>
-<li><code>/retry</code> - retry answering the last question</li>
-<li><code>/help</code> - show help</li>
-<li><code>/version</code> - show bot info</li>
-</ul>
-<h2 id="groups">Groups</h2>
-<p>To get an answer from the bot in a group, mention it in a reply to a question, or ask a question directly:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6">
-<figure>
-    <img src="./chat-4.png" alt="Reply with mention" width="400" class="img-bordered-thin">
-    <figcaption>reply with mention<figcaption>
-</figure>
-</div>
-<div class="col-xs-12 col-sm-6">
-<figure>
-    <img src="./chat-5.png" alt="Direct question" width="400" class="img-bordered-thin">
-    <figcaption>direct question<figcaption>
-</figure>
-</div>
-</div>
-<p>To make the bot reply to group members, list the group id in the <code>telegram_chat_ids</code> config property. Otherwise, the bot will ignore questions from group members unless they are listed in the <code>telegram_usernames</code> config property.</p>
-<p>If you don&rsquo;t know the group id, run the <code>/version</code> bot command in a group to find it:</p>
-<pre tabindex="0"><code>Chat information:
-- id: -1001405001234
-- title: My Favorite Group
-- type: supergroup
-...
-</code></pre><h2 id="external-links">External links</h2>
-<p>If you ask &ldquo;vanilla&rdquo; ChatGPT about external resources, it will either hallucinate or admit that it doesn&rsquo;t have access to remote content:</p>
-<blockquote>
-<p>Q: What is the content of <a href="https://sqlime.org/employees.sql?">https://sqlime.org/employees.sql?</a> Make no assumptions.</p>
-<p>A: As an AI language model, I cannot access external URLs on the internet.</p>
-</blockquote>
-<p>The bot solves the problem by fetching the remote content and feeding it to the model:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6">
-<figure>
-    <img src="./chat-7.png" alt="External links" width="400" class="img-bordered-thin">
-</figure>
-</div>
-</div>
-<p>Currently only supports text content (articles, code, data), not PDFs, images or audio.</p>
-<h2 id="shortcuts">Shortcuts</h2>
-<p>Use short commands to save time and ask the bot to do something specific with your questions. For example, ask it to proofread your writing with a <code>!proofread</code> command:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6">
-<figure>
-    <img src="./chat-6.png" alt="Shortcuts" width="400" class="img-bordered-thin">
-</figure>
-</div>
-</div>
-<p>There are several built-in shortcuts:</p>
-<ul>
-<li><code>bugfix</code> fixes your code.</li>
-<li><code>proofread</code> fixes your writing.</li>
-<li><code>translate</code> translates your text into English.</li>
-<li><code>summarize</code> gives a two paragraph summary of a text.</li>
-</ul>
-<p>You can add your own shortcuts. See <code>config.example.yml</code> for details.</p>
-<h2 id="other-useful-features">Other useful features</h2>
-<p>The convenience of working with a bot is made up of small details. Here are some situations where it can save you time and effort.</p>
-<h3 id="forwarding">Forwarding</h3>
-<p>Say you received a message from a colleague or read a post on a channel and want to ask a question. Simply forward the message to the bot and answer the clarifying question it asks:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6">
-<figure>
-    <img src="./chat-8.png" alt="Forwarding 1" width="400" class="img-bordered-thin">
-    <figcaption>forward the message<figcaption>
-</figure>
-</div>
-<div class="col-xs-12 col-sm-6">
-<figure>
-    <img src="./chat-9.png" alt="Forwarding 2" width="400" class="img-bordered-thin">
-    <figcaption>and specify the task<figcaption>
-</figure>
-</div>
-</div>
-<h3 id="reply-with-attachment">Reply with attachment</h3>
-<p>Sometimes the AI&rsquo;s reply exceeds the maximum message length set by Telegram. In this case, the bot will not fail or spam you with messages. Instead, it will send the answer as an attached markdown file:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-6">
-<figure>
-    <img src="./chat-10.png" alt="Reply with attachment" width="400" class="img-bordered-thin">
-</figure>
-</div>
-</div>
-<h3 id="editing-questions">Editing questions</h3>
-<p>To rephrase or add to the last question, edit it (<code>↑</code> shortcut). The bot will notice this and respond to the clarified question.</p>
-<h2 id="bot-information">Bot information</h2>
-<p>Use the <code>/version</code> commands to print detailed information about the current chat, bot, and AI model:</p>
-<pre tabindex="0"><code>Chat information:
-- id: -1001405001234
-- title: My Favorite Group
-- type: supergroup
-
-Bot information:
-- id: 5930739038
-- name: @pokitokibot
-- version: 70
-- usernames: 6 users
-- chat IDs: []
-- access to messages: True
-
-AI information:
-- model: gpt-3.5-turbo
-- history depth: 3
-- shortcuts: ['bugfix', 'proofread', 'summarize', 'translate']
-</code></pre><h2 id="setup">Setup</h2>
-<ol>
-<li>Get your <a href="https://openai.com/api/">OpenAI API</a> key</li>
-<li>Get your Telegram bot token from <a href="https://t.me/BotFather">@BotFather</a></li>
-<li>Copy <code>config.example.yml</code> to <code>config.yml</code> and specify your tokens there.</li>
-<li>Start the bot:</li>
-</ol>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker compose up --build --detach
-</code></pre></div><p>To stop the bot:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker compose stop
-</code></pre></div><p>For older Docker distributions, use <code>docker-compose</code> instead of <code>docker compose</code>.</p>
-<p><a href="https://github.com/nalgeon/pokitoki">Source code on GitHub</a></p>
 ]]></content:encoded></item></channel></rss>

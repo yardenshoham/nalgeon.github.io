@@ -1,0 +1,199 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>More String Functions in SQLite</title>
+<meta name=description content="A rich set of string functions, from `slice`, `contains` and `count` to `split_part`, `trim` and `repeat`.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.fe03afa13d4e1d4607de8f21a6d227f1314ba69e0bf3e4c1e4ce111080af6bb8.css>
+<link rel=icon href=/assets/favicon/favicon.ico sizes=any>
+<link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=manifest href=/assets/favicon/manifest.json>
+<link rel=canonical href=https://antonz.org/sqlean-text/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="More String Functions in SQLite">
+<meta property="og:description" content="A rich set of string functions, from `slice`, `contains` and `count` to `split_part`, `trim` and `repeat`.">
+<meta property="og:url" content="https://antonz.org/sqlean-text/">
+<meta property="og:image" content="https://antonz.org/sqlean-text/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="More String Functions in SQLite">
+<meta name=twitter:description content="A rich set of string functions, from `slice`, `contains` and `count` to `split_part`, `trim` and `repeat`.">
+<meta name=twitter:url content="https://antonz.org/sqlean-text/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/sqlean-text/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+<div class="col-xs-6 col-sm-3"><div class=search-module>
+<form action=https://duckduckgo.com/>
+<input type=hidden name=kf value=-1>
+<input type=hidden name=kz value=-1>
+<input type=hidden name=kaf value=1>
+<input type=hidden name=ko value=-2>
+<input type=hidden name=k1 value=-1>
+<input type=hidden name=sites value=antonz.org>
+<input type=search name=q autocomplete=off placeholder=Search aria-label=Search>
+</form>
+</div></div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>More String Functions in SQLite</h1>
+</header>
+<p>SQLite includes basic text functions like <code>instr</code>, <code>substr</code> and <code>replace</code> (and even <code>trim</code> in later versions), which can get you quite far. But I&rsquo;ve always wanted a more complete set, like the one in PostgreSQL, Python or Go.</p>
+<p>So I&rsquo;ve created a <code>sqlean-text</code> extension that provides a rich set of string functions, from <code>slice</code>, <code>contains</code> and <code>count</code> to <code>split_part</code>, <code>translate</code> and <code>repeat</code>.</p>
+<blockquote>
+<p><strong>Note</strong>. Unlike other DBMS, adding extensions to SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
+</blockquote>
+<p><code>sqlean-text</code> contains 25 functions, many of which are postgres-compatible (i.e. they have the same alias and logic as in PostgreSQL). It can be useful when migrating from SQLite to PostgreSQL or vice versa.</p>
+<div class=row>
+<div class="col-xs-12 col-sm-8">
+<figure>
+<img alt="Text functions" src=functions.png>
+<figcaption>SQLite already has some text functions, but working with a full set is much nicer.</figcaption>
+</figure>
+</div>
+</div>
+<p>Note that some unicode-related functions like <code>upper</code> and <code>lower</code> are in the separate <a href=https://github.com/nalgeon/sqlean/blob/main/docs/unicode.md>unicode</a> extension. Regular expression functions are in the separate <a href=./sqlean-regexp/>regexp</a> extension.</p>
+<h2 id=substrings-and-slicing>Substrings and slicing</h2>
+<pre tabindex=0><code>text_substring(str, start [,length])
+</code></pre><p>Extracts a substring of <code>length</code> characters starting at the <code>start</code> position.</p>
+<pre tabindex=0><code>text_slice(str, start [,end])
+</code></pre><p>Extracts a substring from the <code>start</code> position inclusive to the <code>end</code> position non-inclusive.</p>
+<pre tabindex=0><code>text_left(str, length)
+</code></pre><p>Extracts a substring of <code>length</code> characters from the beginning of the string.</p>
+<pre tabindex=0><code>text_right(str, length)
+</code></pre><p>Extracts a substring of <code>length</code> characters from the end of the string.</p>
+<h2 id=search-and-match>Search and match</h2>
+<pre tabindex=0><code>text_index(str, other)
+</code></pre><p>Returns the first index of the <code>other</code> substring in the original string.</p>
+<pre tabindex=0><code>text_last_index(str, other)
+</code></pre><p>Returns the last index of the <code>other</code> substring in the original string.</p>
+<pre tabindex=0><code>text_contains(str, other)
+</code></pre><p>Checks if the string contains the <code>other</code> substring.</p>
+<pre tabindex=0><code>text_has_prefix(str, other)
+</code></pre><p>Checks if the string starts with the <code>other</code> substring.</p>
+<pre tabindex=0><code>text_has_suffix(str, other)
+</code></pre><p>Checks if the string ends with the <code>other</code> substring.</p>
+<pre tabindex=0><code>text_count(str, other)
+</code></pre><p>Counts how many times the <code>other</code> substring is contained in the original string.</p>
+<h2 id=split-and-join>Split and join</h2>
+<pre tabindex=0><code>text_split(str, sep, n)
+</code></pre><p>Splits a string by a separator and returns the n-th part.</p>
+<pre tabindex=0><code>text_concat(str, ...)
+</code></pre><p>Concatenates strings.</p>
+<pre tabindex=0><code>text_join(sep, str, ...)
+</code></pre><p>Joins strings using the separator.</p>
+<pre tabindex=0><code>text_repeat(str, count)
+</code></pre><p>Concatenates the string to itself a given number of times.</p>
+<h2 id=trim-and-pad>Trim and pad</h2>
+<pre tabindex=0><code>text_ltrim(str [,chars])
+</code></pre><p>Trims certain characters from the beginning of the string.</p>
+<pre tabindex=0><code>text_rtrim(str [,chars])
+</code></pre><p>Trims certain characters from the end of the string.</p>
+<pre tabindex=0><code>text_trim(str [,chars])
+</code></pre><p>Trims certain characters from the beginning and end of the string.</p>
+<pre tabindex=0><code>text_lpad(str, length [,fill])
+</code></pre><p>Pads the string to the specified length by prepending certain characters.</p>
+<pre tabindex=0><code>text_rpad(str, length [,fill])
+</code></pre><p>Pads the string to the specified length by appending certain characters.</p>
+<h2 id=other-modifications>Other modifications</h2>
+<pre tabindex=0><code>text_replace(str, old, new [,count])
+</code></pre><p>Replaces <code>old</code> substrings with <code>new</code> substrings in the original string, but not more than <code>count</code> times.</p>
+<pre tabindex=0><code>text_translate(str, from, to)
+</code></pre><p>Replaces each string character that matches a character in the <code>from</code> set with the corresponding character in the <code>to</code> set.</p>
+<pre tabindex=0><code>text_reverse(str)
+</code></pre><p>Reverses the order of the characters in the string.</p>
+<h2 id=string-properties>String properties</h2>
+<pre tabindex=0><code>text_length(str)
+</code></pre><p>Returns the number of characters in the string.</p>
+<pre tabindex=0><code>text_size(str)
+</code></pre><p>Returns the number of bytes in the string.</p>
+<pre tabindex=0><code>text_bitsize(str)
+</code></pre><p>Returns the number of bits in the string.</p>
+<h2 id=installation-and-usage>Installation and Usage</h2>
+<ol>
+<li>
+<p>Download the <a href=https://github.com/nalgeon/sqlean/releases/latest>latest release</a></p>
+</li>
+<li>
+<p>Use with SQLite command-line interface:</p>
+</li>
+</ol>
+<pre tabindex=0><code>sqlite&gt; .load ./text
+sqlite&gt; select reverse('hello');
+</code></pre><p>See <a href=https://github.com/nalgeon/sqlean/blob/main/docs/install.md>How to Install an Extension</a> for usage with IDE, Python, etc.</p>
+<p>See <a href=https://github.com/nalgeon/sqlean/blob/main/docs/text.md>Extension Documentation</a> for reference.</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2023-06-07 14:00:00 +0000 UTC">07 Jun, 2023</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/sqlite/>sqlite</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/sql-compare-neighbors/>SQL Recipe: Compare with Neighbors</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sqlean-encode/>Base64 and other encodings in SQLite</a></p>
+<p><a href=/sqlime-ai/>AI SQLite Assistant</a></p>
+<p><a href=/interactive-sql-examples/>Interactive SQL Examples in JavaScript</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link><i class="fab fa-twitter"></i><span>Twitter</span></a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
