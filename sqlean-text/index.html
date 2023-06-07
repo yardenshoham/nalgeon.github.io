@@ -2,7 +2,7 @@
 <head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>More String Functions in SQLite</title>
-<meta name=description content="A rich set of string functions, from `slice`, `contains` and `count` to `split_part`, `trim` and `repeat`.">
+<meta name=description content="A rich set of string functions, from `slice`, `contains` and `count` to `split_part`, `translate` and `repeat`.">
 <meta name=robots content="index, follow">
 <link rel=stylesheet type=text/css href=/assets/css/style.fe03afa13d4e1d4607de8f21a6d227f1314ba69e0bf3e4c1e4ce111080af6bb8.css>
 <link rel=icon href=/assets/favicon/favicon.ico sizes=any>
@@ -13,12 +13,12 @@
 <meta name=author content="Anton Zhiyanov">
 <meta property="og:type" content="article">
 <meta property="og:title" content="More String Functions in SQLite">
-<meta property="og:description" content="A rich set of string functions, from `slice`, `contains` and `count` to `split_part`, `trim` and `repeat`.">
+<meta property="og:description" content="A rich set of string functions, from `slice`, `contains` and `count` to `split_part`, `translate` and `repeat`.">
 <meta property="og:url" content="https://antonz.org/sqlean-text/">
 <meta property="og:image" content="https://antonz.org/sqlean-text/cover.png">
 <meta name=twitter:card content="summary_large_image">
 <meta name=twitter:title content="More String Functions in SQLite">
-<meta name=twitter:description content="A rich set of string functions, from `slice`, `contains` and `count` to `split_part`, `trim` and `repeat`.">
+<meta name=twitter:description content="A rich set of string functions, from `slice`, `contains` and `count` to `split_part`, `translate` and `repeat`.">
 <meta name=twitter:url content="https://antonz.org/sqlean-text/">
 <meta name=twitter:site content="@ohmypy">
 <meta name=twitter:image content="https://antonz.org/sqlean-text/cover.png"></head>
@@ -68,11 +68,11 @@
 <h1>More String Functions in SQLite</h1>
 </header>
 <p>SQLite includes basic text functions like <code>instr</code>, <code>substr</code> and <code>replace</code> (and even <code>trim</code> in later versions), which can get you quite far. But I&rsquo;ve always wanted a more complete set, like the one in PostgreSQL, Python or Go.</p>
-<p>So I&rsquo;ve created a <code>sqlean-text</code> extension that provides a rich set of string functions, from <code>slice</code>, <code>contains</code> and <code>count</code> to <code>split_part</code>, <code>translate</code> and <code>repeat</code>.</p>
+<p>So I&rsquo;ve created a <code>sqlean-text</code> extension that provides 25 string functions, from <code>slice</code>, <code>contains</code> and <code>count</code> to <code>split_part</code>, <code>translate</code> and <code>repeat</code>.</p>
 <blockquote>
 <p><strong>Note</strong>. Unlike other DBMS, adding extensions to SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
 </blockquote>
-<p><code>sqlean-text</code> contains 25 functions, many of which are postgres-compatible (i.e. they have the same alias and logic as in PostgreSQL). It can be useful when migrating from SQLite to PostgreSQL or vice versa.</p>
+<p>Many functions are postgres-compatible (i.e. they have the same alias and logic as in PostgreSQL). It can be useful when migrating from SQLite to PostgreSQL or vice versa.</p>
 <div class=row>
 <div class="col-xs-12 col-sm-8">
 <figure>
@@ -81,7 +81,7 @@
 </figure>
 </div>
 </div>
-<p>Note that some unicode-related functions like <code>upper</code> and <code>lower</code> are in the separate <a href=https://github.com/nalgeon/sqlean/blob/main/docs/unicode.md>unicode</a> extension. Regular expression functions are in the separate <a href=./sqlean-regexp/>regexp</a> extension.</p>
+<p>Note that some unicode-related functions like <code>upper</code> and <code>lower</code> are in the separate <a href=https://github.com/nalgeon/sqlean/blob/main/docs/unicode.md>unicode</a> extension. Regular expression functions are in the separate <a href=/sqlean-regexp/>regexp</a> extension.</p>
 <h2 id=substrings-and-slicing>Substrings and slicing</h2>
 <pre tabindex=0><code>text_substring(str, start [,length])
 </code></pre><p>Extracts a substring of <code>length</code> characters starting at the <code>start</code> position.</p>
