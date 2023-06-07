@@ -1,7 +1,7 @@
 +++
 date = 2023-06-07T14:00:00Z
 title = "More String Functions in SQLite"
-description = "A rich set of string functions, from `slice`, `contains` and `count` to `split_part`, `trim` and `repeat`."
+description = "A rich set of string functions, from `slice`, `contains` and `count` to `split_part`, `translate` and `repeat`."
 image = "/sqlean-text/cover.png"
 slug = "sqlean-text"
 tags = ["sqlite"]
@@ -9,11 +9,11 @@ tags = ["sqlite"]
 
 SQLite includes basic text functions like `instr`, `substr` and `replace` (and even `trim` in later versions), which can get you quite far. But I've always wanted a more complete set, like the one in PostgreSQL, Python or Go.
 
-So I've created a `sqlean-text` extension that provides a rich set of string functions, from `slice`, `contains` and `count` to `split_part`, `translate` and `repeat`.
+So I've created a `sqlean-text` extension that provides 25 string functions, from `slice`, `contains` and `count` to `split_part`, `translate` and `repeat`.
 
 > **Note**. Unlike other DBMS, adding extensions to SQLite is a breeze. Download a file, run one database command — and you are good to go.
 
-`sqlean-text` contains 25 functions, many of which are postgres-compatible (i.e. they have the same alias and logic as in PostgreSQL). It can be useful when migrating from SQLite to PostgreSQL or vice versa.
+Many functions are postgres-compatible (i.e. they have the same alias and logic as in PostgreSQL). It can be useful when migrating from SQLite to PostgreSQL or vice versa.
 
 <div class="row">
 <div class="col-xs-12 col-sm-8">
@@ -24,7 +24,7 @@ So I've created a `sqlean-text` extension that provides a rich set of string fun
 </div>
 </div>
 
-Note that some unicode-related functions like `upper` and `lower` are in the separate [unicode](https://github.com/nalgeon/sqlean/blob/main/docs/unicode.md) extension. Regular expression functions are in the separate [regexp](./sqlean-regexp/) extension.
+Note that some unicode-related functions like `upper` and `lower` are in the separate [unicode](https://github.com/nalgeon/sqlean/blob/main/docs/unicode.md) extension. Regular expression functions are in the separate [regexp](/sqlean-regexp/) extension.
 
 ## Substrings and slicing
 
