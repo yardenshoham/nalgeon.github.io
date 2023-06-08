@@ -1441,7 +1441,7 @@ abbr[title] {
  */
 
 @font-face {
-    font-family: "Font Awesome Brands";
+    font-family: "fa-brands";
     font-style: normal;
     font-weight: 400;
     font-display: block;
@@ -1478,7 +1478,7 @@ abbr[title] {
 }
 
 .fab {
-    font-family: "Font Awesome Brands";
+    font-family: "fa-brands";
     font-weight: 400;
 }
 
@@ -1517,17 +1517,8 @@ abbr[title] {
 .fa-envelope::before {
     content: "\f0e0";
 }
-.fa-facebook::before {
-    content: "\f09a";
-}
-.fa-facebook-f::before {
-    content: "\f39e";
-}
 .fa-file::before {
     content: "\f15b";
-}
-.fa-github::before {
-    content: "\f09b";
 }
 .fa-kiwi-bird::before {
     content: "\f535";
@@ -1544,11 +1535,52 @@ abbr[title] {
 .fa-telegram-plane::before {
     content: "\f3fe";
 }
-.fa-twitter::before {
-    content: "\f099";
-}
 .fa-user::before {
     content: "\f007";
+}
+
+/* Brands */
+.fa-discord::before {
+    content: "\e800";
+}
+.fa-facebook-1::before {
+    content: "\e801";
+}
+.fa-facebook-2::before {
+    content: "\e802";
+}
+.fa-facebook-3::before {
+    content: "\e803";
+}
+.fa-github-1::before {
+    content: "\e804";
+}
+.fa-github-2::before {
+    content: "\e805";
+}
+.fa-github-3::before {
+    content: "\e806";
+}
+.fa-instagram::before {
+    content: "\e807";
+}
+.fa-linkedin-1::before {
+    content: "\e808";
+}
+.fa-linkedin-2::before {
+    content: "\e80a";
+}
+.fa-telegram::before {
+    content: "\e809";
+}
+.fa-twitter-1::before {
+    content: "\e80b";
+}
+.fa-twitter-2::before {
+    content: "\e80c";
+}
+.fa-youtube::before {
+    content: "\e80d";
 }
 body {
     display: flex;
