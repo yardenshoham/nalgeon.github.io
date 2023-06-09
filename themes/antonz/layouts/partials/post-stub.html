@@ -1,11 +1,8 @@
 <div class='post-stub {{if .Param "featured" }}post-stub--featured{{ end }}'>
     <h3 class="post-stub__header">
+        <a class="post-stub__title" href="{{ .RelPermalink }}">{{ .Title }}</a>
         {{- if .Param "featured"}}
         <i class="far fa-star post-stub__star"></i>
         {{- end}}
-        <a class="post-stub__title" href="{{ .RelPermalink }}">{{ .Title }}</a>
-        {{- range (.GetTerms "tags") | first 1 }}
-        <span class="post-stub__date nowrap">{{ .LinkTitle | lower}}</span>
-        {{- end }}
     </h3>
 </div>
