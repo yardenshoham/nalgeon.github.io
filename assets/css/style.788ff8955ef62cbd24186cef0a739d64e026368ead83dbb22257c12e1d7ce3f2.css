@@ -1945,15 +1945,19 @@ a.disabled {
     margin: 0;
 }
 
+.post-stub__title {
+    padding-right: 0.5rem;
+}
+
 .post-stub__star {
-    color: var(--color-yellow);
-    display: inline-block;
+    display: none;
     width: 1.2em;
+    color: var(--color-yellow);
 }
 
 .post-stub__date {
+    white-space: nowrap;
     color: var(--color-gray);
-    padding-left: 0.5rem;
     font-size: 0.8em;
 }
 
@@ -1964,6 +1968,7 @@ a.disabled {
 @media only screen and (min-width: 48em) {
     .post-stub__star {
         position: absolute;
+        display: inline-block;
         left: -1.3em;
         top: 0.2em;
     }
