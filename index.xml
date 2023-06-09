@@ -1,4 +1,17 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 07 Jun 2023 14:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>More String Functions in SQLite</title><link>https://antonz.org/sqlean-text/</link><pubDate>Wed, 07 Jun 2023 14:00:00 +0000</pubDate><guid>https://antonz.org/sqlean-text/</guid><description>A rich set of string functions, from `slice`, `contains` and `count` to `split_part`, `translate` and `repeat`.</description><content:encoded><![CDATA[<p>SQLite includes basic text functions like <code>instr</code>, <code>substr</code> and <code>replace</code> (and even <code>trim</code> in later versions), which can get you quite far. But I&rsquo;ve always wanted a more complete set, like the one in PostgreSQL, Python or Go.</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 09 Jun 2023 12:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Blogging Myths You Should Care About</title><link>https://antonz.org/blogging-myths/</link><pubDate>Fri, 09 Jun 2023 12:00:00 +0000</pubDate><guid>https://antonz.org/blogging-myths/</guid><description>If you are an average blogger and not Julia Evans.</description><content:encoded><![CDATA[<p>Okay, here are some REAL blogging myths:</p>
+<ol>
+<li>People will actually read your blog.</li>
+<li>You&rsquo;ll reach your target audience.</li>
+<li>You&rsquo;ll have meaningful conversations.</li>
+<li>Your blog will help you get a job.</li>
+</ol>
+<p>In all cases, the answer is NO.</p>
+<p>If you want to blog just because you like writing, that&rsquo;s a great option. But blogging is not about popularity. There are exceptions, of course, like Julia Evans. But your chances of gaining that kind of audience are close to zero.</p>
+<p>Your true audience (those who care) is about 1% of your subscribers. 1000 followers on Twitter? Your audience is 10 people. 10000 email subscribers? 100 people.</p>
+<p>Yes, there are exceptions. No, you should not hope to be one of them.</p>
+<p>The conclusion is simple. If you are willing to write a blog for yourself, it will bring joy and benefit. But if you hope for an audience, it will bring pain and disappointment.</p>
+<p>That&rsquo;s just the way it is for us average bloggers.</p>
+]]></content:encoded></item><item><title>More String Functions in SQLite</title><link>https://antonz.org/sqlean-text/</link><pubDate>Wed, 07 Jun 2023 14:00:00 +0000</pubDate><guid>https://antonz.org/sqlean-text/</guid><description>A rich set of string functions, from `slice`, `contains` and `count` to `split_part`, `translate` and `repeat`.</description><content:encoded><![CDATA[<p>SQLite includes basic text functions like <code>instr</code>, <code>substr</code> and <code>replace</code> (and even <code>trim</code> in later versions), which can get you quite far. But I&rsquo;ve always wanted a more complete set, like the one in PostgreSQL, Python or Go.</p>
 <p>So I&rsquo;ve created a <code>sqlean-text</code> extension that provides 25 string functions, from <code>slice</code>, <code>contains</code> and <code>count</code> to <code>split_part</code>, <code>translate</code> and <code>repeat</code>.</p>
 <blockquote>
 <p><strong>Note</strong>. Unlike other DBMS, adding extensions to SQLite is a breeze. Download a file, run one database command — and you are good to go.</p>
@@ -1217,30 +1230,4 @@ sum(expense) over w as t_expense,
 <script src="/assets/sqlime/sqlite3.js"></script>
 <script src="/assets/sqlime/sqlime-db.js"></script>
 <script src="/assets/sqlime/sqlime-examples.js"></script>
-]]></content:encoded></item><item><title>AI SQLite Assistant</title><link>https://antonz.org/sqlime-ai/</link><pubDate>Thu, 16 Mar 2023 12:00:00 +0000</pubDate><guid>https://antonz.org/sqlime-ai/</guid><description>Ask AI to explain or troubleshoot your SQL query in a playground.</description><content:encoded><![CDATA[<p>While trying to trick AI into saying ethically questionable things may be fun for some of us, I prefer more practical and useful scenarios.</p>
-<p>So, as of today, <a href="https://sqlime.org/">Sqlime</a> — an online SQLite playground — includes the &ldquo;Ask AI&rdquo; feature.</p>
-<p>AI can explain, teach, and troubleshoot your SQL without leaving the playground:</p>
-<ol>
-<li>Write a question as a comment above the query.</li>
-<li>Click &ldquo;Ask AI&rdquo;.</li>
-<li>Receive a not-so-fast, but often useful answer from AI.</li>
-</ol>
-<div class="row">
-<div class="col-xs-12 col-sm-6">
-<figure>
-    <img src="./ask-ai-1.png" alt="Write a question" width="400" class="img-bordered-thin">
-    <figcaption>ask a question<figcaption>
-</figure>
-</div>
-<div class="col-xs-12 col-sm-6">
-<figure>
-    <img src="./ask-ai-2.png" alt="Get an answer" width="400" class="img-bordered-thin">
-    <figcaption>and receive an answer from AI<figcaption>
-</figure>
-</div>
-</div>
-<p>Try it out! All you need is an OpenAI API key.</p>
-<p class="big">
-<a href="https://sqlime.org/">Ask AI in Sqlime</a>
-</p>
 ]]></content:encoded></item></channel></rss>
