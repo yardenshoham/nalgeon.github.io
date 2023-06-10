@@ -17,6 +17,12 @@ In all cases, the answer is NO.
 
 If you want to blog just because you like writing, that's a great option. But blogging is not about popularity. There are exceptions, of course, like Julia Evans. But your chances of gaining that kind of audience are close to zero.
 
+A blog is like any other product. "Build it and they will come" no longer works — you need excellent marketing to get people to notice you and start reading. If you're a mediocre marketer (like most technical people), don't set yourself unrealistic expectations.
+
+You spent a week writing an excellent, detailed, clear technical article — and only got a few dozen views? This is typical. If that bothers you, then blogging is not for you.
+
+Of course, no one will comment. Share with others? Pffft.
+
 Your true audience (those who care) is about 1% of your subscribers. 1000 followers on Twitter? Your audience is 10 people. 10000 email subscribers? 100 people.
 
 Yes, there are exceptions. No, you should not hope to be one of them.
