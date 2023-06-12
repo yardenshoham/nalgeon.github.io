@@ -1,0 +1,143 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Covering Index in SQL</title>
+<meta name=description content="Allows executing queries without touching the table.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.788ff8955ef62cbd24186cef0a739d64e026368ead83dbb22257c12e1d7ce3f2.css>
+<link rel=icon href=/assets/favicon/favicon.ico sizes=any>
+<link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=manifest href=/assets/favicon/manifest.json>
+<link rel=canonical href=https://antonz.org/sql-covering-index/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Covering Index in SQL">
+<meta property="og:description" content="Allows executing queries without touching the table.">
+<meta property="og:url" content="https://antonz.org/sql-covering-index/">
+<meta property="og:image" content="https://antonz.org/sql-covering-index/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Covering Index in SQL">
+<meta name=twitter:description content="Allows executing queries without touching the table.">
+<meta name=twitter:url content="https://antonz.org/sql-covering-index/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/sql-covering-index/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+<div class="col-xs-6 col-sm-3"><div class=search-module>
+<form action=https://duckduckgo.com/>
+<input type=hidden name=kf value=-1>
+<input type=hidden name=kz value=-1>
+<input type=hidden name=kaf value=1>
+<input type=hidden name=ko value=-2>
+<input type=hidden name=k1 value=-1>
+<input type=hidden name=sites value=antonz.org>
+<input type=search name=q autocomplete=off placeholder=Search aria-label=Search>
+</form>
+</div></div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Covering Index in SQL</h1>
+</header>
+<p>A covering index is the fastest way to select data from a table.</p>
+<p>For example, there is a query that selects employees with a certain salary:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span> <span style=color:#000>id</span>, <span style=color:#000>name</span> <span style=color:#a90d91>from</span> <span style=color:#000>employees</span>
+<span style=color:#a90d91>where</span> <span style=color:#000>salary</span> <span style=color:#000>=</span> <span style=color:#1c01ce>90</span>;
+</code></pre></div><p>If there is no index, it goes through the entire table (this is called a &ldquo;full scan&rdquo;):</p>
+<pre tabindex=0><code>QUERY PLAN
+`--SCAN employees
+</code></pre><p>Let&rsquo;s create an index by salary:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>create</span> <span style=color:#a90d91>index</span> <span style=color:#000>employees_idx</span>
+<span style=color:#a90d91>on</span> <span style=color:#000>employees</span> (<span style=color:#000>salary</span>);
+</code></pre></div><p>Now the same query finds records by salary in the index (this is faster than going through the entire table). And for each record found, it accesses the table to get the <code>id</code> and <code>name</code> values:</p>
+<pre tabindex=0><code>QUERY PLAN
+`--SEARCH employees USING INDEX employees_idx (salary=?)
+</code></pre><p>But if we create a covering index (which covers all selected columns):</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>create</span> <span style=color:#a90d91>index</span> <span style=color:#000>employees_idx</span>
+<span style=color:#a90d91>on</span> <span style=color:#000>employees</span> (<span style=color:#000>salary</span>, <span style=color:#000>id</span>, <span style=color:#000>name</span>);
+</code></pre></div><p>Then the query will work only with the index, without accessing the table at all. This is even faster:</p>
+<pre tabindex=0><code>QUERY PLAN
+`--SEARCH employees USING COVERING INDEX employees_idx (salary=?)
+</code></pre><p>Covering indexes cost more when the data in the table changes, so don&rsquo;t create them for every type of query. Often this is one of the last optimizations after everything else has been done.</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2023-06-12 14:30:00 +0000 UTC">12 Jun, 2023</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/data/>data</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/blogging-myths/>Blogging Myths You Should Care About</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sql-compare-neighbors/>SQL Recipe: Compare with Neighbors</a></p>
+<p><a href=/sql-fetch/>LIMIT vs. FETCH in SQL</a></p>
+<p><a href=/sql-segmenting/>SQL Recipe: Segmenting Data</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link>
+<i class="fab fa-twitter-1"></i><span>Twitter</span>
+</a>
+<a href=https://github.com/nalgeon class=footer__social-link>
+<i class="fab fa-github-1"></i><span>GitHub</span>
+</a>
+<a href=https://www.linkedin.com/in/nalgeon/ class=footer__social-link>
+<i class="fab fa-linkedin-2"></i><span>LinkedIn</span>
+</a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>

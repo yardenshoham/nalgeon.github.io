@@ -1,4 +1,24 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 09 Jun 2023 12:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Blogging Myths You Should Care About</title><link>https://antonz.org/blogging-myths/</link><pubDate>Fri, 09 Jun 2023 12:00:00 +0000</pubDate><guid>https://antonz.org/blogging-myths/</guid><description>If you are an average blogger and not Julia Evans.</description><content:encoded><![CDATA[<p>Okay, here are some REAL blogging myths:</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Mon, 12 Jun 2023 14:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Covering Index in SQL</title><link>https://antonz.org/sql-covering-index/</link><pubDate>Mon, 12 Jun 2023 14:30:00 +0000</pubDate><guid>https://antonz.org/sql-covering-index/</guid><description>Allows executing queries without touching the table.</description><content:encoded><![CDATA[<p>A covering index is the fastest way to select data from a table.</p>
+<p>For example, there is a query that selects employees with a certain salary:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">id</span>, <span style="color:#000">name</span> <span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
+<span style="color:#a90d91">where</span> <span style="color:#000">salary</span> <span style="color:#000">=</span> <span style="color:#1c01ce">90</span>;
+</code></pre></div><p>If there is no index, it goes through the entire table (this is called a &ldquo;full scan&rdquo;):</p>
+<pre tabindex="0"><code>QUERY PLAN
+`--SCAN employees
+</code></pre><p>Let&rsquo;s create an index by salary:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">create</span> <span style="color:#a90d91">index</span> <span style="color:#000">employees_idx</span>
+<span style="color:#a90d91">on</span> <span style="color:#000">employees</span> (<span style="color:#000">salary</span>);
+</code></pre></div><p>Now the same query finds records by salary in the index (this is faster than going through the entire table). And for each record found, it accesses the table to get the <code>id</code> and <code>name</code> values:</p>
+<pre tabindex="0"><code>QUERY PLAN
+`--SEARCH employees USING INDEX employees_idx (salary=?)
+</code></pre><p>But if we create a covering index (which covers all selected columns):</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">create</span> <span style="color:#a90d91">index</span> <span style="color:#000">employees_idx</span>
+<span style="color:#a90d91">on</span> <span style="color:#000">employees</span> (<span style="color:#000">salary</span>, <span style="color:#000">id</span>, <span style="color:#000">name</span>);
+</code></pre></div><p>Then the query will work only with the index, without accessing the table at all. This is even faster:</p>
+<pre tabindex="0"><code>QUERY PLAN
+`--SEARCH employees USING COVERING INDEX employees_idx (salary=?)
+</code></pre><p>Covering indexes cost more when the data in the table changes, so don&rsquo;t create them for every type of query. Often this is one of the last optimizations after everything else has been done.</p>
+]]></content:encoded></item><item><title>Blogging Myths You Should Care About</title><link>https://antonz.org/blogging-myths/</link><pubDate>Fri, 09 Jun 2023 12:00:00 +0000</pubDate><guid>https://antonz.org/blogging-myths/</guid><description>If you are an average blogger and not Julia Evans.</description><content:encoded><![CDATA[<p>Okay, here are some REAL blogging myths:</p>
 <ol>
 <li>People will actually read your blog.</li>
 <li>You&rsquo;ll reach your target audience.</li>
@@ -965,264 +985,6 @@ sum(expense) over w as t_expense,
 <li>Rolling aggregates (moving average and cumulative total).</li>
 </ul>
 <p>To learn more about window functions or to get some practice — buy my book <em>SQL Window Functions Explained</em>.</p>
-<p>
-    <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
-        Get the book
-    </a>
-</p>
-<p><sqlime-db name="employees" path="/sql-window-functions-book/employees.sql"></sqlime-db>
-<sqlime-examples db="employees" selector="div.highlight" editable></sqlime-examples></p>
-<script src="/assets/sqlime/sqlite3.js"></script>
-<script src="/assets/sqlime/sqlime-db.js"></script>
-<script src="/assets/sqlime/sqlime-examples.js"></script>
-]]></content:encoded></item><item><title>Aggregating Data with SQL Window Functions</title><link>https://antonz.org/sql-window-functions-aggregation/</link><pubDate>Sun, 30 Apr 2023 18:30:00 +0000</pubDate><guid>https://antonz.org/sql-window-functions-aggregation/</guid><description>Comparing individual values with totals and averages.</description><content:encoded><![CDATA[<p><em>This is an excerpt from my book <a href="/sql-window-functions-book">SQL Window Functions Explained</a>. The book is a clear and visual introduction to the topic with lots of practical exercises.</em></p>
-<p>Previously we&rsquo;ve covered <a href="/sql-window-functions-ranking/">ranking</a> and <a href="/sql-window-functions-offset/">offset</a> window functions.</p>
-<p>Aggregation means counting totals or averages (or other <em>aggregates</em>). For example, the average salary per city. Or the total number of gold medals for each country in the Olympic Games standings.</p>
-<p>We will aggregate records from the <code>employees</code> table:</p>
-<pre tabindex="0"><code>┌────┬───────┬────────┬────────────┬────────┐
-│ id │ name  │  city  │ department │ salary │
-├────┼───────┼────────┼────────────┼────────┤
-│ 11 │ Diane │ London │ hr         │ 70     │
-│ 12 │ Bob   │ London │ hr         │ 78     │
-│ 21 │ Emma  │ London │ it         │ 84     │
-│ 22 │ Grace │ Berlin │ it         │ 90     │
-│ 23 │ Henry │ London │ it         │ 104    │
-│ 24 │ Irene │ Berlin │ it         │ 104    │
-│ 25 │ Frank │ Berlin │ it         │ 120    │
-│ 31 │ Cindy │ Berlin │ sales      │ 96     │
-│ 32 │ Dave  │ London │ sales      │ 96     │
-│ 33 │ Alice │ Berlin │ sales      │ 100    │
-└────┴───────┴────────┴────────────┴────────┘
-</code></pre><p><a href="https://sqlime.org/#employees.db">playground</a> • <a href="/sql-window-functions-book/employees.sql">download</a></p>
-<p>Table of contents:</p>
-<ul>
-<li><a href="#partitioned-aggregates">Partitioned aggregates</a></li>
-<li><a href="#filtering-and-execution-order">Filtering and execution order</a></li>
-<li><a href="#window-definition">Window definition</a></li>
-<li><a href="#aggregation-functions">Aggregation functions</a></li>
-<li><a href="#keep-it-up">Keep it up</a></li>
-</ul>
-<h2 id="partitioned-aggregates">Partitioned aggregates</h2>
-<p>Each department has a salary fund — money spent monthly on paying employees' salaries. Let&rsquo;s see what percentage of this fund represents each employee&rsquo;s salary:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-    before<br/>
-    <figure><img src="before.png" width="300" alt="Before partition sum"/></figure>
-</div>
-<div class="col-xs-12 col-sm-5">
-    after<br/>
-    <figure><img src="sum-after.png" width="300" alt="After partition sum"/></figure>
-</div>
-</div>
-<p>The <code>fund</code> column shows the department&rsquo;s salary fund, and the <code>perc</code> column shows the employee&rsquo;s salary share of that fund. As you can see, everything is more or less even in HR and Sales, but IT has a noticeable spread of salaries.</p>
-<p>How do we go from &ldquo;before&rdquo; to &ldquo;after&rdquo;?</p>
-<p>First, let&rsquo;s sort the table by department:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>,
-  <span style="color:#a90d91">null</span> <span style="color:#a90d91">as</span> <span style="color:#000">fund</span>, <span style="color:#a90d91">null</span> <span style="color:#a90d91">as</span> <span style="color:#000">perc</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>, <span style="color:#000">salary</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>Now let&rsquo;s traverse from the first record to the last, computing the following values along the way:</p>
-<ul>
-<li><code>fund</code> — total departmental salary;</li>
-<li><code>perc</code> — employee&rsquo;s salary as a percentage of the <code>fund</code>.</li>
-</ul>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-    ➀<br/>
-    <figure><img src="sum/03.png" width="300" alt="Partition sum step #1"/></figure>
-</div>
-<div class="col-xs-12 col-sm-5">
-    ➁<br/>
-    <figure><img src="sum/04.png" width="300" alt="Partition sum step #2"/></figure>
-</div>
-</div>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-    ➂<br/>
-    <figure><img src="sum/05.png" width="300" alt="Partition sum step #3"/></figure>
-</div>
-<div class="col-xs-12 col-sm-5">
-    ➃<br/>
-    <figure><img src="sum/06.png" width="300" alt="Partition sum step #4"/></figure>
-</div>
-</div>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-    ➄<br/>
-    <figure><img src="sum/07.png" width="300" alt="Partition sum step #5"/></figure>
-</div>
-<div class="col-xs-12 col-sm-5">
-    <p>and so on...</p>
-</div>
-</div>
-<p>In a single gif:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-<figure>
-  <img src="sum.gif" width="300" alt="Partition sum animation"/>
-</figure>
-</div>
-</div>
-<p>The window consists of several partitions, one partition per department. The order of records in a partition is not essential: we are counting the total <code>salary</code>, which does not depend on the order.</p>
-<pre tabindex="0"><code>window w as (
-  partition by department
-)
-</code></pre><p>We can use a regular <code>sum()</code> over the window to calculate the <code>fund</code>. And the <code>perc</code> will be calculated as <code>salary / fund</code>:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>,
-  <span style="color:#a90d91">sum</span>(<span style="color:#000">salary</span>) <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#000">fund</span>,
-  <span style="color:#000">round</span>(<span style="color:#000">salary</span> <span style="color:#000">*</span> <span style="color:#1c01ce">100</span>.<span style="color:#1c01ce">0</span> <span style="color:#000">/</span> <span style="color:#a90d91">sum</span>(<span style="color:#000">salary</span>) <span style="color:#000">over</span> <span style="color:#000">w</span>) <span style="color:#a90d91">as</span> <span style="color:#000">perc</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#000">partition</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>, <span style="color:#000">salary</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>The <code>sum()</code> function works without surprises — it counts the sum of values for the entire partition to which the current row belongs.</p>
-<div class="boxed">
-<h3>✎ Exercise: City salary fund (+1 more)</h3>
-<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises — that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
-<p>If you are okay with just theory for now, let's continue.</p>
-</div>
-<h2 id="filtering-and-execution-order">Filtering and execution order</h2>
-<p>Let&rsquo;s get back to the query that calculated the salary fund by department:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>,
-  <span style="color:#a90d91">sum</span>(<span style="color:#000">salary</span>) <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#000">fund</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#000">partition</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>, <span style="color:#000">salary</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>Let&rsquo;s say we want to leave only London employees in the report. We&rsquo;ll add a filter:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">name</span>, <span style="color:#000">salary</span>,
-  <span style="color:#a90d91">sum</span>(<span style="color:#000">salary</span>) <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#000">fund</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#a90d91">where</span> <span style="color:#000">city</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#39;London&#39;</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#000">partition</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>, <span style="color:#000">salary</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>The filter works. However, the <code>fund</code> values differ from the expected:</p>
-<div class="row">
-<div class="col-xs-12 col-sm-5">
-    expectation<br/>
-    <pre><code>┌───────┬────────┬──────┐
-│ name  │ salary │ fund │
-├───────┼────────┼──────┤
-│ Diane │ 70     │ 148  │
-│ Bob   │ 78     │ 148  │
-│ Emma  │ 84     │ 502  │
-│ Henry │ 104    │ 502  │
-│ Dave  │ 96     │ 292  │
-└───────┴────────┴──────┘</code></pre>
-</div>
-<div class="col-xs-12 col-sm-5">
-    reality<br/>
-    <pre><code>┌───────┬────────┬──────┐
-│ name  │ salary │ fund │
-├───────┼────────┼──────┤
-│ Diane │ 70     │ 148  │
-│ Bob   │ 78     │ 148  │
-│ Emma  │ 84     │ 188  │
-│ Henry │ 104    │ 188  │
-│ Dave  │ 96     │ 96   │
-└───────┴────────┴──────┘</code></pre>
-</div>
-</div>
-<p>It&rsquo;s all about the order of operations. Here is the order in which the DB engine executes the query:</p>
-<ol>
-<li>Take the tables (<code>from</code>) and join them if necessary (<code>join</code>).</li>
-<li>Filter the rows (<code>where</code>).</li>
-<li>Group the rows (<code>group by</code>).</li>
-<li>Filter the aggregated results (<code>having</code>).</li>
-<li>Take specific columns from the result (<code>select</code>).</li>
-<li>Calculate the values of window functions (<code>function() over window</code>).</li>
-<li>Sort the results (<code>order by</code>).</li>
-</ol>
-<p>Windows are processed at the next-to-last step, after filtering and grouping the results. Therefore, in our query, the <code>fund</code> represents not the sum of all department salaries but the sum only for London employees.</p>
-<p>The solution is to use a subquery with a window and filter it in the main query:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">with</span> <span style="color:#000">emp</span> <span style="color:#a90d91">as</span> (
-  <span style="color:#a90d91">select</span>
-    <span style="color:#000">name</span>, <span style="color:#000">city</span>, <span style="color:#000">salary</span>,
-    <span style="color:#a90d91">sum</span>(<span style="color:#000">salary</span>) <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#000">fund</span>
-  <span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-  <span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#000">partition</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>)
-  <span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>, <span style="color:#000">salary</span>, <span style="color:#000">id</span>
-)
-<span style="color:#a90d91">select</span> <span style="color:#000">name</span>, <span style="color:#000">salary</span>, <span style="color:#000">fund</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">emp</span> <span style="color:#a90d91">where</span> <span style="color:#000">city</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#39;London&#39;</span>;
-</code></pre></div><h2 id="window-definition">Window definition</h2>
-<p>So far, we have described the window in the <code>window</code> clause and referred to it in the <code>over</code> clause:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>,
-  <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#000">emp_count</span>,
-  <span style="color:#a90d91">sum</span>(<span style="color:#000">salary</span>) <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#000">fund</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#000">partition</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>, <span style="color:#000">salary</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>There is another way. SQL allows to omit the <code>window</code> clause and define the window directly inside <code>over</code>:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>,
-  <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#000">over</span> (<span style="color:#000">partition</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>) <span style="color:#a90d91">as</span> <span style="color:#000">emp_count</span>,
-  <span style="color:#a90d91">sum</span>(<span style="color:#000">salary</span>) <span style="color:#000">over</span> (<span style="color:#000">partition</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>) <span style="color:#a90d91">as</span> <span style="color:#000">fund</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>, <span style="color:#000">salary</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>I prefer the <code>window</code> clause — it is easier to read, and you can explicitly reuse the window. But the <code>over</code> option is common in the documentation and examples, so do not be surprised when you see it.</p>
-<p>By the way, the window definition can be empty:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>,
-  <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>) <span style="color:#000">over</span> () <span style="color:#a90d91">as</span> <span style="color:#000">emp_count</span>,
-  <span style="color:#a90d91">sum</span>(<span style="color:#000">salary</span>) <span style="color:#000">over</span> () <span style="color:#a90d91">as</span> <span style="color:#000">fund</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">department</span>, <span style="color:#000">salary</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>An empty window includes all rows, so:</p>
-<ul>
-<li><code>emp_count</code> amounts to the total number of employees,</li>
-<li><code>fund</code> amounts to the total salary for all employees.</li>
-</ul>
-<div class="boxed">
-<h3>✎ Exercise: Execution order (+1 more)</h3>
-<p>Practice is crucial in turning abstract knowledge into skills, making theory alone insufficient. The book, unlike this article, contains a lot of exercises — that's why I recommend <a href="https://antonz.gumroad.com/l/sql-windows">getting it</a>.</p>
-<p>If you are okay with just theory for now, let's continue.</p>
-</div>
-<h2 id="aggregation-functions">Aggregation functions</h2>
-<p>Here are the aggregation window functions:</p>
-<table>
-<thead>
-<tr>
-<th>Function</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>min(value)</code></td>
-<td>returns the minimum <code>value</code> across all window rows</td>
-</tr>
-<tr>
-<td><code>max(value)</code></td>
-<td>returns the maximum <code>value</code></td>
-</tr>
-<tr>
-<td><code>count(value)</code></td>
-<td>returns the count of non-null <code>value</code>s</td>
-</tr>
-<tr>
-<td><code>avg(value)</code></td>
-<td>returns the average <code>value</code></td>
-</tr>
-<tr>
-<td><code>sum(value)</code></td>
-<td>returns the total <code>value</code></td>
-</tr>
-<tr>
-<td><code>group_concat(value, separator)</code></td>
-<td>returns a string combining <code>value</code>s using <code>separator</code> (SQLite and MySQL only)</td>
-</tr>
-<tr>
-<td><code>string_agg(value, separator)</code></td>
-<td>similar to <code>group_concat()</code> in PostgreSQL and MS SQL</td>
-</tr>
-</tbody>
-</table>
-<h2 id="keep-it-up">Keep it up</h2>
-<p>You have learned how to calculate regular window aggregates. In the next chapter we will try <a href="/sql-window-functions-rolling-aggregates/">rolling aggregates</a>!</p>
 <p>
     <a class="button" href="https://antonz.gumroad.com/l/sql-windows">
         Get the book
