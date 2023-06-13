@@ -1,23 +1,33 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Mon, 12 Jun 2023 14:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Covering Index in SQL</title><link>https://antonz.org/sql-covering-index/</link><pubDate>Mon, 12 Jun 2023 14:30:00 +0000</pubDate><guid>https://antonz.org/sql-covering-index/</guid><description>Allows executing queries without touching the table.</description><content:encoded><![CDATA[<p>A covering index is the fastest way to select data from a table.</p>
-<p>For example, there is a query that selects employees with a certain salary:</p>
+<p>Let&rsquo;s see how it works using a query that selects employees with a certain salary:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span> <span style="color:#000">id</span>, <span style="color:#000">name</span> <span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
 <span style="color:#a90d91">where</span> <span style="color:#000">salary</span> <span style="color:#000">=</span> <span style="color:#1c01ce">90</span>;
-</code></pre></div><p>If there is no index, it goes through the entire table (this is called a &ldquo;full scan&rdquo;):</p>
+</code></pre></div><h2 id="no-index-vs-using-an-index">No index vs. Using an index</h2>
+<p>If there is no index, the database engine goes through the entire table (this is called a &ldquo;full scan&rdquo;):</p>
 <pre tabindex="0"><code>QUERY PLAN
 `--SCAN employees
 </code></pre><p>Let&rsquo;s create an index by salary:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">create</span> <span style="color:#a90d91">index</span> <span style="color:#000">employees_idx</span>
 <span style="color:#a90d91">on</span> <span style="color:#000">employees</span> (<span style="color:#000">salary</span>);
-</code></pre></div><p>Now the same query finds records by salary in the index (this is faster than going through the entire table). And for each record found, it accesses the table to get the <code>id</code> and <code>name</code> values:</p>
+</code></pre></div><p>Now the database engine finds records by salary in the index (this is faster than going through the entire table). And for each record found, it accesses the table to get the <code>id</code> and <code>name</code> values:</p>
 <pre tabindex="0"><code>QUERY PLAN
 `--SEARCH employees USING INDEX employees_idx (salary=?)
-</code></pre><p>But if we create a covering index (which covers all selected columns):</p>
+</code></pre><h2 id="using-a-covering-index">Using a covering index</h2>
+<p>Let&rsquo;s create a covering index (which covers all selected columns):</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">create</span> <span style="color:#a90d91">index</span> <span style="color:#000">employees_idx</span>
 <span style="color:#a90d91">on</span> <span style="color:#000">employees</span> (<span style="color:#000">salary</span>, <span style="color:#000">id</span>, <span style="color:#000">name</span>);
-</code></pre></div><p>Then the query will work only with the index, without accessing the table at all. This is even faster:</p>
+</code></pre></div><p>Now the database engine works only with the index, without accessing the table at all. This is even faster:</p>
 <pre tabindex="0"><code>QUERY PLAN
 `--SEARCH employees USING COVERING INDEX employees_idx (salary=?)
-</code></pre><p>Covering indexes cost more when the data in the table changes, so don&rsquo;t create them for every type of query. Often this is one of the last optimizations after everything else has been done.</p>
+</code></pre><p>However, simply covering all columns used in a query may not be enough. The order of the columns should allow for a fast search using the index.</p>
+<p>Suppose we build an index with the same set of columns, but in a different order:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">create</span> <span style="color:#a90d91">index</span> <span style="color:#000">employees_idx</span>
+<span style="color:#a90d91">on</span> <span style="color:#000">employees</span> (<span style="color:#000">id</span>, <span style="color:#000">name</span>, <span style="color:#000">salary</span>);
+</code></pre></div><p>Now the database engine won&rsquo;t be able to quickly find records with <code>salary</code> = <code>90</code>. It may still use the index, but it will be a full index scan instead of a search (which is slow).</p>
+<pre tabindex="0"><code>QUERY PLAN
+`--SCAN employees USING COVERING INDEX employees_idx
+</code></pre><p>(note SCAN instead of SEARCH here)</p>
+<p>Covering indexes cost more when the data in the table changes, so don&rsquo;t create them for every type of query. Often this is one of the last optimizations after everything else has been done.</p>
 ]]></content:encoded></item><item><title>Blogging Myths You Should Care About</title><link>https://antonz.org/blogging-myths/</link><pubDate>Fri, 09 Jun 2023 12:00:00 +0000</pubDate><guid>https://antonz.org/blogging-myths/</guid><description>If you are an average blogger and not Julia Evans.</description><content:encoded><![CDATA[<p>Okay, here are some REAL blogging myths:</p>
 <ol>
 <li>People will actually read your blog.</li>
