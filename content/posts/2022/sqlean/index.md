@@ -16,35 +16,39 @@ I wanted more consistency. So I started the **sqlean** project, which brings the
 
 I plan to write in detail about each module in a separate article, but for now — here's a brief overview.
 
-## Main Set
+## Main set
 
-These are the most popular functions missing in SQLite:
+These are the most popular functions. They are tested, documented and organized into the domain modules with clear API.
 
--   [crypto](https://github.com/nalgeon/sqlean/blob/main/docs/crypto.md): hash functions like MD5 or SHA-256.
--   [define](/sqlean-define/): user-defined functions and dynamic sql.
--   [fileio](https://github.com/nalgeon/sqlean/blob/main/docs/fileio.md): read and write files and catalogs.
--   [fuzzy](https://github.com/nalgeon/sqlean/blob/main/docs/fuzzy.md): fuzzy string matching and phonetics.
+Think of them as the extended standard library for SQLite:
+
+-   [crypto](/sqlean-encode/): Hashing, encoding and decoding data.
+-   [define](/sqlean-define/): User-defined functions and dynamic SQL.
+-   [fileio](/sqlean-fileio/): Reading and writing files and catalogs.
+-   [fuzzy](https://github.com/nalgeon/sqlean/blob/main/docs/fuzzy.md): Fuzzy string matching and phonetics.
 -   [ipaddr](https://github.com/nalgeon/sqlean/blob/main/docs/ipaddr.md): IP address manipulation.
--   [json1](https://github.com/nalgeon/sqlean/blob/main/docs/json1.md): JSON functions.
--   [math](https://github.com/nalgeon/sqlean/blob/main/docs/math.md): math functions.
--   [regexp](/sqlean-regexp/): pattern matching using regular expressions.
--   [stats](https://github.com/nalgeon/sqlean/blob/main/docs/stats.md): math statistics — median, percentiles, etc.
--   [text](https://github.com/nalgeon/sqlean/blob/main/docs/text.md): string functions.
+-   [math](https://github.com/nalgeon/sqlean/blob/main/docs/math.md): Math functions.
+-   [regexp](/sqlean-regexp/): Pattern matching using regular expressions.
+-   [stats](https://github.com/nalgeon/sqlean/blob/main/docs/stats.md): Math statistics — median, percentiles, etc.
+-   [text](/sqlean-text/): Advanced string functions.
 -   [unicode](https://github.com/nalgeon/sqlean/blob/main/docs/unicode.md): Unicode support.
 -   [uuid](https://github.com/nalgeon/sqlean/blob/main/docs/uuid.md): Universally Unique IDentifiers.
 -   [vsv](https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md): CSV files as virtual tables.
+
+The single-file `sqlean` bundle contains all extensions from the main set.
 
 There are [precompiled binaries](https://github.com/nalgeon/sqlean/releases/latest) for Windows, Linix and macOS.
 
 ## Incubator
 
-These extensions haven't yet made their way to the main set. They may be too broad, too narrow, or without a well-thought API. I'm gradually refactoring and merging them into the main set:
+These extensions haven't yet made their way to the main set. They may be untested, poorly documented, too broad, too narrow, or without a well-thought API.
+
+Think of them as candidates for the standard library:
 
 -   [array](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004109889): one-dimensional arrays.
 -   [besttype](https://github.com/nalgeon/sqlean/issues/27#issuecomment-999732640): convert string value to numeric.
 -   [bloom](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1002267134): a fast way to tell if a value is already in a table.
 -   [btreeinfo](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004896027), [memstat](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007421989), [recsize](https://github.com/nalgeon/sqlean/issues/27#issuecomment-999732907) and [stmt](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007654407): various database introspection features.
--   [cbrt](https://github.com/nalgeon/sqlean/issues/27#issuecomment-996605444) and [math2](https://github.com/nalgeon/sqlean/issues/27#issuecomment-999128539): additional math functions and bit arithmetics.
 -   [classifier](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1001239676): binary classifier via logistic regression.
 -   [closure](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1004931771): navigate hierarchic tables with parent/child relationships.
 -   [compress](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1000937999) and [sqlar](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1000938046): compress / uncompress data.
@@ -54,6 +58,8 @@ These extensions haven't yet made their way to the main set. They may be too bro
 -   [envfuncs](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997423609): read environment variables.
 -   [eval](https://github.com/nalgeon/sqlean/issues/27#issuecomment-996432840): run arbitrary SQL statements.
 -   [isodate](https://github.com/nalgeon/sqlean/issues/27#issuecomment-998138191): additional date and time functions.
+-   [json1](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1593490593): JSON functions
+-   [math2](https://github.com/nalgeon/sqlean/issues/27#issuecomment-999128539): additional math functions and bit arithmetics
 -   [path](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1252243356): parsing and querying paths
 -   [pearson](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997417836): Pearson correlation coefficient between two data sets.
 -   [pivotvtab](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997052157): pivot tables.
@@ -61,7 +67,6 @@ These extensions haven't yet made their way to the main set. They may be too bro
 -   [rotate](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007500659): string obfuscation.
 -   [spellfix](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1002297477): search a large vocabulary for close matches.
 -   [stats2](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1000902666) and [stats3](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1002703581): additional math statistics functions.
--   [text2](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1003105288): additional string functions.
 -   [uint](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1001232670): natural string sorting and comparison.
 -   [unhex](https://github.com/nalgeon/sqlean/issues/27#issuecomment-997432989): reverse for `hex()`.
 -   [unionvtab](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007687162): union similar tables into one.
@@ -69,15 +74,17 @@ These extensions haven't yet made their way to the main set. They may be too bro
 -   [zipfile](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1001190336): read and write zip files.
 -   [zorder](https://github.com/nalgeon/sqlean/issues/27#issuecomment-1007733209): map multidimensional data to a single dimension.
 
-[Vote for your favorites](https://github.com/nalgeon/sqlean/issues/27)! Popular ones will make their way into the main set faster.
-
 Incubator extensions are also available [for download](https://github.com/nalgeon/sqlean/releases/tag/incubator).
 
-## How to Install an Extension
+## How to install an extension
+
+The easiest way to try out the extensions is to use the [pre-bundled shell](https://github.com/nalgeon/sqlean/blob/main/docs/shell.md). But you can also load them individually.
 
 First, [download](https://github.com/nalgeon/sqlean/releases/latest) the extension. Then load it as described below.
 
-Examples use the `stats` extension; you can specify any other supported extension.
+Examples use the `stats` extension; you can specify any other supported extension. To load all extensions at once, use the single-file `sqlean` bundle.
+
+### Command-line or IDE
 
 SQLite command-line interface (CLI, aka 'sqlite3.exe' on Windows):
 
@@ -93,19 +100,49 @@ select load_extension('c:\Users\anton\sqlite\stats.dll');
 select median(value) from generate_series(1, 99);
 ```
 
-Python:
+_Note for macOS users_. macOS may disable unsigned binaries and prevent the extension from loading. To resolve this issue, remove the extension from quarantine by running the following command in Terminal (replace `/path/to/folder` with an actual path to the folder containing the extension):
+
+```
+xattr -d com.apple.quarantine /path/to/folder/stats.dylib
+```
+
+Also note that the "stock" SQLite CLI on macOS does not support extensions. Use the [custom build](https://github.com/nalgeon/sqlite).
+
+### Python
+
+Install the [`sqlean.py`](/sqlean-py) package, which is a drop-in replacement for the default `sqlite3` module:
+
+```
+pip install sqlean.py
+```
+
+All extensions from the main set are already enabled:
+
+```python
+import sqlean as sqlite3
+
+conn = sqlite3.connect(":memory:")
+conn.execute("select median(value) from generate_series(1, 99)")
+conn.close()
+```
+
+You can also use the default `sqlite3` module and load extensions manually:
 
 ```python
 import sqlite3
 
-connection = sqlite3.connect(":memory:")
-connection.enable_load_extension(True)
-connection.load_extension("./stats")
-connection.execute("select median(value) from generate_series(1, 99)")
-connection.close()
+conn = sqlite3.connect(":memory:")
+conn.enable_load_extension(True)
+conn.load_extension("./stats")
+conn.execute("select median(value) from generate_series(1, 99)")
+conn.close()
 ```
 
-Node.js, using [better-sqlite3](https://github.com/WiseLibs/better-sqlite3):
+_Note for macOS users_. "Stock" SQLite on macOS does not support extensions, so the default `sqlite3` module won't work. Use the `sqlean.py` package.
+
+### Node.js
+
+Using [`better-sqlite3`](https://github.com/WiseLibs/better-sqlite3):
 
 ```js
 const sqlite3 = require("better-sqlite3");
