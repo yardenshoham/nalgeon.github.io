@@ -1,0 +1,167 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Python's sqlite3 with extensions</title>
+<meta name=description content="A drop-in replacement for the sqlite3 module, bundled with essential extensions.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.1298740fb12777af4ee1e867068ab1346fee55f55d941cd1726c640003698f1d.css>
+<link rel=icon href=/assets/favicon/favicon.ico sizes=any>
+<link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=manifest href=/assets/favicon/manifest.json>
+<link rel=canonical href=https://antonz.org/sqlean-py/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python's sqlite3 with extensions">
+<meta property="og:description" content="A drop-in replacement for the sqlite3 module, bundled with essential extensions.">
+<meta property="og:url" content="https://antonz.org/sqlean-py/">
+<meta property="og:image" content="https://antonz.org/sqlean-py/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="Python's sqlite3 with extensions">
+<meta name=twitter:description content="A drop-in replacement for the sqlite3 module, bundled with essential extensions.">
+<meta name=twitter:url content="https://antonz.org/sqlean-py/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/sqlean-py/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+<div class="col-xs-6 col-sm-3"><div class=search-module>
+<form action=https://duckduckgo.com/>
+<input type=hidden name=kf value=-1>
+<input type=hidden name=kz value=-1>
+<input type=hidden name=kaf value=1>
+<input type=hidden name=ko value=-2>
+<input type=hidden name=k1 value=-1>
+<input type=hidden name=sites value=antonz.org>
+<input type=search name=q autocomplete=off placeholder=Search aria-label=Search>
+</form>
+</div></div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>Python's sqlite3 with extensions</h1>
+</header>
+<p>Adding SQLite extensions with Python&rsquo;s <code>sqlite3</code> module is a breeze. Download a file, call a few functions, and you are good to go. Unless you try to do it on macOS, where <code>sqlite3</code> is compiled without extension support.</p>
+<p>I wanted to make the process even easier (and of course solve the macOS problem). So I created the <a href=https://github.com/nalgeon/sqlean.py><code>sqlean.py</code></a> package: a drop-in replacement for the standard library&rsquo;s <code>sqlite3</code> module, bundled with the <a href=/sqlean/>essential extensions</a>.</p>
+<h2 id=installation-and-usage>Installation and usage</h2>
+<p>All you need to do is <code>pip install</code> the package:</p>
+<pre tabindex=0><code>pip install sqlean.py
+</code></pre><p>And use it just like you&rsquo;d use <code>sqlite3</code>:</p>
+<pre tabindex=0><code>import sqlean as sqlite3
+
+# has the same API as the default `sqlite3` module
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.execute(&quot;create table employees(id, name)&quot;)
+
+# and comes with the `sqlean` extensions
+cur = conn.execute(&quot;select median(value) from generate_series(1, 99)&quot;)
+print(cur.fetchone())
+# (50.0,)
+
+conn.close()
+</code></pre><p>Note that the package name is <code>sqlean.py</code>, while the code imports are just <code>sqlean</code>. The <code>sqlean</code> package name was taken by some zomby project and the author seemed to be unavailable, so I had to add the <code>.py</code> suffix.</p>
+<h2 id=extensions>Extensions</h2>
+<p><code>sqlean.py</code> contains 12 essential SQLite extensions:</p>
+<ul>
+<li><a href=/sqlean-encode/>crypto</a>: Hashing, encoding and decoding data</li>
+<li><a href=/sqlean-define/>define</a>: User-defined functions and dynamic SQL</li>
+<li><a href=/sqlean-fileio/>fileio</a>: Reading and writing files</li>
+<li><a href=https://github.com/nalgeon/sqlean/blob/main/docs/fuzzy.md>fuzzy</a>: Fuzzy string matching and phonetics</li>
+<li><a href=https://github.com/nalgeon/sqlean/blob/main/docs/ipaddr.md>ipaddr</a>: IP address manipulation</li>
+<li><a href=https://github.com/nalgeon/sqlean/blob/main/docs/math.md>math</a>: Math functions</li>
+<li><a href=/sqlean-regexp/>regexp</a>: Regular expressions</li>
+<li><a href=https://github.com/nalgeon/sqlean/blob/main/docs/stats.md>stats</a>: Math statistics</li>
+<li><a href=/sqlean-text/>text</a>: Advanced string functions</li>
+<li><a href=https://github.com/nalgeon/sqlean/blob/main/docs/unicode.md>unicode</a>: Unicode support</li>
+<li><a href=https://github.com/nalgeon/sqlean/blob/main/docs/uuid.md>uuid</a>: Universally Unique IDentifiers</li>
+<li><a href=https://github.com/nalgeon/sqlean/blob/main/docs/vsv.md>vsv</a>: CSV files as virtual tables</li>
+</ul>
+<h2 id=platforms>Platforms</h2>
+<p>The package is available for the following operating systems:</p>
+<ul>
+<li>Windows (64-bit)</li>
+<li>Linux (64-bit)</li>
+<li>macOS (both Intel and Apple processors)</li>
+</ul>
+<p>You can also compile it from source if necessary.</p>
+<p>See the <a href=https://github.com/nalgeon/sqlean.py>package repo</a> for details.</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2023-06-15 21:30:00 +0000 UTC">15 Jun, 2023</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/sqlite/>sqlite</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/sql-covering-index/>Covering Index in SQL</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sqlean-text/>More String Functions in SQLite</a></p>
+<p><a href=/sqlean-encode/>Base64 and other encodings in SQLite</a></p>
+<p><a href=/sqlime-ai/>AI SQLite Assistant</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link>
+<i class="fab fa-twitter-1"></i><span>Twitter</span>
+</a>
+<a href=https://github.com/nalgeon class=footer__social-link>
+<i class="fab fa-github-1"></i><span>GitHub</span>
+</a>
+<a href=https://www.linkedin.com/in/nalgeon/ class=footer__social-link>
+<i class="fab fa-linkedin-2"></i><span>LinkedIn</span>
+</a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>
