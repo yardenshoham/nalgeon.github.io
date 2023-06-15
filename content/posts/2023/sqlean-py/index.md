@@ -5,11 +5,18 @@ description = "A drop-in replacement for the sqlite3 module, bundled with essent
 image = "/sqlean-py/cover.png"
 slug = "sqlean-py"
 tags = ["sqlite"]
+featured = true
 +++
 
 Adding SQLite extensions with Python's `sqlite3` module is a breeze. Download a file, call a few functions, and you are good to go. Unless you try to do it on macOS, where `sqlite3` is compiled without extension support.
 
 I wanted to make the process even easier (and of course solve the macOS problem). So I created the [`sqlean.py`](https://github.com/nalgeon/sqlean.py) package: a drop-in replacement for the standard library's `sqlite3` module, bundled with the [essential extensions](/sqlean/).
+
+<div class="row">
+<div class="col-xs-12 col-sm-8">
+    <figure><img src="poster.png" alt="Extensions"/></figure>
+</div>
+</div>
 
 ## Installation and usage
 

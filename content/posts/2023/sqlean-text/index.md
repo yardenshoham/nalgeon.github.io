@@ -5,6 +5,7 @@ description = "A rich set of string functions, from `slice`, `contains` and `cou
 image = "/sqlean-text/cover.png"
 slug = "sqlean-text"
 tags = ["sqlite"]
+featured = true
 +++
 
 SQLite includes basic text functions like `instr`, `substr` and `replace` (and even `trim` in later versions), which can get you quite far. But I've always wanted a more complete set, like the one in PostgreSQL, Python or Go.
