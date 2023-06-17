@@ -1,0 +1,225 @@
+<!doctype html><html lang=en>
+<head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>I Don't Need Your Query Language</title>
+<meta name=description content="Seriously, I don't. I'd prefer SQL.">
+<meta name=robots content="index, follow">
+<link rel=stylesheet type=text/css href=/assets/css/style.1298740fb12777af4ee1e867068ab1346fee55f55d941cd1726c640003698f1d.css>
+<link rel=icon href=/assets/favicon/favicon.ico sizes=any>
+<link rel=icon type=image/svg+xml href=/assets/favicon/favicon.svg>
+<link rel=apple-touch-icon href=/assets/favicon/apple-touch-icon.png>
+<link rel=manifest href=/assets/favicon/manifest.json>
+<link rel=canonical href=https://antonz.org/fancy-ql/>
+<meta name=author content="Anton Zhiyanov">
+<meta property="og:type" content="article">
+<meta property="og:title" content="I Don't Need Your Query Language">
+<meta property="og:description" content="Seriously, I don't. I'd prefer SQL.">
+<meta property="og:url" content="https://antonz.org/fancy-ql/">
+<meta property="og:image" content="https://antonz.org/fancy-ql/cover.png">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:title content="I Don't Need Your Query Language">
+<meta name=twitter:description content="Seriously, I don't. I'd prefer SQL.">
+<meta name=twitter:url content="https://antonz.org/fancy-ql/">
+<meta name=twitter:site content="@ohmypy">
+<meta name=twitter:image content="https://antonz.org/fancy-ql/cover.png"></head>
+<body>
+<div class=header>
+<div class=container>
+<div class=row>
+<div class="col-xs-6 col-sm-3">
+<a class=img-link href=/>
+<img src=/assets/logo.svg class=header-icon>
+</a> 
+<a href=/>
+<strong>Anton Zhiyanov</strong>
+</a>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-4 hidden-mobile">
+<a class=menu__link href=/all/>
+<span>blog</span>
+</a>
+<a class=menu__link href=/#about>
+<span>contacts</span>
+</a>
+<a class=menu__link href=https://antonz.ru>
+<span>ru</span>
+</a>
+</div>
+<div class="col-xs-6 col-sm-3"><div class=search-module>
+<form action=https://duckduckgo.com/>
+<input type=hidden name=kf value=-1>
+<input type=hidden name=kz value=-1>
+<input type=hidden name=kaf value=1>
+<input type=hidden name=ko value=-2>
+<input type=hidden name=k1 value=-1>
+<input type=hidden name=sites value=antonz.org>
+<input type=search name=q autocomplete=off placeholder=Search aria-label=Search>
+</form>
+</div></div>
+</div>
+</div>
+</div>
+<div class=storey>
+<div class=container>
+<article class=post>
+<div class=row>
+<div class="col-xs-12 col-sm-10 article">
+<header>
+<h1>I Don't Need Your Query Language</h1>
+</header>
+<p><em>This post may seem a bit harsh, but I&rsquo;m tired of the &ldquo;SQL shaming&rdquo; that has somehow become a thing in the industry. I have a right to disagree, don&rsquo;t I?</em></p>
+<p>Every year or so, a new general-purpose database engine comes out. And that&rsquo;s great! It can bring new valuable approaches, architectures, and tools (plus, building database engines is fun).</p>
+<p>Often this new database engine comes with a new query language. And that&rsquo;s probably good, too. Or maybe it&rsquo;s not.</p>
+<h2 id=simple-and-elegant>Simple and elegant</h2>
+<figure>
+<img src=fancy-1.png alt="An elegant query language for a more civilized age">
+<figcaption>Oh, it's elegant and civilized? Sure, I'll bite.</figcaption>
+</figure>
+<p>What puzzles me is that every time the authors claim that having this brand-new query language is somehow a strength. It&rsquo;s not. It&rsquo;s a weakness. Learning a whole new language just to query your database is a burden. I don&rsquo;t want to do that.</p>
+<p>We already have a common ground language for general-purpose databases. It&rsquo;s called SQL. I&rsquo;d rather use it with your database.</p>
+<p>📝 <em>I&rsquo;m not talking about software that targets a specific narrow domain field. Having a separate domain language for specific use cases makes perfect sense.</em></p>
+<p>Sure, your language is elegant. That doesn&rsquo;t help me. First, it&rsquo;s still easier to write a slightly longer query in SQL than to learn a new query language. Second, your supposedly simple language will become complex anyways — as soon as I try to solve real-world tasks with it. So why bother?</p>
+<h2 id=better-than-sql>Better than SQL</h2>
+<figure>
+<img src=fancy-2.png alt="A comparison that speaks for itself">
+<figcaption>Just look at that ugly SQL beast.</figcaption>
+</figure>
+<p>Sometimes the authors of a new query language try to frame SQL as terribly complex. Let&rsquo;s take an example from one of these &ldquo;post-SQL&rdquo; databases. A comparison that, according to the authors, speaks for itself.</p>
+<p>📝 <em>I&rsquo;m using a particular &ldquo;post-SQL&rdquo; database (without naming it) to illustrate my point here, because its landing page is a vivid example of &ldquo;SQL shaming&rdquo;. This is not a criticism of the database or its authors. I&rsquo;m sure it&rsquo;s a great product.</em></p>
+<p>FancyQL:</p>
+<pre tabindex=0><code>select Movie {
+  title,
+  actors: {
+   name
+  },
+};
+</code></pre><p>SQL (as the authors of FancyQL see it):</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>SELECT</span>
+  <span style=color:#000>title</span>,
+  <span style=color:#000>Actors</span>.<span style=color:#000>name</span> <span style=color:#a90d91>AS</span> <span style=color:#000>actor_name</span>
+<span style=color:#a90d91>FROM</span> <span style=color:#000>Movie</span>
+ <span style=color:#a90d91>LEFT</span> <span style=color:#a90d91>JOIN</span> <span style=color:#000>Movie_Actors</span> <span style=color:#a90d91>ON</span>
+  <span style=color:#000>Movie</span>.<span style=color:#000>id</span> <span style=color:#000>=</span> <span style=color:#000>Movie_Actors</span>.<span style=color:#000>movie_id</span>
+ <span style=color:#a90d91>LEFT</span> <span style=color:#a90d91>JOIN</span> <span style=color:#000>Person</span> <span style=color:#a90d91>AS</span> <span style=color:#000>Actors</span> <span style=color:#a90d91>ON</span>
+  <span style=color:#000>Movie_Actors</span>.<span style=color:#000>person_id</span> <span style=color:#000>=</span> <span style=color:#000>Person</span>.<span style=color:#000>id</span>
+</code></pre></div><p>SQL (as it may be):</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
+  <span style=color:#000>title</span>,
+  <span style=color:#000>actors</span>.<span style=color:#000>name</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>movies</span>
+  <span style=color:#a90d91>join</span> <span style=color:#000>movies_actors</span> <span style=color:#a90d91>using</span>(<span style=color:#000>movie_id</span>)
+  <span style=color:#a90d91>join</span> <span style=color:#000>actors</span> <span style=color:#a90d91>using</span>(<span style=color:#000>actor_id</span>)
+</code></pre></div><p>Hmm. Another example?</p>
+<p>FancyQL:</p>
+<pre tabindex=0><code>select Movie {
+  title,
+  actors: {
+   name
+  },
+  rating := math::mean(.reviews.score)
+} filter &quot;Zendaya&quot; in .actors.name;
+</code></pre><p>SQL (as the authors of FancyQL see it):</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>SELECT</span>
+  <span style=color:#000>title</span>,
+  <span style=color:#000>Actors</span>.<span style=color:#000>name</span> <span style=color:#a90d91>AS</span> <span style=color:#000>actor_name</span>,
+  (<span style=color:#a90d91>SELECT</span> <span style=color:#a90d91>avg</span>(<span style=color:#000>score</span>)
+    <span style=color:#a90d91>FROM</span> <span style=color:#000>Movie_Reviews</span>
+    <span style=color:#a90d91>WHERE</span> <span style=color:#000>movie_id</span> <span style=color:#000>=</span> <span style=color:#000>Movie</span>.<span style=color:#000>id</span>) <span style=color:#a90d91>AS</span> <span style=color:#000>rating</span>
+<span style=color:#a90d91>FROM</span>
+  <span style=color:#000>Movie</span>
+  <span style=color:#a90d91>LEFT</span> <span style=color:#a90d91>JOIN</span> <span style=color:#000>Movie_Actors</span> <span style=color:#a90d91>ON</span>
+    <span style=color:#000>Movie</span>.<span style=color:#000>id</span> <span style=color:#000>=</span> <span style=color:#000>Movie_Actors</span>.<span style=color:#000>movie_id</span>
+  <span style=color:#a90d91>LEFT</span> <span style=color:#a90d91>JOIN</span> <span style=color:#000>Person</span> <span style=color:#a90d91>AS</span> <span style=color:#000>Actors</span> <span style=color:#a90d91>ON</span>
+    <span style=color:#000>Movie_Actors</span>.<span style=color:#000>person_id</span> <span style=color:#000>=</span> <span style=color:#000>Person</span>.<span style=color:#000>id</span>
+<span style=color:#a90d91>WHERE</span>
+  <span style=color:#c41a16>&#39;Zendaya&#39;</span> <span style=color:#a90d91>IN</span> (
+    <span style=color:#a90d91>SELECT</span> <span style=color:#000>Person</span>.<span style=color:#000>name</span>
+    <span style=color:#a90d91>FROM</span>
+      <span style=color:#000>Movie_Actors</span>
+      <span style=color:#a90d91>INNER</span> <span style=color:#a90d91>JOIN</span> <span style=color:#000>Person</span>
+        <span style=color:#a90d91>ON</span> <span style=color:#000>Movie_Actors</span>.<span style=color:#000>person_id</span> <span style=color:#000>=</span> <span style=color:#000>Person</span>.<span style=color:#000>id</span>
+    <span style=color:#a90d91>WHERE</span>
+      <span style=color:#000>Movie_Actors</span>.<span style=color:#000>movie_id</span> <span style=color:#000>=</span> <span style=color:#000>Movie</span>.<span style=color:#000>id</span>)
+</code></pre></div><p>SQL (as it may be):</p>
+<div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#a90d91>select</span>
+  <span style=color:#000>title</span>,
+  <span style=color:#000>actors</span>.<span style=color:#000>name</span>,
+  (<span style=color:#a90d91>select</span> <span style=color:#a90d91>avg</span>(<span style=color:#000>score</span>) <span style=color:#a90d91>from</span> <span style=color:#000>reviews</span>
+   <span style=color:#a90d91>where</span> <span style=color:#000>movie_id</span> <span style=color:#000>=</span> <span style=color:#000>movies</span>.<span style=color:#000>movie_id</span>) <span style=color:#a90d91>as</span> <span style=color:#000>rating</span>
+<span style=color:#a90d91>from</span> <span style=color:#000>movies</span>
+  <span style=color:#a90d91>join</span> <span style=color:#000>movies_actors</span> <span style=color:#a90d91>using</span>(<span style=color:#000>movie_id</span>)
+  <span style=color:#a90d91>join</span> <span style=color:#000>actors</span> <span style=color:#a90d91>using</span>(<span style=color:#000>actor_id</span>)
+<span style=color:#a90d91>where</span> <span style=color:#000>movie_id</span> <span style=color:#a90d91>in</span> (
+  <span style=color:#a90d91>select</span> <span style=color:#000>movie_id</span>
+  <span style=color:#a90d91>from</span> <span style=color:#000>actors</span> <span style=color:#a90d91>join</span> <span style=color:#000>movies_actors</span> <span style=color:#a90d91>using</span>(<span style=color:#000>actor_id</span>)
+  <span style=color:#a90d91>where</span> <span style=color:#000>actors</span>.<span style=color:#000>name</span> <span style=color:#000>=</span> <span style=color:#c41a16>&#39;Zendaya&#39;</span>
+)
+</code></pre></div><p><a href=https://gist.github.com/nalgeon/f80845eab71153eed7d41b5306d6d785>movies.sql</a></p>
+<p>A bit verbose. But maybe SQL is not that complex after all? Otherwise, why would you paint it scarier than it really is?</p>
+<h2 id=modern>Modern</h2>
+<figure>
+<img src=fancy-3.png alt="Designed for devs, not suits">
+<figcaption>Let's throw in some suite-shaming!</figcaption>
+</figure>
+<p>Here is another common argument:</p>
+<blockquote>
+<p>SQL was designed with 1970s businessmen in mind, and it shows.</p>
+</blockquote>
+<p>True, SQL was designed in the 1970s. But how is that a weakness? Everyone knows SQL. All major database engines support SQL. SQL is expressive enough to solve any data-related task. SQL has a solid standards committee that maintains and improves it. What can your language offer besides being created in the 2020s?</p>
+<p>I can go on, but I don&rsquo;t think it&rsquo;s necessary. My point is simple.</p>
+<p>I don&rsquo;t need your fancy query language. I&rsquo;d stick with SQL.</p>
+<p>Maybe it&rsquo;s just me.</p>
+<p><em>Follow <a href=https://twitter.com/ohmypy><strong>@ohmypy</strong></a> on Twitter to keep up with new posts</em> 🚀</p>
+</div>
+</div><footer class=post__footer>
+<div class=row>
+<div class=col-xs-12>
+<div class=post__date>
+<time datetime="2023-06-17 04:00:00 +0000 UTC">17 Jun, 2023</time>
+</div>
+<div class=post__tags>
+<a href=https://antonz.org/tags/data/>data</a>&nbsp;
+</div>
+</div>
+</div>
+</footer></article>
+<aside class=post__related>
+<div class="post__nav article">
+<div class=row>
+<div class="col-xs-12 col-sm-6">
+<p>&larr;&nbsp;<a href=https://antonz.org/sqlean-py/>Python's sqlite3 with extensions</a></p>
+</div>
+</div>
+</div>
+<div class=article>
+<div class=row>
+<div class="col-xs-12 col-sm-8 col-md-6">
+<h3>See also</h3>
+<p><a href=/sql-covering-index/>Covering Index in SQL</a></p>
+<p><a href=/sql-compare-neighbors/>SQL Recipe: Compare with Neighbors</a></p>
+<p><a href=/sql-fetch/>LIMIT vs. FETCH in SQL</a></p>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<footer class="container footer">
+<ul class=naked-list>
+<li class=footer__item>Subscribe:
+<a href=https://twitter.com/ohmypy class=footer__social-link>
+<i class="fab fa-twitter-1"></i><span>Twitter</span>
+</a>
+<a href=https://github.com/nalgeon class=footer__social-link>
+<i class="fab fa-github-1"></i><span>GitHub</span>
+</a>
+<a href=https://www.linkedin.com/in/nalgeon/ class=footer__social-link>
+<i class="fab fa-linkedin-2"></i><span>LinkedIn</span>
+</a>
+<a href=/index.xml class=footer__social-link><i class="fas fa-rss"></i><span>RSS</span></a>
+</li>
+<li class=footer__item>Email: <a href=mailto:m@antonz.org>m@antonz.org</a></li>
+</ul>
+</footer>
+<script async src=//gc.zgo.at/count.js data-goatcounter=https://antonzorg.goatcounter.com/count></script></body>
+</html>

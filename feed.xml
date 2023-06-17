@@ -1,4 +1,106 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Thu, 15 Jun 2023 21:30:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>Python's sqlite3 with extensions</title><link>https://antonz.org/sqlean-py/</link><pubDate>Thu, 15 Jun 2023 21:30:00 +0000</pubDate><guid>https://antonz.org/sqlean-py/</guid><description>A drop-in replacement for the sqlite3 module, bundled with essential extensions.</description><content:encoded><![CDATA[<p>Adding SQLite extensions with Python&rsquo;s <code>sqlite3</code> module is a breeze. Download a file, call a few functions, and you are good to go. Unless you try to do it on macOS, where <code>sqlite3</code> is compiled without extension support.</p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Anton Zhiyanov</title><description>Everything about SQLite, Python, open data and awesome software.</description><link>https://antonz.org/</link><image><url>https://antonz.org/assets/favicon/favicon.png</url><title>Anton Zhiyanov</title><link>https://antonz.org/</link></image><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 17 Jun 2023 04:00:00 +0000</lastBuildDate><atom:link href="https://antonz.org/index.xml" rel="self" type="application/rss+xml"/><item><title>I Don't Need Your Query Language</title><link>https://antonz.org/fancy-ql/</link><pubDate>Sat, 17 Jun 2023 04:00:00 +0000</pubDate><guid>https://antonz.org/fancy-ql/</guid><description>Seriously, I don't. I'd prefer SQL.</description><content:encoded><![CDATA[<p><em>This post may seem a bit harsh, but I&rsquo;m tired of the &ldquo;SQL shaming&rdquo; that has somehow become a thing in the industry. I have a right to disagree, don&rsquo;t I?</em></p>
+<p>Every year or so, a new general-purpose database engine comes out. And that&rsquo;s great! It can bring new valuable approaches, architectures, and tools (plus, building database engines is fun).</p>
+<p>Often this new database engine comes with a new query language. And that&rsquo;s probably good, too. Or maybe it&rsquo;s not.</p>
+<h2 id="simple-and-elegant">Simple and elegant</h2>
+<figure>
+    <img src="fancy-1.png" alt="An elegant query language for a more civilized age">
+    <figcaption>Oh, it's elegant and civilized? Sure, I'll bite.</figcaption>
+</figure>
+<p>What puzzles me is that every time the authors claim that having this brand-new query language is somehow a strength. It&rsquo;s not. It&rsquo;s a weakness. Learning a whole new language just to query your database is a burden. I don&rsquo;t want to do that.</p>
+<p>We already have a common ground language for general-purpose databases. It&rsquo;s called SQL. I&rsquo;d rather use it with your database.</p>
+<p>📝 <em>I&rsquo;m not talking about software that targets a specific narrow domain field. Having a separate domain language for specific use cases makes perfect sense.</em></p>
+<p>Sure, your language is elegant. That doesn&rsquo;t help me. First, it&rsquo;s still easier to write a slightly longer query in SQL than to learn a new query language. Second, your supposedly simple language will become complex anyways — as soon as I try to solve real-world tasks with it. So why bother?</p>
+<h2 id="better-than-sql">Better than SQL</h2>
+<figure>
+    <img src="fancy-2.png" alt="A comparison that speaks for itself">
+    <figcaption>Just look at that ugly SQL beast.</figcaption>
+</figure>
+<p>Sometimes the authors of a new query language try to frame SQL as terribly complex. Let&rsquo;s take an example from one of these &ldquo;post-SQL&rdquo; databases. A comparison that, according to the authors, speaks for itself.</p>
+<p>📝 <em>I&rsquo;m using a particular &ldquo;post-SQL&rdquo; database (without naming it) to illustrate my point here, because its landing page is a vivid example of &ldquo;SQL shaming&rdquo;. This is not a criticism of the database or its authors. I&rsquo;m sure it&rsquo;s a great product.</em></p>
+<p>FancyQL:</p>
+<pre tabindex="0"><code>select Movie {
+  title,
+  actors: {
+   name
+  },
+};
+</code></pre><p>SQL (as the authors of FancyQL see it):</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">SELECT</span>
+  <span style="color:#000">title</span>,
+  <span style="color:#000">Actors</span>.<span style="color:#000">name</span> <span style="color:#a90d91">AS</span> <span style="color:#000">actor_name</span>
+<span style="color:#a90d91">FROM</span> <span style="color:#000">Movie</span>
+ <span style="color:#a90d91">LEFT</span> <span style="color:#a90d91">JOIN</span> <span style="color:#000">Movie_Actors</span> <span style="color:#a90d91">ON</span>
+  <span style="color:#000">Movie</span>.<span style="color:#000">id</span> <span style="color:#000">=</span> <span style="color:#000">Movie_Actors</span>.<span style="color:#000">movie_id</span>
+ <span style="color:#a90d91">LEFT</span> <span style="color:#a90d91">JOIN</span> <span style="color:#000">Person</span> <span style="color:#a90d91">AS</span> <span style="color:#000">Actors</span> <span style="color:#a90d91">ON</span>
+  <span style="color:#000">Movie_Actors</span>.<span style="color:#000">person_id</span> <span style="color:#000">=</span> <span style="color:#000">Person</span>.<span style="color:#000">id</span>
+</code></pre></div><p>SQL (as it may be):</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#000">title</span>,
+  <span style="color:#000">actors</span>.<span style="color:#000">name</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">movies</span>
+  <span style="color:#a90d91">join</span> <span style="color:#000">movies_actors</span> <span style="color:#a90d91">using</span>(<span style="color:#000">movie_id</span>)
+  <span style="color:#a90d91">join</span> <span style="color:#000">actors</span> <span style="color:#a90d91">using</span>(<span style="color:#000">actor_id</span>)
+</code></pre></div><p>Hmm. Another example?</p>
+<p>FancyQL:</p>
+<pre tabindex="0"><code>select Movie {
+  title,
+  actors: {
+   name
+  },
+  rating := math::mean(.reviews.score)
+} filter &quot;Zendaya&quot; in .actors.name;
+</code></pre><p>SQL (as the authors of FancyQL see it):</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">SELECT</span>
+  <span style="color:#000">title</span>,
+  <span style="color:#000">Actors</span>.<span style="color:#000">name</span> <span style="color:#a90d91">AS</span> <span style="color:#000">actor_name</span>,
+  (<span style="color:#a90d91">SELECT</span> <span style="color:#a90d91">avg</span>(<span style="color:#000">score</span>)
+    <span style="color:#a90d91">FROM</span> <span style="color:#000">Movie_Reviews</span>
+    <span style="color:#a90d91">WHERE</span> <span style="color:#000">movie_id</span> <span style="color:#000">=</span> <span style="color:#000">Movie</span>.<span style="color:#000">id</span>) <span style="color:#a90d91">AS</span> <span style="color:#000">rating</span>
+<span style="color:#a90d91">FROM</span>
+  <span style="color:#000">Movie</span>
+  <span style="color:#a90d91">LEFT</span> <span style="color:#a90d91">JOIN</span> <span style="color:#000">Movie_Actors</span> <span style="color:#a90d91">ON</span>
+    <span style="color:#000">Movie</span>.<span style="color:#000">id</span> <span style="color:#000">=</span> <span style="color:#000">Movie_Actors</span>.<span style="color:#000">movie_id</span>
+  <span style="color:#a90d91">LEFT</span> <span style="color:#a90d91">JOIN</span> <span style="color:#000">Person</span> <span style="color:#a90d91">AS</span> <span style="color:#000">Actors</span> <span style="color:#a90d91">ON</span>
+    <span style="color:#000">Movie_Actors</span>.<span style="color:#000">person_id</span> <span style="color:#000">=</span> <span style="color:#000">Person</span>.<span style="color:#000">id</span>
+<span style="color:#a90d91">WHERE</span>
+  <span style="color:#c41a16">&#39;Zendaya&#39;</span> <span style="color:#a90d91">IN</span> (
+    <span style="color:#a90d91">SELECT</span> <span style="color:#000">Person</span>.<span style="color:#000">name</span>
+    <span style="color:#a90d91">FROM</span>
+      <span style="color:#000">Movie_Actors</span>
+      <span style="color:#a90d91">INNER</span> <span style="color:#a90d91">JOIN</span> <span style="color:#000">Person</span>
+        <span style="color:#a90d91">ON</span> <span style="color:#000">Movie_Actors</span>.<span style="color:#000">person_id</span> <span style="color:#000">=</span> <span style="color:#000">Person</span>.<span style="color:#000">id</span>
+    <span style="color:#a90d91">WHERE</span>
+      <span style="color:#000">Movie_Actors</span>.<span style="color:#000">movie_id</span> <span style="color:#000">=</span> <span style="color:#000">Movie</span>.<span style="color:#000">id</span>)
+</code></pre></div><p>SQL (as it may be):</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
+  <span style="color:#000">title</span>,
+  <span style="color:#000">actors</span>.<span style="color:#000">name</span>,
+  (<span style="color:#a90d91">select</span> <span style="color:#a90d91">avg</span>(<span style="color:#000">score</span>) <span style="color:#a90d91">from</span> <span style="color:#000">reviews</span>
+   <span style="color:#a90d91">where</span> <span style="color:#000">movie_id</span> <span style="color:#000">=</span> <span style="color:#000">movies</span>.<span style="color:#000">movie_id</span>) <span style="color:#a90d91">as</span> <span style="color:#000">rating</span>
+<span style="color:#a90d91">from</span> <span style="color:#000">movies</span>
+  <span style="color:#a90d91">join</span> <span style="color:#000">movies_actors</span> <span style="color:#a90d91">using</span>(<span style="color:#000">movie_id</span>)
+  <span style="color:#a90d91">join</span> <span style="color:#000">actors</span> <span style="color:#a90d91">using</span>(<span style="color:#000">actor_id</span>)
+<span style="color:#a90d91">where</span> <span style="color:#000">movie_id</span> <span style="color:#a90d91">in</span> (
+  <span style="color:#a90d91">select</span> <span style="color:#000">movie_id</span>
+  <span style="color:#a90d91">from</span> <span style="color:#000">actors</span> <span style="color:#a90d91">join</span> <span style="color:#000">movies_actors</span> <span style="color:#a90d91">using</span>(<span style="color:#000">actor_id</span>)
+  <span style="color:#a90d91">where</span> <span style="color:#000">actors</span>.<span style="color:#000">name</span> <span style="color:#000">=</span> <span style="color:#c41a16">&#39;Zendaya&#39;</span>
+)
+</code></pre></div><p><a href="https://gist.github.com/nalgeon/f80845eab71153eed7d41b5306d6d785">movies.sql</a></p>
+<p>A bit verbose. But maybe SQL is not that complex after all? Otherwise, why would you paint it scarier than it really is?</p>
+<h2 id="modern">Modern</h2>
+<figure>
+    <img src="fancy-3.png" alt="Designed for devs, not suits">
+    <figcaption>Let's throw in some suite-shaming!</figcaption>
+</figure>
+<p>Here is another common argument:</p>
+<blockquote>
+<p>SQL was designed with 1970s businessmen in mind, and it shows.</p>
+</blockquote>
+<p>True, SQL was designed in the 1970s. But how is that a weakness? Everyone knows SQL. All major database engines support SQL. SQL is expressive enough to solve any data-related task. SQL has a solid standards committee that maintains and improves it. What can your language offer besides being created in the 2020s?</p>
+<p>I can go on, but I don&rsquo;t think it&rsquo;s necessary. My point is simple.</p>
+<p>I don&rsquo;t need your fancy query language. I&rsquo;d stick with SQL.</p>
+<p>Maybe it&rsquo;s just me.</p>
+]]></content:encoded></item><item><title>Python's sqlite3 with extensions</title><link>https://antonz.org/sqlean-py/</link><pubDate>Thu, 15 Jun 2023 21:30:00 +0000</pubDate><guid>https://antonz.org/sqlean-py/</guid><description>A drop-in replacement for the sqlite3 module, bundled with essential extensions.</description><content:encoded><![CDATA[<p>Adding SQLite extensions with Python&rsquo;s <code>sqlite3</code> module is a breeze. Download a file, call a few functions, and you are good to go. Unless you try to do it on macOS, where <code>sqlite3</code> is compiled without extension support.</p>
 <p>I wanted to make the process even easier (and of course solve the macOS problem). So I created the <a href="https://github.com/nalgeon/sqlean.py"><code>sqlean.py</code></a> package: a drop-in replacement for the standard library&rsquo;s <code>sqlite3</code> module, bundled with the <a href="/sqlean/">essential extensions</a>.</p>
 <div class="row">
 <div class="col-xs-12 col-sm-8">
@@ -616,53 +718,6 @@ sqlite&gt; select encode('hello', 'base64');
 <p>Of course, SQL has many more capabilities, but that&rsquo;s another story.</p>
 <p><sqlime-db name="sample" path="./sample.sql"></sqlime-db>
 <sqlime-examples db="sample" selector="div.highlight" editable></sqlime-examples></p>
-<script src="/assets/sqlime/sqlite3.js"></script>
-<script src="/assets/sqlime/sqlime-db.js"></script>
-<script src="/assets/sqlime/sqlime-examples.js"></script>
-]]></content:encoded></item><item><title>SQL Recipe: Ranking Records</title><link>https://antonz.org/sql-ranking/</link><pubDate>Thu, 11 May 2023 15:50:00 +0000</pubDate><guid>https://antonz.org/sql-ranking/</guid><description>Assigning a rank to each row based on the value of one or more columns.</description><content:encoded><![CDATA[<p><em>This post is part of the &ldquo;SQL Recipes&rdquo; series, where I provide short patterns for solving common SQL data analysis tasks.</em></p>
-<p>Suppose we want to create a ranking, where the position of each record is determined by the value of one or more columns.</p>
-<p>The solution is to use the <code>rank()</code> function over an SQL window ordered by target columns.</p>
-<h2 id="example">Example</h2>
-<p>Let&rsquo;s rank <code>employees</code> by salary:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">rank</span>() <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#c41a16">&#34;rank&#34;</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>The <code>rank()</code> function assigns each employee a rank according to their salary (<code>order by salary desc</code>). Note that employees with the same salary receive the same rank (Henry and Irene, Cindy and Dave).</p>
-<h2 id="alternatives">Alternatives</h2>
-<p>We can use <code>dense_rank()</code> instead of <code>rank()</code> to avoid &ldquo;gaps&rdquo; in the ranking:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">dense_rank</span>() <span style="color:#000">over</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#000">window</span> <span style="color:#000">w</span> <span style="color:#a90d91">as</span> (<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>)
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#c41a16">&#34;rank&#34;</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>Note that Alice is ranked #3 and Grace is ranked #5, whereas previously they were ranked #4 and #7, respectively.</p>
-<h2 id="compatibility">Compatibility</h2>
-<p>All major vendors support the <code>rank()</code> and <code>dense_rank()</code> window functions. Some of them, such as MS SQL and Oracle, do not support the <code>window</code> clause. In these cases, we can inline the window definition:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  <span style="color:#000">rank</span>() <span style="color:#000">over</span> (
-    <span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#000">salary</span> <span style="color:#a90d91">desc</span>
-  ) <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
-  <span style="color:#000">name</span>, <span style="color:#000">department</span>, <span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span>
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#c41a16">&#34;rank&#34;</span>, <span style="color:#000">id</span>;
-</code></pre></div><p>We can also rewrite the query without window functions:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#a90d91">select</span>
-  (
-    <span style="color:#a90d91">select</span> <span style="color:#a90d91">count</span>(<span style="color:#000">*</span>)
-    <span style="color:#a90d91">from</span> <span style="color:#000">employees</span> <span style="color:#a90d91">as</span> <span style="color:#000">e2</span>
-    <span style="color:#a90d91">where</span> <span style="color:#000">e2</span>.<span style="color:#000">salary</span> <span style="color:#000">&gt;</span> <span style="color:#000">e1</span>.<span style="color:#000">salary</span>
-  ) <span style="color:#000">+</span> <span style="color:#1c01ce">1</span> <span style="color:#a90d91">as</span> <span style="color:#c41a16">&#34;rank&#34;</span>,
-  <span style="color:#000">e1</span>.<span style="color:#000">name</span>, <span style="color:#000">e1</span>.<span style="color:#000">department</span>, <span style="color:#000">e1</span>.<span style="color:#000">salary</span>
-<span style="color:#a90d91">from</span> <span style="color:#000">employees</span> <span style="color:#a90d91">as</span> <span style="color:#000">e1</span>
-<span style="color:#a90d91">order</span> <span style="color:#a90d91">by</span> <span style="color:#c41a16">&#34;rank&#34;</span>, <span style="color:#000">e1</span>.<span style="color:#000">id</span>;
-</code></pre></div><br>
-<p>Want to learn more about window functions? Read my book — <a href="/sql-window-functions-book/"><strong>SQL Window Functions Explained</strong></a></p>
-<p><sqlime-db name="employees" path="/sql-window-functions-book/employees.sql"></sqlime-db>
-<sqlime-examples db="employees" selector="div.highlight" editable></sqlime-examples></p>
 <script src="/assets/sqlime/sqlite3.js"></script>
 <script src="/assets/sqlime/sqlime-db.js"></script>
 <script src="/assets/sqlime/sqlime-examples.js"></script>
